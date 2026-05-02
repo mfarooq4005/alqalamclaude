@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AL Qalam International School System</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ── Hero ── */
+.hero {
+  min-height:100vh; display:flex; align-items:center;
+  background:var(--navy); position:relative; overflow:hidden;
+  padding:100px 24px 80px;
+}
+.hero-bg {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 80% at 80% 50%, rgba(184,148,63,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(26,107,74,0.1) 0%, transparent 50%);
+}
+.hero-grid {
+  position:relative; z-index:1;
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center;
+}
+.hero-label {
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--gold-l); margin-bottom:24px;
+}
+.hero-label::before { content:''; width:20px; height:1px; background:var(--gold-l); }
+.hero h1 {
+  font-family:var(--ff-serif);
+  font-size:clamp(2.2rem,5vw,3.6rem);
+  color:#fff; line-height:1.15; margin-bottom:20px;
+}
+.hero h1 em { font-style:italic; color:var(--gold-l); }
+.hero p {
+  font-size:1rem; color:rgba(255,255,255,0.6);
+  line-height:1.8; margin-bottom:36px; max-width:460px;
+}
+.hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
+
+/* Hero card visual */
+.hero-visual { position:relative; }
+.hero-card-stack { position:relative; }
+.hcard {
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px; padding:24px;
+  backdrop-filter:blur(10px);
+}
+.hcard.main { z-index:2; position:relative; }
+.hcard.float1 {
+  position:absolute; top:-20px; right:-20px; z-index:1;
+  width:200px; background:rgba(184,148,63,0.15);
+  border-color:rgba(184,148,63,0.3);
+  transform:rotate(3deg);
+}
+.hcard.float2 {
+  position:absolute; bottom:-24px; left:-16px; z-index:1;
+  width:180px; background:rgba(26,107,74,0.15);
+  border-color:rgba(26,107,74,0.3);
+  transform:rotate(-2deg);
+}
+.hcard-badge {
+  font-size:.62rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--gold-l); background:rgba(184,148,63,0.15);
+  padding:4px 10px; border-radius:4px; display:inline-block; margin-bottom:14px;
+}
+.hcard-title { color:#fff; font-size:.95rem; font-weight:700; margin-bottom:8px; }
+.hcard-sub   { color:rgba(255,255,255,0.5); font-size:.78rem; line-height:1.5; }
+.hcard-row   { display:flex; align-items:center; gap:10px; margin-top:16px; }
+.hcard-stat  { text-align:center; }
+.hcard-stat strong { display:block; color:var(--gold-l); font-size:1.4rem; font-weight:800; }
+.hcard-stat span   { font-size:.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.08em; }
+.hcard-divider     { width:1px; height:36px; background:rgba(255,255,255,0.1); }
+
+/* Scroll badge */
+.hero-scroll {
+  position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(255,255,255,0.3);
+}
+.scroll-dot {
+  width:20px; height:32px; border:1.5px solid rgba(255,255,255,0.2);
+  border-radius:10px; position:relative;
+}
+.scroll-dot::after {
+  content:''; position:absolute; top:5px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,0.5);
+  animation:scrollDot 1.8s infinite;
+}
+@keyframes scrollDot { 0%{top:5px;opacity:1} 100%{top:18px;opacity:0} }
+
+/* ── Highlights strip ── */
+.highlights {
+  background:var(--off); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:28px 24px;
+}
+.highlights-inner {
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+}
+.hl-item {
+  display:flex; align-items:center; gap:14px;
+  padding:0 24px; border-right:1px solid var(--border);
+}
+.hl-item:first-child { padding-left:0; }
+.hl-item:last-child  { border-right:none; }
+.hl-icon { font-size:1.6rem; flex-shrink:0; }
+.hl-text strong { display:block; font-size:.9rem; font-weight:700; color:var(--navy); }
+.hl-text span   { font-size:.75rem; color:var(--muted); }
+
+/* ── Why Us ── */
+.why-grid {
+  display:grid; grid-template-columns:1.1fr 1fr; gap:72px; align-items:center;
+  max-width:1200px; margin:0 auto;
+}
+.why-image-block { position:relative; }
+.why-image-box {
+  background:var(--navy); border-radius:16px; overflow:hidden;
+  aspect-ratio:4/3;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+.why-image-inner {
+  padding:40px; text-align:center;
+}
+.quote-mark { font-size:5rem; color:rgba(255,255,255,0.06); line-height:1; font-family:var(--ff-serif); }
+.why-quote {
+  font-family:var(--ff-serif); font-size:1.4rem; font-style:italic;
+  color:#fff; line-height:1.6; margin:-10px 0 16px;
+}
+.why-quote-sub { font-size:.78rem; color:rgba(255,255,255,0.4); letter-spacing:.1em; text-transform:uppercase; }
+.why-floater {
+  position:absolute; bottom:-20px; right:-20px;
+  background:#fff; border-radius:12px; padding:16px 20px;
+  box-shadow:var(--shadow-lg); text-align:center; min-width:130px;
+}
+.why-floater strong { display:block; font-size:1.8rem; font-weight:800; color:var(--navy); }
+.why-floater span   { font-size:.72rem; color:var(--muted); font-weight:500; }
+.why-content {}
+.vs-row { display:flex; flex-direction:column; gap:14px; margin-top:28px; }
+.vs-item {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+}
+.vs-col {
+  padding:16px 18px; border-radius:8px; font-size:.82rem; line-height:1.5;
+}
+.vs-col.before { background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.15); color:#7f1d1d; }
+.vs-col.after  { background:rgba(26,107,74,0.06); border:1px solid rgba(26,107,74,0.2); color:#065f46; }
+.vs-col .vs-label { font-size:.62rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:5px; opacity:.7; }
+.vs-col strong { display:block; font-weight:700; margin-bottom:2px; font-size:.85rem; }
+
+/* ── Programs preview ── */
+.programs-preview { background:var(--off); }
+.prog-cards { max-width:1200px; margin:0 auto; }
+.prog-card {
+  background:#fff; border:1px solid var(--border); border-radius:14px;
+  overflow:hidden; transition:transform .25s, box-shadow .25s, border-color .25s;
+}
+.prog-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-lg); border-color:rgba(184,148,63,0.3); }
+.prog-card-top { padding:32px 28px 24px; }
+.prog-card-num {
+  font-size:2.4rem; font-weight:800; color:var(--border);
+  line-height:1; margin-bottom:12px; font-family:var(--ff-serif);
+}
+.prog-card h3 { font-size:1.05rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.prog-card p  { font-size:.82rem; color:var(--sub); line-height:1.7; }
+.prog-card-bottom {
+  padding:16px 28px; border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--off);
+}
+.prog-link { font-size:.8rem; font-weight:600; color:var(--navy); display:flex; align-items:center; gap:6px; }
+.prog-link svg { transition:transform .2s; }
+.prog-card:hover .prog-link svg { transform:translateX(4px); }
+
+/* ── Stats band ── */
+.stats-band { background:var(--navy); padding:64px 24px; }
+.stats-inner {
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns:repeat(5,1fr); gap:0;
+}
+.stat-col {
+  text-align:center; padding:0 20px;
+  border-right:1px solid rgba(255,255,255,0.1);
+}
+.stat-col:last-child { border-right:none; }
+.stat-num {
+  font-size:clamp(2rem,3.5vw,2.8rem); font-weight:800;
+  color:var(--gold-l); line-height:1; margin-bottom:6px;
+}
+.stat-label { font-size:.78rem; color:rgba(255,255,255,0.45); letter-spacing:.08em; text-transform:uppercase; }
+
+/* ── CTA ── */
+.cta-band {
+  background:linear-gradient(135deg, var(--navy) 0%, var(--navy-l) 100%);
+  padding:80px 24px; text-align:center; position:relative; overflow:hidden;
+}
+.cta-band::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 80% at 50% 50%, rgba(184,148,63,0.1) 0%, transparent 70%);
+}
+.cta-band > * { position:relative; z-index:1; }
+.cta-band h2 { font-family:var(--ff-serif); font-size:clamp(1.8rem,4vw,2.6rem); color:#fff; margin-bottom:16px; }
+.cta-band p  { font-size:.95rem; color:rgba(255,255,255,0.55); margin-bottom:32px; max-width:480px; margin-left:auto; margin-right:auto; line-height:1.8; }
+.cta-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+@media(max-width:960px) {
+  .hero-grid { grid-template-columns:1fr; gap:48px; }
+  .hero-visual { display:none; }
+  .highlights-inner { grid-template-columns:1fr 1fr; }
+  .hl-item { border-right:none; border-bottom:1px solid var(--border); padding:12px 0; }
+  .hl-item:nth-child(3),.hl-item:nth-child(4) { border-bottom:none; }
+  .why-grid { grid-template-columns:1fr; gap:40px; }
+  .why-image-block { display:none; }
+  .stats-inner { grid-template-columns:1fr 1fr; gap:32px; }
+  .stat-col { border-right:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">AQ</div>
+      <div class="nav-logo-text">
+        <strong>AL Qalam International</strong>
+        <span>School System · Lahore</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="programs.html">Programs</a></li>
+      <li><a href="admissions.html">Admissions</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="admissions.html" class="nav-btn">Apply Now</a>
+    <button class="nav-mobile-btn" id="mBtn"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-label">Lahore, Pakistan · Since 2018</div>
+      <h1>Where Thinking <em>Replaces</em> Memorising</h1>
+      <p>AL Qalam International is Lahore's first STREAM-integrated school with a full Robotics Lab, Digital Classrooms, and Holistic Tarbiyah — building real thinkers, not rote learners.</p>
+      <div class="hero-actions">
+        <a href="admissions.html" class="btn btn-gold">Apply for 2025–26</a>
+        <a href="programs.html" class="btn btn-outline" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.2)">Explore Programs</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-stack">
+        <div class="hcard float1">
+          <div class="hcard-badge">Robotics</div>
+          <div class="hcard-title">Grade 1 Onwards</div>
+          <div class="hcard-sub">Hands-on engineering from day one</div>
+        </div>
+        <div class="hcard main">
+          <div class="hcard-badge">Today's STREAM Lab</div>
+          <div class="hcard-title">Grade 7A — Physics &amp; Math Combined</div>
+          <div class="hcard-sub" style="margin-bottom:18px">Conceptual learning through experiments</div>
+          <div class="hcard-row">
+            <div class="hcard-stat"><strong>24</strong><span>Students</span></div>
+            <div class="hcard-divider"></div>
+            <div class="hcard-stat"><strong>94%</strong><span>Engagement</span></div>
+            <div class="hcard-divider"></div>
+            <div class="hcard-stat"><strong>🏆</strong><span>Top Class</span></div>
+          </div>
+        </div>
+        <div class="hcard float2">
+          <div class="hcard-badge">Character</div>
+          <div class="hcard-title">Holistic Tarbiyah</div>
+          <div class="hcard-sub">Academic + Spiritual + Physical</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-dot"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- HIGHLIGHTS -->
+<div class="highlights">
+  <div class="highlights-inner">
+    <div class="hl-item reveal">
+      <div class="hl-icon">🔬</div>
+      <div class="hl-text"><strong>STREAM Curriculum</strong><span>6 integrated disciplines</span></div>
+    </div>
+    <div class="hl-item reveal d1">
+      <div class="hl-icon">🤖</div>
+      <div class="hl-text"><strong>Robotics Lab</strong><span>Grade 1 to Grade 12</span></div>
+    </div>
+    <div class="hl-item reveal d2">
+      <div class="hl-icon">💻</div>
+      <div class="hl-text"><strong>Digital Classrooms</strong><span>100% smart-board enabled</span></div>
+    </div>
+    <div class="hl-item reveal d3">
+      <div class="hl-icon">🌱</div>
+      <div class="hl-text"><strong>Holistic Tarbiyah</strong><span>Character-first education</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY US -->
+<section class="section" id="why">
+  <div class="why-grid container">
+    <div class="why-image-block reveal">
+      <div class="why-image-box">
+        <div class="why-image-inner">
+          <div class="quote-mark">"</div>
+          <p class="why-quote">We don't teach children to pass exams.<br>We teach them to think.</p>
+          <p class="why-quote-sub">AL Qalam Academic Philosophy</p>
+        </div>
+      </div>
+      <div class="why-floater">
+        <strong>850+</strong>
+        <span>Students Enrolled</span>
+      </div>
+    </div>
+    <div class="why-content reveal d1">
+      <span class="eyebrow">Our Difference</span>
+      <h2 class="section-title">A School That's Actually <em>Different</em></h2>
+      <p class="section-desc">Most schools teach children to memorise and reproduce. We teach them to understand, question, and create. That's not a slogan — it's our entire system design.</p>
+      <div class="vs-row">
+        <div class="vs-item">
+          <div class="vs-col before">
+            <div class="vs-label">Traditional</div>
+            <strong>Memorise the textbook</strong>
+            Pass the exam, forget everything
+          </div>
+          <div class="vs-col after">
+            <div class="vs-label">AL Qalam</div>
+            <strong>Understand the concept</strong>
+            Apply it in real projects
+          </div>
+        </div>
+        <div class="vs-item">
+          <div class="vs-col before">
+            <div class="vs-label">Traditional</div>
+            <strong>Marks define the child</strong>
+            90% = success, 70% = failure
+          </div>
+          <div class="vs-col after">
+            <div class="vs-label">AL Qalam</div>
+            <strong>Growth defines the child</strong>
+            Academic + Character + Skills
+          </div>
+        </div>
+        <div class="vs-item">
+          <div class="vs-col before">
+            <div class="vs-label">Traditional</div>
+            <strong>Chalk and talk</strong>
+            One teacher, 40 passive students
+          </div>
+          <div class="vs-col after">
+            <div class="vs-label">AL Qalam</div>
+            <strong>Build and present</strong>
+            Interactive digital learning
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROGRAMS PREVIEW -->
+<section class="section programs-preview">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px" class="reveal">
+      <span class="eyebrow">What We Offer</span>
+      <h2 class="section-title" style="max-width:500px;margin:0 auto 12px">Our Three Core Pillars</h2>
+      <p class="section-desc" style="margin:0 auto;text-align:center">Every student experiences all three — every single day.</p>
+    </div>
+    <div class="grid-3 prog-cards">
+      <div class="prog-card reveal d1">
+        <div class="prog-card-top">
+          <div class="prog-card-num">01</div>
+          <div style="font-size:2rem;margin-bottom:14px">🔬</div>
+          <h3>STREAM Education</h3>
+          <p>Science, Technology, Religion, Engineering, Arts &amp; Mathematics — taught as one connected system, not isolated subjects. Real-world projects, not textbook exercises.</p>
+        </div>
+        <div class="prog-card-bottom">
+          <a href="programs.html#stream" class="prog-link">Explore STREAM <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <span class="tag tag-navy">All Grades</span>
+        </div>
+      </div>
+      <div class="prog-card reveal d2">
+        <div class="prog-card-top">
+          <div class="prog-card-num">02</div>
+          <div style="font-size:2rem;margin-bottom:14px">🤖</div>
+          <h3>Robotics &amp; Coding</h3>
+          <p>From Lego blocks in Grade 1 to Python-powered robots in Grade 10 — our Robotics Lab turns every student into an engineer and problem-solver.</p>
+        </div>
+        <div class="prog-card-bottom">
+          <a href="programs.html#robotics" class="prog-link">See Robotics <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <span class="tag tag-gold">Award Winning</span>
+        </div>
+      </div>
+      <div class="prog-card reveal d3">
+        <div class="prog-card-top">
+          <div class="prog-card-num">03</div>
+          <div style="font-size:2rem;margin-bottom:14px">🌱</div>
+          <h3>Holistic Tarbiyah</h3>
+          <p>Faith, character, leadership, physical wellness — we develop the whole person. Our graduates are not just academically strong, but morally grounded human beings.</p>
+        </div>
+        <div class="prog-card-bottom">
+          <a href="about.html#tarbiyah" class="prog-link">Learn More <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          <span class="tag tag-green">Core Value</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-band">
+  <div class="stats-inner">
+    <div class="stat-col reveal">
+      <div class="stat-num" data-target="850">0+</div>
+      <div class="stat-label">Students</div>
+    </div>
+    <div class="stat-col reveal d1">
+      <div class="stat-num" data-target="60">0+</div>
+      <div class="stat-label">Teachers</div>
+    </div>
+    <div class="stat-col reveal d2">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Digital Classrooms</div>
+    </div>
+    <div class="stat-col reveal d3">
+      <div class="stat-num" data-target="12">0+</div>
+      <div class="stat-label">Robotics Awards</div>
+    </div>
+    <div class="stat-col reveal d4">
+      <div class="stat-num">6</div>
+      <div class="stat-label">STREAM Disciplines</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band">
+  <h2>Ready to Give Your Child a Real Education?</h2>
+  <p>Seats are limited for 2025–26. Submit your application today or visit our campus in Lahore.</p>
+  <div class="cta-actions">
+    <a href="admissions.html" class="btn btn-gold">Apply for Admissions</a>
+    <a href="contact.html" class="btn btn-white">Book a Campus Tour</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo-mark">AQ</div>
+      <strong>AL Qalam International</strong>
+      <span>SCHOOL SYSTEM · LAHORE</span>
+      <p>Building thinkers, not memorisers. STREAM · Robotics · Digital Classrooms · Holistic Tarbiyah.</p>
+    </div>
+    <div class="footer-col">
+      <h4>School</h4>
+      <ul>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="about.html#philosophy">Our Philosophy</a></li>
+        <li><a href="about.html#tarbiyah">Tarbiyah</a></li>
+        <li><a href="about.html#leadership">Leadership</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Academics</h4>
+      <ul>
+        <li><a href="programs.html#stream">STREAM</a></li>
+        <li><a href="programs.html#robotics">Robotics Lab</a></li>
+        <li><a href="programs.html#digital">Digital Campus</a></li>
+        <li><a href="programs.html#cocurricular">Co-Curricular</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="admissions.html">Admissions</a></li>
+        <li><a href="contact.html">Get in Touch</a></li>
+        <li><a href="alqalam_ems.html">Student Portal</a></li>
+        <li><a href="tel:+924212345678">042-XXXXXXX</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 AL Qalam International School System — <a href="#">alqalam.edu.pk</a></p>
+    <p style="color:rgba(255,255,255,0.3)">Lahore, Pakistan</p>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+// Reveal
+new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('up')),{threshold:.12})
+  .observe=function(el){this._obs||(this._obs=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('up')),{threshold:.12}));this._obs.observe(el);};
+const io=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('up')),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+// Counter
+const co=new IntersectionObserver(e=>e.forEach(x=>{
+  if(!x.isIntersecting)return;
+  const el=x.target,t=+el.dataset.target,s=t/60;
+  let c=0,ti=setInterval(()=>{c=Math.min(c+s,t);el.textContent=Math.floor(c)+(el.dataset.suffix||'+');if(c>=t)clearInterval(ti);},18);
+  co.unobserve(el);
+}),{threshold:.5});
+document.querySelectorAll('.stat-num[data-target]').forEach(el=>{el.dataset.suffix=el.textContent.replace(/\d/g,'');co.observe(el);});
+</script>
+</body>
+</html>

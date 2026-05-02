@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AL Qalam International — نہ رٹو، سمجھو</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════
+   CSS DESIGN TOKENS — AL Qalam Identity System
+═══════════════════════════════════════════════ */
+:root {
+  --ink:        #030b18;
+  --ink-deep:   #010610;
+  --gold:       #c9a84c;
+  --gold-light: #e8c96d;
+  --gold-dim:   rgba(201,168,76,0.12);
+  --emerald:    #0d6e4f;
+  --emerald-l:  #14a070;
+  --circuit:    #0ea5e9;
+  --circuit-dim:rgba(14,165,233,0.1);
+  --parchment:  #f0e6c8;
+  --text:       #d4c9a8;
+  --muted:      #7a6e56;
+  --border:     rgba(201,168,76,0.18);
+  --ff-arabic:  'Amiri', serif;
+  --ff-body:    'Inter', sans-serif;
+  --ff-ui:      'Space Grotesk', sans-serif;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink-deep);
+  color: var(--text);
+  font-family: var(--ff-body);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── Custom ink cursor ── */
+#cursor {
+  position: fixed; width:12px; height:12px; border-radius:50%;
+  background: var(--gold); pointer-events:none; z-index:9999;
+  transform: translate(-50%,-50%);
+  transition: transform .12s ease, opacity .2s;
+  mix-blend-mode: screen;
+}
+#cursor-ring {
+  position:fixed; width:36px; height:36px; border-radius:50%;
+  border:1.5px solid rgba(201,168,76,0.5); pointer-events:none; z-index:9998;
+  transform:translate(-50%,-50%);
+  transition: transform .25s ease, width .2s, height .2s, opacity .2s;
+}
+body:hover #cursor { opacity:1; }
+
+/* ── Canvas ink trail ── */
+#ink-canvas {
+  position:fixed; inset:0; pointer-events:none; z-index:9997; opacity:0.35;
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 01 — NAVIGATION
+═══════════════════════════════════════════════ */
+.nav {
+  position: fixed; top:0; left:0; right:0; z-index:500;
+  padding: 18px 5vw;
+  display: flex; align-items:center; justify-content:space-between;
+  background: linear-gradient(to bottom, rgba(1,6,16,0.95) 0%, transparent 100%);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  transition: all .4s;
+}
+.nav.scrolled {
+  background: rgba(1,6,16,0.97);
+  padding: 12px 5vw;
+}
+.nav-logo {
+  display:flex; align-items:center; gap:14px; text-decoration:none;
+}
+.nav-logo-arabic {
+  font-family: var(--ff-arabic);
+  font-size: 2rem;
+  color: var(--gold);
+  line-height:1;
+  letter-spacing: -0.02em;
+}
+.nav-logo-en {
+  font-family: var(--ff-ui);
+  font-size: .75rem;
+  font-weight:600;
+  color: var(--muted);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  line-height:1.3;
+}
+.nav-links {
+  display:flex; gap:32px; list-style:none;
+}
+.nav-links a {
+  font-family:var(--ff-ui); font-size:.82rem; font-weight:500;
+  color: var(--muted); text-decoration:none; letter-spacing:.04em;
+  transition: color .2s;
+  position:relative;
+}
+.nav-links a::after {
+  content:''; position:absolute; bottom:-4px; left:0; width:0; height:1px;
+  background:var(--gold); transition: width .3s;
+}
+.nav-links a:hover { color:var(--gold); }
+.nav-links a:hover::after { width:100%; }
+.nav-cta {
+  font-family:var(--ff-ui); font-size:.8rem; font-weight:600;
+  padding:10px 22px; border-radius:4px;
+  background: linear-gradient(135deg, var(--gold), #a8832a);
+  color: var(--ink-deep); text-decoration:none; letter-spacing:.04em;
+  transition: opacity .2s, transform .2s;
+}
+.nav-cta:hover { opacity:.9; transform:translateY(-1px); }
+.nav-menu-btn { display:none; background:none; border:none; cursor:none; padding:4px; }
+.nav-menu-btn span {
+  display:block; width:24px; height:1.5px; background:var(--gold);
+  margin:6px 0; transition:.3s;
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 02 — HERO
+═══════════════════════════════════════════════ */
+.hero {
+  position:relative; min-height:100vh;
+  display:flex; align-items:center;
+  overflow:hidden;
+}
+#hero-canvas {
+  position:absolute; inset:0; width:100%; height:100%;
+}
+.hero-content {
+  position:relative; z-index:2;
+  padding: 0 5vw; max-width:900px; padding-top:80px;
+}
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--ff-ui); font-size:.72rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--circuit);
+  margin-bottom:28px; opacity:0; animation: fadeUp .8s .3s forwards;
+}
+.hero-eyebrow::before {
+  content:''; width:32px; height:1px; background:var(--circuit);
+}
+.hero-arabic {
+  font-family: var(--ff-arabic);
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  color: var(--gold);
+  line-height: .9;
+  margin-bottom: 16px;
+  opacity:0; animation: fadeUp .9s .5s forwards;
+}
+.hero-tagline {
+  font-family: var(--ff-ui);
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  font-weight: 300;
+  color: var(--parchment);
+  margin-bottom: 12px;
+  letter-spacing:.02em;
+  opacity:0; animation: fadeUp .9s .7s forwards;
+}
+.hero-tagline strong {
+  font-weight:700; color: var(--gold);
+  font-style:italic; font-family:var(--ff-arabic);
+}
+.hero-sub {
+  font-size:1rem; color:var(--muted); max-width:520px;
+  line-height:1.7; margin-bottom:44px;
+  opacity:0; animation: fadeUp .9s .9s forwards;
+}
+.hero-actions {
+  display:flex; gap:16px; flex-wrap:wrap;
+  opacity:0; animation: fadeUp .9s 1.1s forwards;
+}
+.btn-primary {
+  font-family:var(--ff-ui); font-size:.85rem; font-weight:600;
+  padding:14px 32px; border-radius:4px; text-decoration:none;
+  background: linear-gradient(135deg, var(--gold), #9a7020);
+  color:var(--ink-deep); letter-spacing:.04em;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 0 30px rgba(201,168,76,0.25);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 40px rgba(201,168,76,0.35); }
+.btn-outline {
+  font-family:var(--ff-ui); font-size:.85rem; font-weight:500;
+  padding:13px 30px; border-radius:4px; text-decoration:none;
+  border: 1px solid var(--border); color:var(--parchment); letter-spacing:.04em;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.btn-outline:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
+
+.hero-scroll-hint {
+  position:absolute; bottom:40px; left:5vw; z-index:2;
+  display:flex; align-items:center; gap:12px;
+  font-family:var(--ff-ui); font-size:.7rem; letter-spacing:.14em;
+  color:var(--muted); text-transform:uppercase;
+  opacity:0; animation: fadeUp .9s 1.4s forwards;
+}
+.hero-scroll-line {
+  width:1px; height:48px; background:linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollLine 2s 1.5s infinite;
+}
+@keyframes scrollLine {
+  0%,100% { opacity:1; transform:scaleY(1); transform-origin:top; }
+  50% { opacity:.3; }
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 03 — MANIFESTO "Kyu Alag Hain Hum"
+═══════════════════════════════════════════════ */
+.manifesto {
+  padding: 120px 5vw;
+  position:relative; overflow:hidden;
+}
+.manifesto::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.section-label {
+  font-family:var(--ff-ui); font-size:.68rem; font-weight:600;
+  letter-spacing:.2em; text-transform:uppercase; color:var(--circuit);
+  margin-bottom:20px; display:flex; align-items:center; gap:10px;
+}
+.section-label::before { content:''; width:24px; height:1px; background:var(--circuit); }
+.manifesto-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:80px;
+  align-items:center; max-width:1100px; margin:0 auto;
+}
+.manifesto-text h2 {
+  font-family:var(--ff-arabic);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  color:var(--parchment); line-height:1.15; margin-bottom:24px;
+}
+.manifesto-text h2 span { color:var(--gold); }
+.manifesto-text p {
+  font-size:.95rem; line-height:1.85; color:var(--muted);
+  margin-bottom:16px;
+}
+.manifesto-text .highlight {
+  display:inline; color:var(--parchment); font-weight:500;
+}
+.vs-grid {
+  display:grid; gap:16px;
+}
+.vs-card {
+  padding:24px; border-radius:8px; position:relative; overflow:hidden;
+  border: 1px solid transparent; transition: border-color .3s, transform .3s;
+}
+.vs-card:hover { transform:translateY(-3px); }
+.vs-card.old {
+  background: rgba(139,38,53,0.08);
+  border-color: rgba(139,38,53,0.2);
+}
+.vs-card.new {
+  background: rgba(13,110,79,0.1);
+  border-color: rgba(14,160,112,0.25);
+}
+.vs-tag {
+  font-family:var(--ff-ui); font-size:.62rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase;
+  padding:3px 10px; border-radius:2px; margin-bottom:12px; display:inline-block;
+}
+.vs-card.old .vs-tag { background:rgba(139,38,53,0.3); color:#e07070; }
+.vs-card.new .vs-tag { background:rgba(13,110,79,0.4); color:var(--emerald-l); }
+.vs-card h4 {
+  font-family:var(--ff-ui); font-size:.95rem; font-weight:600;
+  color:var(--parchment); margin-bottom:6px;
+}
+.vs-card p { font-size:.82rem; color:var(--muted); line-height:1.6; }
+.vs-card.new h4 { color:var(--emerald-l); }
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 04 — STREAM CONSTELLATION
+═══════════════════════════════════════════════ */
+.stream-section {
+  padding: 100px 5vw;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(14,165,233,0.04) 0%, transparent 70%);
+  position:relative;
+}
+.stream-section::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--circuit), transparent);
+}
+.stream-header { text-align:center; margin-bottom:70px; }
+.stream-header h2 {
+  font-family:var(--ff-arabic);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color:var(--parchment); margin-bottom:14px;
+}
+.stream-header h2 span { color:var(--circuit); }
+.stream-header p { font-size:.9rem; color:var(--muted); max-width:500px; margin:0 auto; line-height:1.7; }
+
+.stream-constellation {
+  position:relative; max-width:800px; margin:0 auto;
+  height:480px;
+}
+#stream-svg {
+  position:absolute; inset:0; width:100%; height:100%;
+}
+.stream-node {
+  position:absolute; transform:translate(-50%,-50%);
+  cursor:none;
+}
+.stream-node-inner {
+  width:90px; height:90px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border: 1.5px solid; transition: transform .3s, box-shadow .3s;
+  position:relative;
+}
+.stream-node:hover .stream-node-inner {
+  transform:scale(1.15);
+}
+.stream-node-icon { font-size:1.6rem; margin-bottom:4px; }
+.stream-node-label {
+  font-family:var(--ff-ui); font-size:.58rem; font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase;
+}
+.stream-detail {
+  position:absolute; bottom:-60px; left:50%; transform:translateX(-50%);
+  background:var(--ink); border:1px solid var(--border);
+  padding:8px 16px; border-radius:4px; white-space:nowrap;
+  font-family:var(--ff-ui); font-size:.75rem; color:var(--parchment);
+  opacity:0; pointer-events:none; transition:opacity .2s;
+  z-index:10;
+}
+.stream-node:hover .stream-detail { opacity:1; }
+
+/* Center node */
+.stream-center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:100px; height:100px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background: radial-gradient(circle, rgba(201,168,76,0.2), rgba(201,168,76,0.05));
+  border:1.5px solid var(--gold);
+  box-shadow: 0 0 40px rgba(201,168,76,0.2);
+}
+.stream-center-arabic {
+  font-family:var(--ff-arabic); font-size:1.5rem; color:var(--gold); line-height:1;
+}
+.stream-center-label {
+  font-family:var(--ff-ui); font-size:.5rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin-top:2px;
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 05 — TARBIYAH / HOLISTIC DEVELOPMENT
+═══════════════════════════════════════════════ */
+.tarbiyah {
+  padding: 100px 5vw;
+  background: linear-gradient(180deg, transparent 0%, rgba(13,110,79,0.04) 50%, transparent 100%);
+  position:relative;
+}
+.tarbiyah-header { max-width:600px; margin-bottom:64px; }
+.tarbiyah-header h2 {
+  font-family:var(--ff-arabic);
+  font-size: clamp(1.8rem,4vw,2.8rem);
+  color:var(--parchment); line-height:1.2; margin-bottom:16px;
+}
+.tarbiyah-header h2 span { color:var(--emerald-l); }
+.tarbiyah-header p { font-size:.9rem; color:var(--muted); line-height:1.7; }
+
+.tarbiyah-pillars {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:24px; max-width:1100px;
+}
+.pillar-card {
+  padding:32px 24px;
+  border:1px solid rgba(13,110,79,0.2);
+  border-radius:8px;
+  background: rgba(13,110,79,0.05);
+  transition: transform .3s, border-color .3s, box-shadow .3s;
+  position:relative; overflow:hidden;
+}
+.pillar-card::before {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, var(--emerald), transparent);
+  transform:scaleX(0); transform-origin:left; transition:transform .4s;
+}
+.pillar-card:hover { transform:translateY(-4px); border-color:rgba(20,160,112,0.4); box-shadow:0 16px 40px rgba(13,110,79,0.12); }
+.pillar-card:hover::before { transform:scaleX(1); }
+.pillar-number {
+  font-family:var(--ff-ui); font-size:2.5rem; font-weight:700;
+  color:rgba(13,110,79,0.2); line-height:1; margin-bottom:16px;
+}
+.pillar-icon { font-size:2rem; margin-bottom:12px; display:block; }
+.pillar-title {
+  font-family:var(--ff-ui); font-size:.95rem; font-weight:700;
+  color:var(--parchment); margin-bottom:6px;
+}
+.pillar-arabic {
+  font-family:var(--ff-arabic); font-size:1.1rem;
+  color:var(--emerald-l); margin-bottom:10px;
+}
+.pillar-desc { font-size:.8rem; color:var(--muted); line-height:1.65; }
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 06 — DIGITAL CLASSROOM SHOWCASE
+═══════════════════════════════════════════════ */
+.digital-section {
+  padding: 100px 5vw; position:relative; overflow:hidden;
+}
+.digital-section::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.digital-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:64px;
+  align-items:center; max-width:1100px; margin:0 auto;
+}
+.digital-text h2 {
+  font-family:var(--ff-arabic);
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  color:var(--parchment); line-height:1.2; margin-bottom:20px;
+}
+.digital-text h2 span { color:var(--gold); }
+.digital-text p { font-size:.9rem; color:var(--muted); line-height:1.8; margin-bottom:24px; }
+.feature-list { display:flex; flex-direction:column; gap:14px; }
+.feature-item {
+  display:flex; align-items:flex-start; gap:14px;
+  padding:16px; border-radius:6px;
+  background:var(--gold-dim);
+  border:1px solid var(--border);
+  transition: border-color .3s;
+}
+.feature-item:hover { border-color:rgba(201,168,76,0.4); }
+.feature-dot {
+  width:8px; height:8px; border-radius:50%; background:var(--gold);
+  margin-top:5px; flex-shrink:0;
+  box-shadow:0 0 8px var(--gold);
+}
+.feature-item h4 {
+  font-family:var(--ff-ui); font-size:.85rem; font-weight:600;
+  color:var(--parchment); margin-bottom:3px;
+}
+.feature-item p { font-size:.78rem; color:var(--muted); line-height:1.5; }
+
+/* Digital Classroom Visual */
+.classroom-visual {
+  position:relative;
+}
+.classroom-frame {
+  background: var(--ink);
+  border:1px solid var(--border);
+  border-radius:12px; overflow:hidden;
+  box-shadow: 0 0 60px rgba(201,168,76,0.08);
+}
+.classroom-topbar {
+  background:rgba(201,168,76,0.08); padding:10px 16px;
+  display:flex; align-items:center; gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.topbar-dot {
+  width:10px; height:10px; border-radius:50%;
+}
+.classroom-screen {
+  padding:24px; min-height:300px;
+  background: linear-gradient(135deg, #030b18 0%, #041020 100%);
+}
+.lesson-header {
+  font-family:var(--ff-ui); font-size:.7rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--circuit); margin-bottom:16px;
+}
+.lesson-title {
+  font-family:var(--ff-arabic); font-size:1.5rem;
+  color:var(--parchment); margin-bottom:20px;
+}
+.lesson-modules {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+.lesson-module {
+  background:rgba(14,165,233,0.07); border:1px solid rgba(14,165,233,0.2);
+  border-radius:6px; padding:14px;
+  font-family:var(--ff-ui); font-size:.75rem;
+  transition: background .3s, border-color .3s;
+  cursor:none;
+}
+.lesson-module:hover {
+  background:rgba(14,165,233,0.14); border-color:rgba(14,165,233,0.4);
+}
+.lesson-module-icon { font-size:1.2rem; display:block; margin-bottom:6px; }
+.lesson-module-name { color:var(--parchment); font-weight:600; margin-bottom:2px; }
+.lesson-module-sub { color:var(--muted); font-size:.68rem; }
+.lesson-progress {
+  margin-top:16px;
+  background:rgba(255,255,255,0.05); border-radius:2px; height:3px;
+}
+.lesson-progress-fill {
+  height:3px; border-radius:2px;
+  background:linear-gradient(90deg, var(--circuit), var(--emerald-l));
+  animation: progressAnim 3s ease-in-out infinite alternate;
+}
+@keyframes progressAnim { from { width:35%; } to { width:78%; } }
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 07 — ROBOTICS SHOWCASE
+═══════════════════════════════════════════════ */
+.robotics {
+  padding: 100px 5vw;
+  background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(14,165,233,0.05) 0%, transparent 70%);
+  position:relative;
+}
+.robotics::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--circuit), transparent);
+}
+.robotics-inner { max-width:1100px; margin:0 auto; }
+.robotics-header { text-align:center; margin-bottom:64px; }
+.robotics-header h2 {
+  font-family:var(--ff-arabic); font-size:clamp(1.8rem,4vw,3rem);
+  color:var(--parchment); margin-bottom:14px;
+}
+.robotics-header h2 span { color:var(--circuit); }
+.robotics-header p { font-size:.9rem; color:var(--muted); max-width:500px; margin:0 auto; line-height:1.7; }
+
+.robotics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; }
+.robot-card {
+  border:1px solid rgba(14,165,233,0.15);
+  border-radius:8px; padding:32px 24px;
+  background:var(--circuit-dim);
+  position:relative; overflow:hidden;
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+}
+.robot-card:hover {
+  transform:translateY(-5px);
+  box-shadow:0 20px 50px rgba(14,165,233,0.1);
+  border-color:rgba(14,165,233,0.4);
+}
+.robot-card::after {
+  content:''; position:absolute; top:-40%; right:-40%;
+  width:200px; height:200px; border-radius:50%;
+  background:radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 70%);
+}
+.robot-age {
+  font-family:var(--ff-ui); font-size:.62rem; font-weight:700;
+  letter-spacing:.16em; text-transform:uppercase;
+  color:var(--circuit); margin-bottom:16px;
+  background:rgba(14,165,233,0.1); display:inline-block;
+  padding:3px 10px; border-radius:2px;
+}
+.robot-icon { font-size:2.5rem; display:block; margin-bottom:14px; }
+.robot-title {
+  font-family:var(--ff-ui); font-size:1rem; font-weight:700;
+  color:var(--parchment); margin-bottom:8px;
+}
+.robot-desc { font-size:.8rem; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+.robot-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.robot-tag {
+  font-family:var(--ff-ui); font-size:.62rem; font-weight:600;
+  letter-spacing:.06em; padding:2px 8px; border-radius:2px;
+  background:rgba(14,165,233,0.1); color:var(--circuit);
+  border:1px solid rgba(14,165,233,0.2);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 08 — STATS
+═══════════════════════════════════════════════ */
+.stats {
+  padding:80px 5vw;
+  background: linear-gradient(90deg, rgba(201,168,76,0.04) 0%, transparent 50%, rgba(201,168,76,0.04) 100%);
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.stats-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:40px; max-width:1100px; margin:0 auto;
+  text-align:center;
+}
+.stat-item {}
+.stat-num {
+  font-family:var(--ff-ui); font-size:clamp(2rem,4vw,3.2rem); font-weight:700;
+  color:var(--gold); line-height:1; margin-bottom:6px;
+}
+.stat-unit { color:var(--gold-light); }
+.stat-label {
+  font-family:var(--ff-ui); font-size:.78rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted);
+}
+.stat-arabic {
+  font-family:var(--ff-arabic); font-size:1rem; color:var(--muted);
+  display:block; margin-top:4px;
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 09 — TESTIMONIAL / QUOTE
+═══════════════════════════════════════════════ */
+.iqra-section {
+  padding:120px 5vw; text-align:center; position:relative;
+}
+.iqra-section::before {
+  content:'اقرأ';
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  font-family:var(--ff-arabic); font-size:clamp(8rem,20vw,18rem);
+  color:rgba(201,168,76,0.04);
+  pointer-events:none; white-space:nowrap; line-height:1;
+}
+.iqra-content { position:relative; z-index:1; max-width:700px; margin:0 auto; }
+.iqra-arabic-quote {
+  font-family:var(--ff-arabic); font-size:clamp(1.4rem,3vw,2.4rem);
+  color:var(--gold); line-height:1.6; margin-bottom:16px;
+  direction:rtl;
+}
+.iqra-translation {
+  font-family:var(--ff-body); font-size:.9rem; font-style:italic;
+  color:var(--muted); margin-bottom:8px;
+}
+.iqra-ref {
+  font-family:var(--ff-ui); font-size:.72rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--emerald-l);
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 10 — ADMISSIONS CTA
+═══════════════════════════════════════════════ */
+.admissions {
+  padding:100px 5vw;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 70%);
+  position:relative;
+}
+.admissions::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.admissions-inner {
+  max-width:700px; margin:0 auto; text-align:center;
+}
+.admissions-inner h2 {
+  font-family:var(--ff-arabic); font-size:clamp(1.8rem,4vw,3rem);
+  color:var(--parchment); margin-bottom:16px; line-height:1.2;
+}
+.admissions-inner h2 span { color:var(--gold); }
+.admissions-inner p { font-size:.9rem; color:var(--muted); line-height:1.8; margin-bottom:40px; }
+.admissions-steps {
+  display:flex; gap:0; margin-bottom:48px;
+  position:relative;
+}
+.admissions-steps::before {
+  content:''; position:absolute; top:20px; left:calc(10% + 20px); right:calc(10% + 20px);
+  height:1px; background:var(--border);
+}
+.step {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:10px;
+}
+.step-num {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--gold-dim); border:1px solid var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--ff-ui); font-size:.85rem; font-weight:700; color:var(--gold);
+  position:relative; z-index:1;
+}
+.step-label {
+  font-family:var(--ff-ui); font-size:.72rem; font-weight:600;
+  color:var(--muted); text-align:center; letter-spacing:.04em;
+}
+.admissions-cta {
+  display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENT 11 — FOOTER
+═══════════════════════════════════════════════ */
+footer {
+  padding:60px 5vw 32px;
+  border-top:1px solid var(--border);
+  background: linear-gradient(to top, rgba(201,168,76,0.03) 0%, transparent 100%);
+}
+.footer-top {
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px;
+  max-width:1100px; margin:0 auto 48px;
+}
+.footer-brand .footer-arabic {
+  font-family:var(--ff-arabic); font-size:2.4rem; color:var(--gold);
+  line-height:1; margin-bottom:8px;
+}
+.footer-brand .footer-en {
+  font-family:var(--ff-ui); font-size:.7rem; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:16px;
+}
+.footer-brand p { font-size:.82rem; color:var(--muted); line-height:1.7; max-width:260px; }
+.footer-col h4 {
+  font-family:var(--ff-ui); font-size:.72rem; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--gold);
+  margin-bottom:16px;
+}
+.footer-col ul { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.footer-col a {
+  font-size:.8rem; color:var(--muted); text-decoration:none;
+  transition:color .2s;
+}
+.footer-col a:hover { color:var(--parchment); }
+.footer-bottom {
+  max-width:1100px; margin:0 auto;
+  padding-top:24px; border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:12px;
+}
+.footer-bottom p { font-size:.75rem; color:var(--muted); }
+.footer-bottom a { color:var(--gold); text-decoration:none; }
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS + UTILITIES
+═══════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0);    }
+}
+.reveal {
+  opacity:0; transform:translateY(32px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-delay-1 { transition-delay:.1s; }
+.reveal-delay-2 { transition-delay:.2s; }
+.reveal-delay-3 { transition-delay:.3s; }
+.reveal-delay-4 { transition-delay:.4s; }
+
+/* ── Responsive ── */
+@media (max-width:768px) {
+  .nav-links, .nav-cta { display:none; }
+  .nav-menu-btn { display:block; }
+  .manifesto-grid, .digital-grid { grid-template-columns:1fr; gap:48px; }
+  .footer-top { grid-template-columns:1fr 1fr; gap:32px; }
+  .stream-constellation { height:360px; }
+  .stream-node-inner { width:72px; height:72px; }
+  .stream-node-icon { font-size:1.2rem; }
+  .admissions-steps::before { display:none; }
+}
+@media (max-width:480px) {
+  .footer-top { grid-template-columns:1fr; }
+  .tarbiyah-pillars { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor elements -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="ink-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 01 — NAVIGATION
+═══════════════════════════════════════════════ -->
+<nav class="nav" id="navbar">
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-arabic">القلم</span>
+    <span class="nav-logo-en">AL Qalam International<br>School System</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#manifesto">Our Philosophy</a></li>
+    <li><a href="#stream">STREAM</a></li>
+    <li><a href="#tarbiyah">Tarbiyah</a></li>
+    <li><a href="#digital">Digital Campus</a></li>
+    <li><a href="#robotics">Robotics</a></li>
+  </ul>
+  <a href="#admissions" class="nav-cta">Apply Now</a>
+  <button class="nav-menu-btn" id="menuBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 02 — HERO
+═══════════════════════════════════════════════ -->
+<section class="hero" id="home">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Lahore, Pakistan · Est. 2018</div>
+    <h1 class="hero-arabic">القلم</h1>
+    <p class="hero-tagline">نہ رٹو، <strong>سمجھو</strong></p>
+    <p class="hero-sub">
+      Jahan qalam sirf likhnay ka zariya nahi — sochne, banana, aur duniya ko samajhne
+      ka raasta hai. STREAM, Robotics, Digital Classrooms aur Holistic Tarbiyah —
+      yeh hai AL Qalam ka fark.
+    </p>
+    <div class="hero-actions">
+      <a href="#admissions" class="btn-primary">Daakhla Lain</a>
+      <a href="#stream" class="btn-outline">Hamara Nizam Dekhain</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <div class="hero-scroll-line"></div>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 03 — MANIFESTO
+═══════════════════════════════════════════════ -->
+<section class="manifesto" id="manifesto">
+  <div class="manifesto-grid">
+    <div class="manifesto-text reveal">
+      <div class="section-label">Our Difference</div>
+      <h2>Kyu <span>Alag</span> Hain Hum?</h2>
+      <p>
+        روایتی نظام تعلیم میں بچے <span class="highlight">رٹا لگاتے</span> ہیں — امتحان دیتے ہیں —
+        پھر سب بھول جاتے ہیں۔ ہم اس چکر کو توڑنے آئے ہیں۔
+      </p>
+      <p>
+        AL Qalam mein har sabaq ka maqsad hai <span class="highlight">samajhna, banana, aur apply karna</span> —
+        result card nahi, <span class="highlight">real capability</span> banana hai.
+      </p>
+      <p>
+        Hamara naam "القلم" Quran ki pehli wahi se ilham liya gaya hai —
+        <em style="color:var(--gold);font-family:var(--ff-arabic)">"اقرأ بِاسْمِ رَبِّكَ"</em> —
+        parho, samjho, aur apne Rabb ki makhlooq ka bhala karo.
+      </p>
+    </div>
+    <div class="vs-grid reveal reveal-delay-2">
+      <div class="vs-card old">
+        <span class="vs-tag">Pehle</span>
+        <h4>رٹا + امتحان + بھول جاؤ</h4>
+        <p>Textbook se ratna, paper dena, phir agli class mein aage barh jana — bina samjhe.</p>
+      </div>
+      <div class="vs-card new">
+        <span class="vs-tag">AL Qalam</span>
+        <h4>سمجھو + بناؤ + سکھاؤ</h4>
+        <p>Concept samjho, usse apne haath se banao, phir dusron ko sikhao — yahi asli ilm hai.</p>
+      </div>
+      <div class="vs-card old">
+        <span class="vs-tag">Pehle</span>
+        <h4>Sirf Marks ki Daud</h4>
+        <p>90% marks wala beta kamyab — 70% marks wala na-kamyab. Character zero.</p>
+      </div>
+      <div class="vs-card new">
+        <span class="vs-tag">AL Qalam</span>
+        <h4>Holistic Tarbiyah</h4>
+        <p>Ilm + Akhlaq + Creativity + Tech Skills + Physical Health — poora insaan banana hai.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 04 — STREAM CONSTELLATION
+═══════════════════════════════════════════════ -->
+<section class="stream-section" id="stream">
+  <div class="stream-header reveal">
+    <div class="section-label" style="justify-content:center">Our Curriculum</div>
+    <h2>STREAM se <span>Poori Duniya</span></h2>
+    <p>Sirf science nahi, sirf religion nahi — in sab ka milap hi asli ilm hai.</p>
+  </div>
+
+  <div class="stream-constellation reveal reveal-delay-1">
+    <svg id="stream-svg" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet">
+      <!-- Connection lines drawn by JS -->
+      <g id="stream-lines"></g>
+    </svg>
+
+    <!-- Center node -->
+    <div class="stream-center">
+      <span class="stream-center-arabic">القلم</span>
+      <span class="stream-center-label">Core</span>
+    </div>
+
+    <!-- S — Science -->
+    <div class="stream-node" style="top:12%;left:50%" data-subject="Science" data-desc="Physics · Chemistry · Biology · Environmental Science">
+      <div class="stream-node-inner" style="border-color:#06b6d4;background:rgba(6,182,212,0.1);">
+        <span class="stream-node-icon">🔬</span>
+        <span class="stream-node-label" style="color:#06b6d4">S</span>
+      </div>
+      <span class="stream-detail">Science — Parhatay hain, prove kartay hain</span>
+    </div>
+    <!-- T — Technology -->
+    <div class="stream-node" style="top:30%;left:82%" data-subject="Technology" data-desc="Coding · AI · Digital Tools · Cyber Safety">
+      <div class="stream-node-inner" style="border-color:#8b5cf6;background:rgba(139,92,246,0.1);">
+        <span class="stream-node-icon">💻</span>
+        <span class="stream-node-label" style="color:#8b5cf6">T</span>
+      </div>
+      <span class="stream-detail">Technology — Dekhte nahi, banate hain</span>
+    </div>
+    <!-- R — Religion -->
+    <div class="stream-node" style="top:72%;left:82%" data-subject="Religion" data-desc="Quran · Hadith · Fiqh · Islamic History · Akhlaq">
+      <div class="stream-node-inner" style="border-color:#10b981;background:rgba(16,185,129,0.1);">
+        <span class="stream-node-icon">☪️</span>
+        <span class="stream-node-label" style="color:#10b981">R</span>
+      </div>
+      <span class="stream-detail">Religion — Deen samjhna, sar jhukana</span>
+    </div>
+    <!-- E — Engineering -->
+    <div class="stream-node" style="top:88%;left:50%" data-subject="Engineering" data-desc="Robotics · Design Thinking · Mechanics · 3D Printing">
+      <div class="stream-node-inner" style="border-color:#f59e0b;background:rgba(245,158,11,0.1);">
+        <span class="stream-node-icon">⚙️</span>
+        <span class="stream-node-label" style="color:#f59e0b">E</span>
+      </div>
+      <span class="stream-detail">Engineering — Sochte hain, toot ke banaate hain</span>
+    </div>
+    <!-- A — Arts -->
+    <div class="stream-node" style="top:72%;left:18%" data-subject="Arts" data-desc="Calligraphy · Fine Arts · Music · Literature · Drama">
+      <div class="stream-node-inner" style="border-color:#ec4899;background:rgba(236,72,153,0.1);">
+        <span class="stream-node-icon">🎨</span>
+        <span class="stream-node-label" style="color:#ec4899">A</span>
+      </div>
+      <span class="stream-detail">Arts — Feelings ko shape dena</span>
+    </div>
+    <!-- M — Mathematics -->
+    <div class="stream-node" style="top:30%;left:18%" data-subject="Mathematics" data-desc="Algebra · Geometry · Statistics · Logical Thinking">
+      <div class="stream-node-inner" style="border-color:#c9a84c;background:rgba(201,168,76,0.1);">
+        <span class="stream-node-icon">📐</span>
+        <span class="stream-node-label" style="color:#c9a84c">M</span>
+      </div>
+      <span class="stream-detail">Mathematics — Duniya ki bhasha</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 05 — TARBIYAH
+═══════════════════════════════════════════════ -->
+<section class="tarbiyah" id="tarbiyah">
+  <div class="tarbiyah-header reveal">
+    <div class="section-label">Holistic Development</div>
+    <h2>تربیہ — <span>Poora Insaan</span> Banana Hai</h2>
+    <p>Marks sirf ek cheez hain. AL Qalam mein hum bachay ka poora wujood tarbiyat karte hain — rooh, zehan, jism aur kirdar.</p>
+  </div>
+  <div class="tarbiyah-pillars">
+    <div class="pillar-card reveal reveal-delay-1">
+      <div class="pillar-number">01</div>
+      <span class="pillar-icon">🕌</span>
+      <div class="pillar-arabic">ایمان</div>
+      <div class="pillar-title">Spiritual Foundation</div>
+      <p class="pillar-desc">Quran se seedha rishta, daily duas, Seerah se sabaq — baccha spiritually rooted ho, sirf ritually compliant nahi.</p>
+    </div>
+    <div class="pillar-card reveal reveal-delay-2">
+      <div class="pillar-number">02</div>
+      <span class="pillar-icon">🧠</span>
+      <div class="pillar-arabic">عقل</div>
+      <div class="pillar-title">Critical Thinking</div>
+      <p class="pillar-desc">Sawaal karna sikhao, galat ko challenge karo, evidence mangao — yahi asli taqleed-se-azaadi hai.</p>
+    </div>
+    <div class="pillar-card reveal reveal-delay-3">
+      <div class="pillar-number">03</div>
+      <span class="pillar-icon">🤝</span>
+      <div class="pillar-arabic">اخلاق</div>
+      <div class="pillar-title">Character & Ethics</div>
+      <p class="pillar-desc">Seedha bolna, mazloom ka saath dena, amaanat nibhana — akhlaq course nahi, aadat hai.</p>
+    </div>
+    <div class="pillar-card reveal reveal-delay-4">
+      <div class="pillar-number">04</div>
+      <span class="pillar-icon">💪</span>
+      <div class="pillar-arabic">بدن</div>
+      <div class="pillar-title">Physical Wellness</div>
+      <p class="pillar-desc">Sports, outdoor activities, healthy habits — "al-mu'min al-qawi" — mazboot momin ki tarbiyah.</p>
+    </div>
+    <div class="pillar-card reveal reveal-delay-1">
+      <div class="pillar-number">05</div>
+      <span class="pillar-icon">🎯</span>
+      <div class="pillar-arabic">ابداع</div>
+      <div class="pillar-title">Creativity & Innovation</div>
+      <p class="pillar-desc">Har bachay mein kuch unique hai. Hum woh nikaalay bina torte hain — khud se kuch banana sikhao.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 06 — DIGITAL CLASSROOM
+═══════════════════════════════════════════════ -->
+<section class="digital-section" id="digital">
+  <div class="digital-grid">
+    <div class="digital-text reveal">
+      <div class="section-label">Technology</div>
+      <h2>Digital <span>Classroom</span> — Woh Seekhain Jo Aaj Zaroori Hai</h2>
+      <p>Sirf projector aur screen nahi — hamare students actual software use karte hain, code likhte hain, aur digital tools master karte hain school se hi.</p>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div>
+            <h4>Smart Interactive Boards</h4>
+            <p>Har class mein live interaction, real-time quiz, collaborative work</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div>
+            <h4>1:1 Device Program</h4>
+            <p>Grade 4 se upar har student ke paas apna device — sikhne ka zariya banao</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div>
+            <h4>Coding from Grade 1</h4>
+            <p>Scratch se Python tak — logic banana school se hi shuru hota hai</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot"></div>
+          <div>
+            <h4>Parent Portal</h4>
+            <p>Attendance, results, fee, teacher messages — sab ek jagah, real time</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="classroom-visual reveal reveal-delay-2">
+      <div class="classroom-frame">
+        <div class="classroom-topbar">
+          <div class="topbar-dot" style="background:#ef4444"></div>
+          <div class="topbar-dot" style="background:#f59e0b"></div>
+          <div class="topbar-dot" style="background:#10b981"></div>
+          <span style="font-family:var(--ff-ui);font-size:.68rem;color:var(--muted);margin-left:8px">AL Qalam Digital Campus · Grade 7A</span>
+        </div>
+        <div class="classroom-screen">
+          <div class="lesson-header">📚 Today's STREAM Session — Physics + Math</div>
+          <div class="lesson-title">روشنی کی رفتار اور اس کا حساب</div>
+          <div class="lesson-modules">
+            <div class="lesson-module">
+              <span class="lesson-module-icon">🔭</span>
+              <div class="lesson-module-name">Concept</div>
+              <div class="lesson-module-sub">Video + Animation</div>
+            </div>
+            <div class="lesson-module">
+              <span class="lesson-module-icon">🧮</span>
+              <div class="lesson-module-name">Practice</div>
+              <div class="lesson-module-sub">Interactive Problems</div>
+            </div>
+            <div class="lesson-module">
+              <span class="lesson-module-icon">🤖</span>
+              <div class="lesson-module-name">Build It</div>
+              <div class="lesson-module-sub">Robotics Lab</div>
+            </div>
+            <div class="lesson-module">
+              <span class="lesson-module-icon">📝</span>
+              <div class="lesson-module-name">Reflect</div>
+              <div class="lesson-module-sub">Journal Entry</div>
+            </div>
+          </div>
+          <div class="lesson-progress">
+            <div class="lesson-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 07 — ROBOTICS
+═══════════════════════════════════════════════ -->
+<section class="robotics" id="robotics">
+  <div class="robotics-inner">
+    <div class="robotics-header reveal">
+      <div class="section-label" style="justify-content:center">Hands-On Learning</div>
+      <h2>Robotics — <span>Hath Se Sikhna</span></h2>
+      <p>Kitaab mein robot nahi hai — hamare students khud banate hain. Umar ke mutabiq, seedha seekhte hain.</p>
+    </div>
+    <div class="robotics-grid">
+      <div class="robot-card reveal reveal-delay-1">
+        <span class="robot-age">Grade 1–3 · Age 5–8</span>
+        <span class="robot-icon">🧩</span>
+        <div class="robot-title">Lego & Logic</div>
+        <p class="robot-desc">Blocks se structures banana, simple machines samajhna, cause-and-effect — khel khel mein engineering.</p>
+        <div class="robot-tags">
+          <span class="robot-tag">Lego Mindstorms</span>
+          <span class="robot-tag">Puzzles</span>
+          <span class="robot-tag">Block Coding</span>
+        </div>
+      </div>
+      <div class="robot-card reveal reveal-delay-2">
+        <span class="robot-age">Grade 4–6 · Age 9–12</span>
+        <span class="robot-icon">⚙️</span>
+        <div class="robot-title">Meccano + Scratch</div>
+        <p class="robot-desc">Physical components ko code se control karna — Arduino basics, sensors, motors — first real robot banana.</p>
+        <div class="robot-tags">
+          <span class="robot-tag">Arduino</span>
+          <span class="robot-tag">Scratch</span>
+          <span class="robot-tag">Sensors</span>
+        </div>
+      </div>
+      <div class="robot-card reveal reveal-delay-3">
+        <span class="robot-age">Grade 7–9 · Age 13–15</span>
+        <span class="robot-icon">🤖</span>
+        <div class="robot-title">Advanced Robotics</div>
+        <p class="robot-desc">Python se robots program karna, computer vision basics, IoT projects — real-world problems solve karna.</p>
+        <div class="robot-tags">
+          <span class="robot-tag">Python</span>
+          <span class="robot-tag">Raspberry Pi</span>
+          <span class="robot-tag">Computer Vision</span>
+        </div>
+      </div>
+      <div class="robot-card reveal reveal-delay-4">
+        <span class="robot-age">Grade 10–12 · Age 16–18</span>
+        <span class="robot-icon">🚀</span>
+        <div class="robot-title">Innovation Lab</div>
+        <p class="robot-desc">Apna original project banana, national competitions mein participate karna, startup mindset develop karna.</p>
+        <div class="robot-tags">
+          <span class="robot-tag">AI/ML Basics</span>
+          <span class="robot-tag">3D Printing</span>
+          <span class="robot-tag">Competitions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 08 — STATS
+═══════════════════════════════════════════════ -->
+<section class="stats" id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <div class="stat-num" data-target="850">0<span class="stat-unit">+</span></div>
+      <div class="stat-label">Students Enrolled</div>
+      <span class="stat-arabic">طلباء و طالبات</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <div class="stat-num" data-target="60">0<span class="stat-unit">+</span></div>
+      <div class="stat-label">Certified Teachers</div>
+      <span class="stat-arabic">تعلیم یافتہ اساتذہ</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <div class="stat-num" data-target="100">0<span class="stat-unit">%</span></div>
+      <div class="stat-label">Digital Classrooms</div>
+      <span class="stat-arabic">ڈیجیٹل کمرہ جماعت</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <div class="stat-num" data-target="6">0</div>
+      <div class="stat-label">STREAM Disciplines</div>
+      <span class="stat-arabic">تعلیمی شعبے</span>
+    </div>
+    <div class="stat-item reveal reveal-delay-4">
+      <div class="stat-num" data-target="12">0<span class="stat-unit">+</span></div>
+      <div class="stat-label">Robotics Awards</div>
+      <span class="stat-arabic">قومی انعامات</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 09 — IQRA QUOTE
+═══════════════════════════════════════════════ -->
+<section class="iqra-section">
+  <div class="iqra-content reveal">
+    <p class="iqra-arabic-quote">
+      "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ"
+    </p>
+    <p class="iqra-translation">"Read in the name of your Lord who created"</p>
+    <p class="iqra-ref">Surah Al-Alaq · 96:1 · Pehli Wahi · Ilm ka Huqm</p>
+    <p style="font-size:.85rem;color:var(--muted);margin-top:20px;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.8">
+      Yeh pehla hukm parhnay ka tha — aur hamare school ka naam "القلم" us qalam ka hissadar hai
+      jis se likha gaya tha. Hum woh riwayat zinda rakhte hain.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 10 — ADMISSIONS CTA
+═══════════════════════════════════════════════ -->
+<section class="admissions" id="admissions">
+  <div class="admissions-inner reveal">
+    <div class="section-label" style="justify-content:center">New Admissions 2025–26</div>
+    <h2>Aapke Bachay Ka <span>Naya Safar</span> Yahan Se</h2>
+    <p>Chhoti class se bari class tak — sirf limited seats hain. Aaj hi form bharo ya school visit karein.</p>
+    <div class="admissions-steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-label">Form<br>Submit</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-label">Test &<br>Interview</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-label">Offer<br>Letter</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-label">Orientation<br>Day</div>
+      </div>
+    </div>
+    <div class="admissions-cta">
+      <a href="mailto:admissions@alqalam.edu.pk" class="btn-primary">Admission Form Bharo</a>
+      <a href="tel:+924212345678" class="btn-outline">📞 Call Us: 042-XXXXXXX</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     COMPONENT 11 — FOOTER
+═══════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-arabic">القلم</div>
+      <div class="footer-en">AL Qalam International</div>
+      <p>نہ رٹو، سمجھو — STREAM, Robotics, aur Holistic Tarbiyah ke zariye kal ke leaders tarbiyat karna humara mission hai.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#manifesto">Our Philosophy</a></li>
+        <li><a href="#stream">STREAM Program</a></li>
+        <li><a href="#tarbiyah">Tarbiyah</a></li>
+        <li><a href="#robotics">Robotics Lab</a></li>
+        <li><a href="#admissions">Admissions</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Portals</h4>
+      <ul>
+        <li><a href="alqalam_ems.html">Student Portal</a></li>
+        <li><a href="alqalam_ems.html">Parent Portal</a></li>
+        <li><a href="alqalam_ems.html">Teacher Portal</a></li>
+        <li><a href="alqalam_ems.html">Admin EMS</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="#">📍 Lahore, Pakistan</a></li>
+        <li><a href="tel:+924212345678">📞 042-XXXXXXX</a></li>
+        <li><a href="mailto:info@alqalam.edu.pk">✉️ info@alqalam.edu.pk</a></li>
+        <li><a href="https://wa.me/923001234567">💬 WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 AL Qalam International School System — <a href="#">alqalam.edu.pk</a></p>
+    <p style="font-family:var(--ff-arabic);font-size:.9rem;color:var(--muted)">
+      القلم — علم کا سفر جاری رہے
+    </p>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  JS COMPONENT A — Custom Ink Cursor
+// ═══════════════════════════════════════════════
+const cursor     = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mx = 0, my = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left     = mx + 'px';
+  cursor.style.top      = my + 'px';
+  cursorRing.style.left = mx + 'px';
+  cursorRing.style.top  = my + 'px';
+});
+
+document.querySelectorAll('a, button, .stream-node, .pillar-card, .robot-card, .lesson-module')
+  .forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform     = 'translate(-50%,-50%) scale(2)';
+      cursorRing.style.width     = '56px';
+      cursorRing.style.height    = '56px';
+      cursorRing.style.opacity   = '.4';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform     = 'translate(-50%,-50%) scale(1)';
+      cursorRing.style.width     = '36px';
+      cursorRing.style.height    = '36px';
+      cursorRing.style.opacity   = '1';
+    });
+  });
+
+// ═══════════════════════════════════════════════
+//  JS COMPONENT B — Ink Trail Canvas
+// ═══════════════════════════════════════════════
+const inkCanvas = document.getElementById('ink-canvas');
+const inkCtx    = inkCanvas.getContext('2d');
+let inkPoints   = [];
+
+function resizeInk() {
+  inkCanvas.width  = window.innerWidth;
+  inkCanvas.height = window.innerHeight;
+}
+resizeInk();
+window.addEventListener('resize', resizeInk);
+
+document.addEventListener('mousemove', e => {
+  inkPoints.push({ x: e.clientX, y: e.clientY, age: 0 });
+  if (inkPoints.length > 80) inkPoints.shift();
+});
+
+function drawInk() {
+  inkCtx.clearRect(0, 0, inkCanvas.width, inkCanvas.height);
+  inkPoints.forEach((p, i) => {
+    p.age += 0.5;
+    if (p.age > 30) return;
+    const alpha = Math.max(0, 1 - p.age / 30) * 0.6;
+    const size  = Math.max(0.5, (1 - p.age / 30) * 3);
+    inkCtx.beginPath();
+    inkCtx.arc(p.x, p.y, size, 0, Math.PI * 2);
+    inkCtx.fillStyle = `rgba(201,168,76,${alpha})`;
+    inkCtx.fill();
+  });
+  inkPoints = inkPoints.filter(p => p.age <= 30);
+  requestAnimationFrame(drawInk);
+}
+drawInk();
+
+// ═══════════════════════════════════════════════
+//  JS COMPONENT C — Hero Canvas (Circuit+Calligraphy)
+// ═══════════════════════════════════════════════
+const heroCanvas = document.getElementById('hero-canvas');
+const hCtx       = heroCanvas.getContext('2d');
+
+function resizeHero() {
+  heroCanvas.width  = window.innerWidth;
+  heroCanvas.height = window.innerHeight;
+}
+resizeHero();
+window.addEventListener('resize', resizeHero);
+
+// Particle system — circuit nodes
+const particles = Array.from({length: 60}, () => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  vx: (Math.random() - 0.5) * 0.4,
+  vy: (Math.random() - 0.5) * 0.4,
+  r: Math.random() * 2 + 0.5,
+  type: Math.random() > 0.5 ? 'gold' : 'circuit',
+}));
+
+function drawHero() {
+  hCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+  // Move + draw particles
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = heroCanvas.width;
+    if (p.x > heroCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = heroCanvas.height;
+    if (p.y > heroCanvas.height) p.y = 0;
+
+    const color = p.type === 'gold' ? '201,168,76' : '14,165,233';
+    hCtx.beginPath();
+    hCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    hCtx.fillStyle = `rgba(${color},0.6)`;
+    hCtx.fill();
+  });
+
+  // Draw connections (circuit lines)
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx   = particles[i].x - particles[j].x;
+      const dy   = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 140) {
+        const alpha = (1 - dist/140) * 0.15;
+        const color = (particles[i].type === 'gold' && particles[j].type === 'gold')
+          ? `rgba(201,168,76,${alpha})`
+          : `rgba(14,165,233,${alpha * 0.7})`;
+        hCtx.beginPath();
+        hCtx.moveTo(particles[i].x, particles[i].y);
+        hCtx.lineTo(particles[j].x, particles[j].y);
+        hCtx.strokeStyle = color;
+        hCtx.lineWidth = 0.8;
+        hCtx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(drawHero);
+}
+drawHero();
+
+// ═══════════════════════════════════════════════
+//  JS COMPONENT D — STREAM SVG Lines
+// ═══════════════════════════════════════════════
+function drawStreamLines() {
+  const svg    = document.getElementById('stream-lines');
+  const cont   = document.querySelector('.stream-constellation');
+  if (!svg || !cont) return;
+  const nodes  = cont.querySelectorAll('.stream-node');
+  const center = cont.querySelector('.stream-center');
+  if (!center) return;
+
+  const cRect  = cont.getBoundingClientRect();
+  const cx     = center.offsetLeft + center.offsetWidth  / 2;
+  const cy     = center.offsetTop  + center.offsetHeight / 2;
+  const W      = cont.offsetWidth;
+  const H      = cont.offsetHeight;
+
+  svg.innerHTML = '';
+
+  nodes.forEach(node => {
+    const nx = (node.offsetLeft / W) * 800;
+    const ny = (node.offsetTop  / H) * 480;
+    const ccx = (cx / W) * 800;
+    const ccy = (cy / H) * 480;
+
+    const color = node.querySelector('.stream-node-inner').style.borderColor;
+    const line  = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', ccx); line.setAttribute('y1', ccy);
+    line.setAttribute('x2', nx);  line.setAttribute('y2', ny);
+    line.setAttribute('stroke', color || '#c9a84c');
+    line.setAttribute('stroke-width', '1');
+    line.setAttribute('stroke-opacity', '0.25');
+    line.setAttribute('stroke-dasharray', '4 4');
+
+    // Animated dot along line
+    const anim  = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    anim.setAttribute('r','3');
+    anim.setAttribute('fill', color || '#c9a84c');
+    anim.setAttribute('opacity','0.8');
+    const animEl = document.createElementNS('http://www.w3.org/2000/svg','animateMotion');
+    animEl.setAttribute('dur', (1.8 + Math.random()*1.2) + 's');
+    animEl.setAttribute('repeatCount','indefinite');
+    animEl.setAttribute('path', `M${ccx},${ccy} L${nx},${ny}`);
+    anim.appendChild(animEl);
+
+    svg.appendChild(line);
+    svg.appendChild(anim);
+  });
+}
+
+window.addEventListener('load', () => setTimeout(drawStreamLines, 300));
+window.addEventListener('resize', () => setTimeout(drawStreamLines, 100));
+
+// ═══════════════════════════════════════════════
+//  JS COMPONENT E — Scroll Reveal
+// ═══════════════════════════════════════════════
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ═══════════════════════════════════════════════
+//  JS COMPONENT F — Counter Animation
+// ═══════════════════════════════════════════════
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el     = e.target;
+    const target = +el.dataset.target;
+    const unit   = el.querySelector('.stat-unit')?.outerHTML ?? '';
+    let current  = 0;
+    const step   = target / 60;
+    const timer  = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.innerHTML = Math.floor(current) + unit;
+      if (current >= target) clearInterval(timer);
+    }, 18);
+    counterObserver.unobserve(el);
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stat-num[data-target]')
+  .forEach(el => counterObserver.observe(el));
+
+// ═══════════════════════════════════════════════
+//  JS COMPONENT G — Navbar scroll state
+// ═══════════════════════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList
+    .toggle('scrolled', window.scrollY > 60);
+});
+</script>
+</body>
+</html>

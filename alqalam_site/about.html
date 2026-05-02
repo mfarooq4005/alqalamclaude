@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About — AL Qalam International</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.mission-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; max-width:1200px; margin:0 auto; }
+.mission-card { padding:36px 28px; border-radius:14px; }
+.mission-card.blue { background:var(--navy); color:#fff; }
+.mission-card.gold-bg { background:var(--gold); color:#fff; }
+.mission-card.green  { background:var(--green); color:#fff; }
+.mission-card h3 { font-family:var(--ff-serif); font-size:1.4rem; margin-bottom:12px; }
+.mission-card p  { font-size:.88rem; line-height:1.8; opacity:.85; }
+.mission-card .m-label { font-size:.65rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; opacity:.6; margin-bottom:10px; }
+
+.philosophy-row { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1.2fr; gap:72px; align-items:start; }
+.phil-sticky { position:sticky; top:90px; }
+.phil-heading { font-family:var(--ff-serif); font-size:clamp(1.8rem,3.5vw,2.6rem); color:var(--navy); line-height:1.2; margin-bottom:20px; }
+.phil-heading em { color:var(--gold); font-style:italic; }
+.phil-points { display:flex; flex-direction:column; gap:16px; margin-top:32px; }
+.phil-point { display:flex; gap:16px; padding:20px; border-radius:10px; border:1px solid var(--border); background:#fff; transition:border-color .3s; }
+.phil-point:hover { border-color:rgba(184,148,63,0.4); }
+.phil-num { font-family:var(--ff-serif); font-size:1.6rem; color:var(--border); font-weight:700; flex-shrink:0; line-height:1; }
+.phil-point h4 { font-size:.9rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
+.phil-point p  { font-size:.8rem; color:var(--sub); line-height:1.6; }
+
+.tarbiyah-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; max-width:1200px; margin:0 auto; }
+.tarb-card { padding:32px 24px; border-radius:12px; border:1px solid var(--border); background:#fff; transition:transform .25s,box-shadow .25s,border-color .25s; }
+.tarb-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(26,107,74,0.3); }
+.tarb-icon { font-size:2rem; margin-bottom:16px; }
+.tarb-en { font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--green); margin-bottom:6px; }
+.tarb-title { font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.tarb-desc { font-size:.8rem; color:var(--sub); line-height:1.65; }
+
+.team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px; max-width:1200px; margin:0 auto; }
+.team-card { text-align:center; }
+.team-avatar { width:80px; height:80px; border-radius:50%; background:var(--off); border:3px solid var(--border); margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:2rem; }
+.team-name { font-size:.95rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
+.team-role { font-size:.78rem; color:var(--muted); margin-bottom:8px; }
+.team-bio  { font-size:.78rem; color:var(--sub); line-height:1.6; }
+
+@media(max-width:960px) {
+  .mission-grid { grid-template-columns:1fr; }
+  .philosophy-row { grid-template-columns:1fr; gap:40px; }
+  .phil-sticky { position:static; }
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">AQ</div>
+      <div class="nav-logo-text"><strong>AL Qalam International</strong><span>School System · Lahore</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="programs.html">Programs</a></li>
+      <li><a href="admissions.html">Admissions</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="admissions.html" class="nav-btn">Apply Now</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="eyebrow">Who We Are</span>
+  <h1>About AL Qalam International</h1>
+  <p>Founded on the belief that every child deserves an education that develops the mind, shapes the character, and prepares them for the real world.</p>
+</div>
+
+<!-- MISSION / VISION / VALUES -->
+<section class="section">
+  <div class="mission-grid">
+    <div class="mission-card blue reveal">
+      <div class="m-label">Our Mission</div>
+      <h3>What We Do Every Day</h3>
+      <p>To provide a thinking-based, technology-rich, and values-driven education that develops competent, confident, and morally grounded individuals — ready for a changing world.</p>
+    </div>
+    <div class="mission-card gold-bg reveal d1">
+      <div class="m-label">Our Vision</div>
+      <h3>Where We're Headed</h3>
+      <p>To become Pakistan's leading model for holistic, STREAM-integrated schooling — proving that academic excellence and strong character are not opposites, but inseparable.</p>
+    </div>
+    <div class="mission-card green reveal d2">
+      <div class="m-label">Our Promise</div>
+      <h3>What Parents Can Expect</h3>
+      <p>Every child at AL Qalam will leave school as a curious thinker, a capable builder, and a responsible human being — not just a certificate holder.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PHILOSOPHY -->
+<section class="section" id="philosophy">
+  <div class="philosophy-row container">
+    <div class="phil-sticky reveal">
+      <span class="eyebrow">Our Approach</span>
+      <h2 class="phil-heading">An Education Built on <em>Understanding,</em> Not Memory</h2>
+      <p class="section-desc">Pakistan's education system has long relied on rote learning. AL Qalam was built specifically to break that cycle — with a curriculum and culture designed around genuine comprehension.</p>
+      <a href="programs.html" class="btn btn-primary" style="margin-top:28px">See Our Curriculum →</a>
+    </div>
+    <div class="phil-points reveal d1">
+      <div class="phil-point">
+        <div class="phil-num">01</div>
+        <div>
+          <h4>Concept Before Content</h4>
+          <p>Every lesson starts with the "why" — students understand the principle before they encounter the formula or fact. This builds genuine retention and transferable knowledge.</p>
+        </div>
+      </div>
+      <div class="phil-point">
+        <div class="phil-num">02</div>
+        <div>
+          <h4>Learning by Building</h4>
+          <p>Students don't just read about circuits — they build them. Not just read about algorithms — they code them. Hands-on application is built into every subject, every week.</p>
+        </div>
+      </div>
+      <div class="phil-point">
+        <div class="phil-num">03</div>
+        <div>
+          <h4>Teaching to Teach</h4>
+          <p>One of our most powerful methods: students who understand something teach it to peers. This reinforces understanding, builds confidence, and develops communication skills.</p>
+        </div>
+      </div>
+      <div class="phil-point">
+        <div class="phil-num">04</div>
+        <div>
+          <h4>Questions Are Celebrated</h4>
+          <p>Asking "why?" is not a disruption — it's the goal. Our teachers are trained to reward curiosity, challenge assumptions, and model intellectual humility.</p>
+        </div>
+      </div>
+      <div class="phil-point">
+        <div class="phil-num">05</div>
+        <div>
+          <h4>Assessment for Growth</h4>
+          <p>Exams measure what was understood, not just what was memorised. Project-based assessments, presentations, and portfolios are part of every student's evaluation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TARBIYAH -->
+<section class="section" id="tarbiyah" style="background:var(--off)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px" class="reveal">
+      <span class="eyebrow">Holistic Development</span>
+      <h2 class="section-title">Tarbiyah — <em>The Whole Child</em></h2>
+      <p class="section-desc" style="margin:0 auto;text-align:center">Academic performance is one dimension of a person. We develop five dimensions — deliberately, systematically, every day.</p>
+    </div>
+    <div class="tarbiyah-grid">
+      <div class="tarb-card reveal d1">
+        <div class="tarb-icon">🕌</div>
+        <div class="tarb-en">Spiritual</div>
+        <div class="tarb-title">Faith &amp; Purpose</div>
+        <p class="tarb-desc">A direct, living connection with the Quran. Students understand their deen, not just recite it. Daily reflection, Seerah studies, and ethical reasoning are embedded in school life.</p>
+      </div>
+      <div class="tarb-card reveal d2">
+        <div class="tarb-icon">🧠</div>
+        <div class="tarb-en">Intellectual</div>
+        <div class="tarb-title">Critical Thinking</div>
+        <p class="tarb-desc">Students are taught to question, analyse, and evaluate evidence. We train minds to think independently — not to simply accept what they are told.</p>
+      </div>
+      <div class="tarb-card reveal d3">
+        <div class="tarb-icon">🤝</div>
+        <div class="tarb-en">Moral</div>
+        <div class="tarb-title">Character &amp; Ethics</div>
+        <p class="tarb-desc">Honesty, empathy, responsibility, and courage. Character development is not a Friday lecture — it is woven into daily interactions, class culture, and school policy.</p>
+      </div>
+      <div class="tarb-card reveal d4">
+        <div class="tarb-icon">💪</div>
+        <div class="tarb-en">Physical</div>
+        <div class="tarb-title">Health &amp; Wellness</div>
+        <p class="tarb-desc">Structured physical education, sports, outdoor activities, and healthy habits. A strong body supports a strong mind — this is not optional at AL Qalam.</p>
+      </div>
+      <div class="tarb-card reveal d1">
+        <div class="tarb-icon">🎯</div>
+        <div class="tarb-en">Creative</div>
+        <div class="tarb-title">Innovation &amp; Expression</div>
+        <p class="tarb-desc">Every child has a unique gift. Through arts, design, robotics, and student-led projects, we help each child discover and develop what makes them exceptional.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERSHIP -->
+<section class="section" id="leadership">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px" class="reveal">
+      <span class="eyebrow">The Team</span>
+      <h2 class="section-title">Leadership &amp; Faculty</h2>
+      <p class="section-desc" style="margin:0 auto;text-align:center">Experienced educators, technology specialists, and character mentors — committed to a shared vision.</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal d1">
+        <div class="team-avatar">👨‍💼</div>
+        <div class="team-name">Mr. Imran Ahmed</div>
+        <div class="team-role">Founder &amp; Principal</div>
+        <p class="team-bio">15 years in education. Holds an M.Ed. from LUMS. Passionate about reforming Pakistan's education model through thinking-based learning.</p>
+      </div>
+      <div class="team-card reveal d2">
+        <div class="team-avatar">👩‍🔬</div>
+        <div class="team-name">Ms. Sadia Noor</div>
+        <div class="team-role">Head of STREAM</div>
+        <p class="team-bio">Former LUMS lecturer. Designed our integrated STREAM curriculum from scratch. National robotics competition mentor and STEM advocate.</p>
+      </div>
+      <div class="team-card reveal d3">
+        <div class="team-avatar">👨‍💻</div>
+        <div class="team-name">Mr. Ali Hassan</div>
+        <div class="team-role">Director, Digital Campus</div>
+        <p class="team-bio">Computer Science graduate, 10 years in EdTech. Built our digital classroom infrastructure and student learning management system.</p>
+      </div>
+      <div class="team-card reveal d4">
+        <div class="team-avatar">👩‍🎓</div>
+        <div class="team-name">Ms. Fatima Malik</div>
+        <div class="team-role">Head of Tarbiyah</div>
+        <p class="team-bio">Islamic Studies M.A. + Child Psychology diploma. Oversees character development, spiritual education, and student wellbeing programmes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band" style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-l) 100%);padding:80px 24px;text-align:center;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(184,148,63,0.1) 0%,transparent 70%)"></div>
+  <div style="position:relative;z-index:1">
+    <h2 style="font-family:var(--ff-serif);font-size:clamp(1.8rem,4vw,2.4rem);color:#fff;margin-bottom:16px">Want to See This in Action?</h2>
+    <p style="color:rgba(255,255,255,0.55);margin-bottom:32px;max-width:460px;margin-left:auto;margin-right:auto;font-size:.95rem;line-height:1.8">Book a campus tour and watch an actual STREAM lesson, visit the Robotics Lab, and meet our team.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="contact.html" class="btn btn-gold">Book a Campus Tour</a>
+      <a href="admissions.html" class="btn btn-white">Apply for Admissions</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo-mark">AQ</div>
+      <strong>AL Qalam International</strong>
+      <span>SCHOOL SYSTEM · LAHORE</span>
+      <p>Building thinkers, not memorisers. STREAM · Robotics · Digital Classrooms · Holistic Tarbiyah.</p>
+    </div>
+    <div class="footer-col"><h4>School</h4><ul><li><a href="about.html">About Us</a></li><li><a href="about.html#philosophy">Philosophy</a></li><li><a href="about.html#tarbiyah">Tarbiyah</a></li><li><a href="about.html#leadership">Leadership</a></li></ul></div>
+    <div class="footer-col"><h4>Academics</h4><ul><li><a href="programs.html#stream">STREAM</a></li><li><a href="programs.html#robotics">Robotics</a></li><li><a href="programs.html#digital">Digital Campus</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li><a href="admissions.html">Admissions</a></li><li><a href="contact.html">Get in Touch</a></li><li><a href="tel:+924212345678">042-XXXXXXX</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 AL Qalam International School System</p><p style="color:rgba(255,255,255,0.3)">Lahore, Pakistan</p></div>
+</footer>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+const io=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('up')),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

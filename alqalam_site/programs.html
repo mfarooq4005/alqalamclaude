@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Programs — AL Qalam International</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* STREAM tabs */
+.stream-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:40px; }
+.s-tab {
+  padding:10px 20px; border-radius:8px; border:1.5px solid var(--border);
+  background:#fff; font-size:.82rem; font-weight:600; color:var(--sub);
+  cursor:pointer; transition:.2s;
+}
+.s-tab.active,.s-tab:hover { border-color:var(--navy); background:var(--navy); color:#fff; }
+.stream-content { display:none; }
+.stream-content.active { display:grid; grid-template-columns:1fr 1.1fr; gap:60px; align-items:start; }
+.stream-info {}
+.stream-info h3 { font-family:var(--ff-serif); font-size:1.8rem; color:var(--navy); margin-bottom:12px; }
+.stream-info .s-desc { font-size:.9rem; color:var(--sub); line-height:1.8; margin-bottom:24px; }
+.stream-topics { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.s-topic { padding:12px 16px; background:var(--off); border-radius:8px; font-size:.8rem; font-weight:600; color:var(--navy); border:1px solid var(--border); }
+.stream-visual { background:var(--off); border-radius:16px; padding:32px; border:1px solid var(--border); }
+.sv-label { font-size:.65rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:20px; }
+.sv-projects { display:flex; flex-direction:column; gap:12px; }
+.sv-proj { background:#fff; border-radius:8px; padding:16px; border:1px solid var(--border); display:flex; align-items:center; gap:14px; }
+.sv-proj-icon { font-size:1.5rem; }
+.sv-proj h4 { font-size:.85rem; font-weight:700; color:var(--navy); margin-bottom:2px; }
+.sv-proj p  { font-size:.75rem; color:var(--sub); }
+
+/* Robotics timeline */
+.robotics-timeline { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:0; position:relative; }
+.robotics-timeline::before { content:''; position:absolute; top:28px; left:5%; right:5%; height:2px; background:var(--border); z-index:0; }
+.r-step { position:relative; z-index:1; text-align:center; padding:0 16px; }
+.r-dot { width:56px; height:56px; border-radius:50%; border:2.5px solid var(--border); background:#fff; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 20px; transition:.3s; }
+.r-step:hover .r-dot { border-color:var(--navy); background:var(--navy); }
+.r-grade { font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin-bottom:6px; }
+.r-title { font-size:.9rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.r-desc  { font-size:.78rem; color:var(--sub); line-height:1.6; }
+.r-tags  { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:12px; }
+.r-tag   { font-size:.62rem; font-weight:600; padding:3px 8px; border-radius:4px; background:var(--off); color:var(--navy); border:1px solid var(--border); }
+
+/* Digital campus */
+.digital-cards { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.dcard { background:#fff; border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:transform .25s,box-shadow .25s,border-color .25s; }
+.dcard:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(184,148,63,0.3); }
+.dcard-head { padding:28px 28px 0; }
+.dcard-icon { font-size:2.2rem; margin-bottom:16px; }
+.dcard h3 { font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px; }
+.dcard p  { font-size:.82rem; color:var(--sub); line-height:1.7; }
+.dcard-screen { margin:20px 28px 0; background:var(--navy); border-radius:10px 10px 0 0; padding:18px; min-height:120px; }
+.ds-bar { height:8px; border-radius:4px; background:rgba(255,255,255,0.08); margin-bottom:8px; overflow:hidden; }
+.ds-fill { height:8px; border-radius:4px; background:linear-gradient(90deg,var(--gold),var(--green)); }
+.ds-row { display:flex; gap:8px; margin-bottom:6px; }
+.ds-pill { height:7px; border-radius:3px; background:rgba(255,255,255,0.12); }
+
+/* Cocurricular */
+.cocurr-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; max-width:1200px; margin:0 auto; }
+.cc-card { padding:24px 20px; border-radius:12px; border:1px solid var(--border); background:#fff; text-align:center; transition:transform .25s,border-color .25s; }
+.cc-card:hover { transform:translateY(-3px); border-color:rgba(184,148,63,0.3); }
+.cc-icon { font-size:2rem; margin-bottom:10px; }
+.cc-title { font-size:.88rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
+.cc-sub   { font-size:.74rem; color:var(--muted); }
+
+@media(max-width:960px) {
+  .stream-content.active { grid-template-columns:1fr; }
+  .stream-topics { grid-template-columns:1fr; }
+  .robotics-timeline { grid-template-columns:1fr 1fr; gap:32px; }
+  .robotics-timeline::before { display:none; }
+  .digital-cards { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">AQ</div>
+      <div class="nav-logo-text"><strong>AL Qalam International</strong><span>School System · Lahore</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="programs.html" class="active">Programs</a></li>
+      <li><a href="admissions.html">Admissions</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="admissions.html" class="nav-btn">Apply Now</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="eyebrow">Academic Programs</span>
+  <h1>What We Teach — and How</h1>
+  <p>STREAM, Robotics, Digital Classrooms, and Co-Curricular activities — all designed around one goal: building capable, thinking human beings.</p>
+</div>
+
+<!-- STREAM -->
+<section class="section" id="stream">
+  <div class="container">
+    <div style="margin-bottom:40px" class="reveal">
+      <span class="eyebrow">STREAM Curriculum</span>
+      <h2 class="section-title">Six Disciplines. <em>One System.</em></h2>
+      <p class="section-desc">At AL Qalam, Science, Technology, Religion, Engineering, Arts, and Mathematics are not separate silos. They are taught as interconnected areas of human knowledge — just as they exist in the real world.</p>
+    </div>
+    <div class="stream-tabs reveal">
+      <button class="s-tab active" data-tab="science">🔬 Science</button>
+      <button class="s-tab" data-tab="tech">💻 Technology</button>
+      <button class="s-tab" data-tab="religion">📖 Religion</button>
+      <button class="s-tab" data-tab="engineering">⚙️ Engineering</button>
+      <button class="s-tab" data-tab="arts">🎨 Arts</button>
+      <button class="s-tab" data-tab="math">📐 Mathematics</button>
+    </div>
+
+    <div class="stream-content active" id="tab-science">
+      <div class="stream-info reveal">
+        <span class="tag tag-navy" style="margin-bottom:14px">Science</span>
+        <h3>Physics, Chemistry, Biology — Applied</h3>
+        <p class="s-desc">Science at AL Qalam starts with a question, not a textbook. Students observe, hypothesise, experiment, and conclude. Lab time is not supplementary — it is central to every science unit.</p>
+        <div class="stream-topics">
+          <div class="s-topic">Physics — Mechanics &amp; Light</div>
+          <div class="s-topic">Chemistry — Elements &amp; Reactions</div>
+          <div class="s-topic">Biology — Cells to Ecosystems</div>
+          <div class="s-topic">Environmental Science</div>
+          <div class="s-topic">Scientific Method</div>
+          <div class="s-topic">Lab Safety &amp; Practice</div>
+        </div>
+      </div>
+      <div class="stream-visual reveal d2">
+        <div class="sv-label">Real Student Projects</div>
+        <div class="sv-projects">
+          <div class="sv-proj"><div class="sv-proj-icon">💡</div><div><h4>Light Refraction Model</h4><p>Grade 6 — built using water, glass, and LEDs</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🌱</div><div><h4>Hydroponics Project</h4><p>Grade 8 — growing plants without soil using nutrients</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🧪</div><div><h4>pH Testing Kit</h4><p>Grade 5 — testing household liquids for acidity</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stream-content" id="tab-tech">
+      <div class="stream-info reveal">
+        <span class="tag tag-navy" style="margin-bottom:14px">Technology</span>
+        <h3>Coding, AI Basics &amp; Digital Literacy</h3>
+        <p class="s-desc">From Scratch in Grade 1 to Python in Grade 8 — students learn to code, understand algorithms, stay safe online, and use digital tools as creators, not just consumers.</p>
+        <div class="stream-topics">
+          <div class="s-topic">Scratch (Grades 1–3)</div>
+          <div class="s-topic">Python Basics (Grades 6+)</div>
+          <div class="s-topic">Web Design (Grade 8+)</div>
+          <div class="s-topic">Digital Safety</div>
+          <div class="s-topic">Spreadsheets &amp; Data</div>
+          <div class="s-topic">AI Awareness</div>
+        </div>
+      </div>
+      <div class="stream-visual reveal d2">
+        <div class="sv-label">Real Student Projects</div>
+        <div class="sv-projects">
+          <div class="sv-proj"><div class="sv-proj-icon">🎮</div><div><h4>Scratch Game — Grade 3</h4><p>Students designed and coded a simple platformer game</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🌐</div><div><h4>Class Website — Grade 9</h4><p>Built a live HTML/CSS website for their science project</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">📊</div><div><h4>Data Visualisation — Grade 7</h4><p>Analysed and charted school attendance data in Python</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stream-content" id="tab-religion">
+      <div class="stream-info reveal">
+        <span class="tag tag-green" style="margin-bottom:14px">Religion</span>
+        <h3>Quran, Seerah &amp; Islamic Ethics — Understood</h3>
+        <p class="s-desc">Religion at AL Qalam is not memorisation and recitation alone. Students understand the Quran's message, learn from the Prophet's ﷺ life, and develop an ethical framework for real decisions.</p>
+        <div class="stream-topics">
+          <div class="s-topic">Quran with Tafseer</div>
+          <div class="s-topic">Seerah Studies</div>
+          <div class="s-topic">Islamic History</div>
+          <div class="s-topic">Fiqh of Daily Life</div>
+          <div class="s-topic">Ethics &amp; Moral Reasoning</div>
+          <div class="s-topic">Comparative Perspective</div>
+        </div>
+      </div>
+      <div class="stream-visual reveal d2">
+        <div class="sv-label">How It's Taught</div>
+        <div class="sv-projects">
+          <div class="sv-proj"><div class="sv-proj-icon">📖</div><div><h4>Seerah Podcast Project</h4><p>Grade 7 — students created audio episodes about the Prophet's ﷺ life</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🤔</div><div><h4>Ethics Case Studies</h4><p>Grade 9 — discussing real-world dilemmas through Islamic principles</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🗺️</div><div><h4>Islamic History Timeline</h4><p>Grade 5 — illustrated visual timeline from birth of Islam to today</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stream-content" id="tab-engineering">
+      <div class="stream-info reveal">
+        <span class="tag tag-gold" style="margin-bottom:14px">Engineering</span>
+        <h3>Design Thinking &amp; Physical Making</h3>
+        <p class="s-desc">Engineering is the bridge between science and the real world. Students work through design challenges, build prototypes, fail safely, iterate, and present working solutions.</p>
+        <div class="stream-topics">
+          <div class="s-topic">Design Thinking Process</div>
+          <div class="s-topic">Prototyping</div>
+          <div class="s-topic">Simple Machines</div>
+          <div class="s-topic">Structural Engineering</div>
+          <div class="s-topic">3D Design Basics</div>
+          <div class="s-topic">Materials &amp; Forces</div>
+        </div>
+      </div>
+      <div class="stream-visual reveal d2">
+        <div class="sv-label">Real Student Projects</div>
+        <div class="sv-projects">
+          <div class="sv-proj"><div class="sv-proj-icon">🌉</div><div><h4>Bridge Challenge — Grade 5</h4><p>Design a popsicle-stick bridge to hold maximum weight</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🏠</div><div><h4>Earthquake-Proof House</h4><p>Grade 7 — cardboard structure that survives a shake test</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">⚙️</div><div><h4>Gear Train Model — Grade 6</h4><p>Built working gear systems to understand mechanical advantage</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stream-content" id="tab-arts">
+      <div class="stream-info reveal">
+        <span class="tag" style="background:rgba(236,72,153,0.1);color:#9d174d;margin-bottom:14px">Arts</span>
+        <h3>Calligraphy, Fine Arts, Drama &amp; Music</h3>
+        <p class="s-desc">Arts at AL Qalam develops visual thinking, emotional intelligence, and creative expression. Every student — not just the "artsy" ones — engages with art as a fundamental form of human communication.</p>
+        <div class="stream-topics">
+          <div class="s-topic">Islamic Calligraphy</div>
+          <div class="s-topic">Drawing &amp; Painting</div>
+          <div class="s-topic">Drama &amp; Public Speaking</div>
+          <div class="s-topic">Digital Art</div>
+          <div class="s-topic">Creative Writing</div>
+          <div class="s-topic">Photography</div>
+        </div>
+      </div>
+      <div class="stream-visual reveal d2">
+        <div class="sv-label">Annual Showcase Highlights</div>
+        <div class="sv-projects">
+          <div class="sv-proj"><div class="sv-proj-icon">🎭</div><div><h4>Annual School Play</h4><p>Student-written, student-directed, student-performed — every grade</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🖋️</div><div><h4>Calligraphy Exhibition</h4><p>Grade 4–10 showcase their Arabic and Urdu calligraphy work</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">📸</div><div><h4>Photo Story Project — Grade 8</h4><p>Documentary photography telling a story about their community</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stream-content" id="tab-math">
+      <div class="stream-info reveal">
+        <span class="tag tag-navy" style="margin-bottom:14px">Mathematics</span>
+        <h3>Numbers, Logic &amp; Real-World Problem Solving</h3>
+        <p class="s-desc">Mathematics is the language of the universe. We teach it as a thinking tool, not a set of rules to memorise. Students solve real problems, explain their reasoning, and connect maths to science and engineering.</p>
+        <div class="stream-topics">
+          <div class="s-topic">Number Systems</div>
+          <div class="s-topic">Algebra</div>
+          <div class="s-topic">Geometry &amp; Measurement</div>
+          <div class="s-topic">Statistics &amp; Data</div>
+          <div class="s-topic">Logic &amp; Reasoning</div>
+          <div class="s-topic">Financial Maths</div>
+        </div>
+      </div>
+      <div class="stream-visual reveal d2">
+        <div class="sv-label">Real Student Projects</div>
+        <div class="sv-projects">
+          <div class="sv-proj"><div class="sv-proj-icon">📊</div><div><h4>Budget Planning — Grade 7</h4><p>Students planned a school event within a given budget</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">📐</div><div><h4>Architecture Scale Models</h4><p>Grade 6 — drew and built scale models of their dream houses</p></div></div>
+          <div class="sv-proj"><div class="sv-proj-icon">🎲</div><div><h4>Probability Fair — Grade 5</h4><p>Designed and ran games to demonstrate probability concepts</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ROBOTICS -->
+<section class="section" id="robotics" style="background:var(--off)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:56px" class="reveal">
+      <span class="eyebrow">Robotics Program</span>
+      <h2 class="section-title">From Lego to Python — <em>Every Grade</em></h2>
+      <p class="section-desc" style="margin:0 auto;text-align:center">Our Robotics Lab is not an after-school club. It's a core part of the curriculum, from Grade 1 to Grade 12, structured by age and ability.</p>
+    </div>
+    <div class="robotics-timeline">
+      <div class="r-step reveal d1">
+        <div class="r-dot">🧩</div>
+        <div class="r-grade">Grade 1–3</div>
+        <div class="r-title">Lego &amp; Logic</div>
+        <p class="r-desc">Block-based building, simple machines, cause-and-effect. Learning to think like an engineer through play.</p>
+        <div class="r-tags"><span class="r-tag">Lego</span><span class="r-tag">Block Coding</span><span class="r-tag">Puzzles</span></div>
+      </div>
+      <div class="r-step reveal d2">
+        <div class="r-dot">⚙️</div>
+        <div class="r-grade">Grade 4–6</div>
+        <div class="r-title">Arduino Basics</div>
+        <p class="r-desc">First real circuits. Sensors, motors, and LEDs controlled through code. Students build their first robot.</p>
+        <div class="r-tags"><span class="r-tag">Arduino</span><span class="r-tag">Scratch</span><span class="r-tag">Circuits</span></div>
+      </div>
+      <div class="r-step reveal d3">
+        <div class="r-dot">🤖</div>
+        <div class="r-grade">Grade 7–9</div>
+        <div class="r-title">Advanced Robotics</div>
+        <p class="r-desc">Python programming, Raspberry Pi, computer vision basics, IoT. Competing in national robotics competitions.</p>
+        <div class="r-tags"><span class="r-tag">Python</span><span class="r-tag">Raspberry Pi</span><span class="r-tag">IoT</span></div>
+      </div>
+      <div class="r-step reveal d4">
+        <div class="r-dot">🚀</div>
+        <div class="r-grade">Grade 10–12</div>
+        <div class="r-title">Innovation Projects</div>
+        <p class="r-desc">Original student-designed robots. AI basics, 3D printing, startup pitching. National &amp; international competitions.</p>
+        <div class="r-tags"><span class="r-tag">AI/ML</span><span class="r-tag">3D Print</span><span class="r-tag">Compete</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DIGITAL CAMPUS -->
+<section class="section" id="digital">
+  <div class="container">
+    <div style="margin-bottom:48px" class="reveal">
+      <span class="eyebrow">Digital Infrastructure</span>
+      <h2 class="section-title">A Genuinely <em>Digital</em> Campus</h2>
+      <p class="section-desc">Not just projectors and PDFs. Our digital classrooms are fully interactive — students use devices to learn, create, and collaborate.</p>
+    </div>
+    <div class="digital-cards">
+      <div class="dcard reveal d1">
+        <div class="dcard-head">
+          <div class="dcard-icon">📱</div>
+          <h3>Smart Boards in Every Classroom</h3>
+          <p>Interactive touchscreen smart boards allow students to annotate, solve problems live on-screen, and engage with multimedia lessons that go far beyond a printed page.</p>
+        </div>
+        <div class="dcard-screen">
+          <div class="ds-bar"><div class="ds-fill" style="width:72%"></div></div>
+          <div class="ds-row"><div class="ds-pill" style="width:45%"></div><div class="ds-pill" style="width:30%"></div></div>
+          <div class="ds-row"><div class="ds-pill" style="width:60%"></div><div class="ds-pill" style="width:20%"></div></div>
+        </div>
+      </div>
+      <div class="dcard reveal d2">
+        <div class="dcard-head">
+          <div class="dcard-icon">💻</div>
+          <h3>1:1 Device Program (Grade 4+)</h3>
+          <p>Every student from Grade 4 upwards has a personal device for schoolwork — not for entertainment. Devices are tools for creation: coding, writing, designing, and researching.</p>
+        </div>
+        <div class="dcard-screen">
+          <div class="ds-row"><div class="ds-pill" style="width:80%"></div></div>
+          <div class="ds-bar" style="margin-top:10px"><div class="ds-fill" style="width:55%;animation:progressAnim 2s infinite alternate"></div></div>
+          <div class="ds-row" style="margin-top:8px"><div class="ds-pill" style="width:35%"></div><div class="ds-pill" style="width:45%"></div></div>
+        </div>
+      </div>
+      <div class="dcard reveal d3">
+        <div class="dcard-head">
+          <div class="dcard-icon">📊</div>
+          <h3>Student &amp; Parent Dashboard</h3>
+          <p>Real-time attendance, exam results, fee status, homework, and teacher messages — all accessible through the AL Qalam Parent App. Transparency as a default.</p>
+        </div>
+        <div class="dcard-screen">
+          <div class="ds-row"><div class="ds-pill" style="width:40%"></div><div class="ds-pill" style="width:25%"></div></div>
+          <div class="ds-bar" style="margin:10px 0 6px"><div class="ds-fill" style="width:85%"></div></div>
+          <div class="ds-row"><div class="ds-pill" style="width:55%"></div></div>
+        </div>
+      </div>
+      <div class="dcard reveal d4">
+        <div class="dcard-head">
+          <div class="dcard-icon">🎒</div>
+          <h3>Digital Homework &amp; Assignments</h3>
+          <p>Assignments are submitted and returned digitally. Teachers provide detailed feedback. Students can review, resubmit, and track their own progress over time.</p>
+        </div>
+        <div class="dcard-screen">
+          <div class="ds-row"><div class="ds-pill" style="width:70%"></div></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <div style="flex:1;height:44px;border-radius:6px;background:rgba(26,107,74,0.3)"></div>
+            <div style="flex:1;height:44px;border-radius:6px;background:rgba(184,148,63,0.3)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CO-CURRICULAR -->
+<section class="section" id="cocurricular" style="background:var(--off)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:40px" class="reveal">
+      <span class="eyebrow">Beyond the Classroom</span>
+      <h2 class="section-title">Co-Curricular Activities</h2>
+      <p class="section-desc" style="margin:0 auto;text-align:center">Learning doesn't stop at the classroom door. Our co-curricular programme develops leadership, creativity, teamwork, and physical fitness.</p>
+    </div>
+    <div class="cocurr-grid">
+      <div class="cc-card reveal d1"><div class="cc-icon">🏏</div><div class="cc-title">Cricket &amp; Sports</div><div class="cc-sub">Inter-school competitions</div></div>
+      <div class="cc-card reveal d2"><div class="cc-icon">🎭</div><div class="cc-title">Drama Club</div><div class="cc-sub">Annual school play</div></div>
+      <div class="cc-card reveal d3"><div class="cc-icon">📷</div><div class="cc-title">Photography</div><div class="cc-sub">Visual storytelling</div></div>
+      <div class="cc-card reveal d4"><div class="cc-icon">🎤</div><div class="cc-title">Debate Society</div><div class="cc-sub">Public speaking training</div></div>
+      <div class="cc-card reveal d1"><div class="cc-icon">🌿</div><div class="cc-title">Environment Club</div><div class="cc-sub">Sustainability projects</div></div>
+      <div class="cc-card reveal d2"><div class="cc-icon">📰</div><div class="cc-title">School Magazine</div><div class="cc-sub">Student-run publication</div></div>
+      <div class="cc-card reveal d3"><div class="cc-icon">🤝</div><div class="cc-title">Community Service</div><div class="cc-sub">Monthly outreach</div></div>
+      <div class="cc-card reveal d4"><div class="cc-icon">🔭</div><div class="cc-title">Science Club</div><div class="cc-sub">Weekly experiments</div></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--navy);padding:80px 24px;text-align:center;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(184,148,63,0.1) 0%,transparent 70%)"></div>
+  <div style="position:relative;z-index:1">
+    <h2 style="font-family:var(--ff-serif);font-size:clamp(1.8rem,4vw,2.4rem);color:#fff;margin-bottom:16px">Enrol Your Child in a Real Curriculum</h2>
+    <p style="color:rgba(255,255,255,0.55);margin-bottom:32px;max-width:460px;margin-left:auto;margin-right:auto;font-size:.95rem;line-height:1.8">Limited seats available for 2025–26. Applications are reviewed in order of receipt.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="admissions.html" class="btn btn-gold">Apply for Admissions</a>
+      <a href="contact.html" class="btn btn-white">Ask a Question</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><div class="logo-mark">AQ</div><strong>AL Qalam International</strong><span>SCHOOL SYSTEM · LAHORE</span><p>Building thinkers, not memorisers. STREAM · Robotics · Digital Classrooms · Holistic Tarbiyah.</p></div>
+    <div class="footer-col"><h4>School</h4><ul><li><a href="about.html">About Us</a></li><li><a href="about.html#philosophy">Philosophy</a></li><li><a href="about.html#tarbiyah">Tarbiyah</a></li></ul></div>
+    <div class="footer-col"><h4>Programs</h4><ul><li><a href="#stream">STREAM</a></li><li><a href="#robotics">Robotics</a></li><li><a href="#digital">Digital Campus</a></li><li><a href="#cocurricular">Co-Curricular</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li><a href="admissions.html">Admissions</a></li><li><a href="contact.html">Get in Touch</a></li><li><a href="tel:+924212345678">042-XXXXXXX</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 AL Qalam International School System</p><p style="color:rgba(255,255,255,0.3)">Lahore, Pakistan</p></div>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+const io=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('up')),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+// Tabs
+document.querySelectorAll('.s-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.stream-content').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+@keyframes progressAnim{from{width:35%}to{width:78%}}
+</script>
+<style>@keyframes progressAnim{from{width:35%}to{width:78%}}.dcard-screen .ds-fill{animation:progressAnim 2.5s ease-in-out infinite alternate}</style>
+</body>
+</html>

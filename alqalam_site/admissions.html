@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admissions — AL Qalam International</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ── Steps ── */
+.steps-row { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0; }
+.step { position:relative; padding:36px 28px; }
+.step:not(:last-child)::after {
+  content:''; position:absolute; top:52px; right:-1px;
+  width:2px; height:40px; background:var(--border);
+}
+.step-num {
+  width:44px; height:44px; border-radius:50%;
+  background:var(--navy); color:#fff;
+  font-family:var(--ff-serif); font-size:1.1rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:16px; flex-shrink:0;
+}
+.step h4 { font-size:.95rem; font-weight:700; color:var(--navy); margin-bottom:6px; }
+.step p  { font-size:.82rem; color:var(--sub); line-height:1.7; }
+.step-badge { display:inline-block; font-size:.65rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:4px; background:rgba(26,107,74,.1); color:var(--green); margin-top:10px; }
+
+/* ── Eligibility table ── */
+.elig-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.elig-table th { background:var(--navy); color:#fff; padding:14px 18px; text-align:left; font-size:.78rem; font-weight:600; letter-spacing:.04em; }
+.elig-table tr:nth-child(even) td { background:var(--off); }
+.elig-table td { padding:13px 18px; border-bottom:1px solid var(--border); color:var(--text); }
+.elig-table td:first-child { font-weight:600; color:var(--navy); }
+.elig-table tr:last-child td { border-bottom:none; }
+
+/* ── Fee table ── */
+.fee-table-wrap { overflow-x:auto; }
+.fee-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.fee-table th { background:var(--gold); color:#fff; padding:14px 18px; text-align:left; font-size:.78rem; font-weight:600; letter-spacing:.04em; }
+.fee-table tr:nth-child(even) td { background:rgba(184,148,63,0.04); }
+.fee-table td { padding:13px 18px; border-bottom:1px solid var(--border); color:var(--text); }
+.fee-table td:first-child { font-weight:600; color:var(--navy); }
+.fee-table tr:last-child td { border-bottom:none; }
+.fee-note { font-size:.78rem; color:var(--muted); margin-top:14px; line-height:1.7; }
+
+/* ── FAQ ── */
+.faq-list { max-width:800px; margin:0 auto; display:flex; flex-direction:column; gap:2px; }
+.faq-item { border:1px solid var(--border); border-radius:10px; overflow:hidden; background:#fff; }
+.faq-q {
+  width:100%; text-align:left; padding:20px 24px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  background:none; border:none; cursor:pointer;
+  font-family:var(--ff); font-size:.9rem; font-weight:600; color:var(--navy);
+  transition:background .2s;
+}
+.faq-q:hover { background:var(--off); }
+.faq-q .faq-icon { flex-shrink:0; width:20px; height:20px; border-radius:50%; background:var(--off); display:flex; align-items:center; justify-content:center; transition:transform .3s, background .3s; font-size:.75rem; }
+.faq-item.open .faq-q .faq-icon { transform:rotate(45deg); background:var(--navy); color:#fff; }
+.faq-a { max-height:0; overflow:hidden; transition:max-height .35s ease, padding .3s; }
+.faq-item.open .faq-a { max-height:400px; }
+.faq-a-inner { padding:0 24px 20px; font-size:.84rem; color:var(--sub); line-height:1.8; }
+
+/* ── Requirements checklist ── */
+.checklist { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.checklist li { display:flex; align-items:flex-start; gap:12px; font-size:.87rem; color:var(--sub); line-height:1.6; }
+.checklist li::before { content:'✓'; flex-shrink:0; width:22px; height:22px; border-radius:50%; background:rgba(26,107,74,.12); color:var(--green); font-size:.75rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+
+/* ── Important dates ── */
+.dates-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; max-width:900px; margin:0 auto; }
+.date-card { padding:24px 20px; border-radius:12px; border:1px solid var(--border); background:#fff; transition:transform .25s, box-shadow .25s; }
+.date-card:hover { transform:translateY(-3px); box-shadow:var(--shadow); }
+.date-label { font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.date-val { font-family:var(--ff-serif); font-size:1.05rem; font-weight:700; color:var(--navy); margin-bottom:4px; }
+.date-desc { font-size:.78rem; color:var(--sub); }
+
+@media(max-width:780px) {
+  .steps-row { grid-template-columns:1fr 1fr; }
+  .step:not(:last-child)::after { display:none; }
+}
+@media(max-width:480px) {
+  .steps-row { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">AQ</div>
+      <div class="nav-logo-text"><strong>AL Qalam International</strong><span>School System · Lahore</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="programs.html">Programs</a></li>
+      <li><a href="admissions.html" class="active">Admissions</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="contact.html" class="nav-btn">Book a Tour</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="eyebrow">Join AL Qalam</span>
+  <h1>Admissions 2025–26</h1>
+  <p>We welcome families who share our belief that real education is about understanding — not memorising. Here's everything you need to know about joining our school.</p>
+</div>
+
+<!-- APPLICATION STEPS -->
+<section class="section">
+  <div class="container" style="margin-bottom:48px;text-align:center" class="reveal">
+    <span class="eyebrow">How to Apply</span>
+    <h2 class="section-title">5 Simple Steps</h2>
+    <p class="section-desc" style="margin:0 auto;text-align:center">The entire process from inquiry to enrolment takes about 2–3 weeks.</p>
+  </div>
+  <div class="steps-row">
+    <div class="step reveal">
+      <div class="step-num">1</div>
+      <h4>Submit Inquiry</h4>
+      <p>Fill in the online inquiry form or visit our admissions office. Tell us which grade your child is applying for and their current academic level.</p>
+      <span class="step-badge">Day 1</span>
+    </div>
+    <div class="step reveal d1">
+      <div class="step-num">2</div>
+      <h4>Assessment Test</h4>
+      <p>A short, concept-based assessment — not a rote test. We want to understand how your child thinks, not what they've memorised.</p>
+      <span class="step-badge">Day 3–5</span>
+    </div>
+    <div class="step reveal d2">
+      <div class="step-num">3</div>
+      <h4>Parent Interview</h4>
+      <p>A 20-minute conversation with our Principal or Admissions Head. We want to understand your family's goals and what you expect from school.</p>
+      <span class="step-badge">Day 5–7</span>
+    </div>
+    <div class="step reveal d3">
+      <div class="step-num">4</div>
+      <h4>Offer Letter</h4>
+      <p>If accepted, you receive a formal offer letter within 48 hours of the interview. The offer is valid for 7 days.</p>
+      <span class="step-badge">Day 7–9</span>
+    </div>
+    <div class="step reveal d4">
+      <div class="step-num">5</div>
+      <h4>Enrolment & Fee</h4>
+      <p>Submit required documents, pay the registration and first-month fee, and your child is officially a student at AL Qalam.</p>
+      <span class="step-badge">Day 9–14</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ELIGIBILITY -->
+<section class="section" style="background:var(--off)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:72px;align-items:start">
+      <div class="reveal" style="position:sticky;top:90px">
+        <span class="eyebrow">Who Can Apply</span>
+        <h2 class="section-title">Age &amp; Grade <em>Eligibility</em></h2>
+        <p class="section-desc">We admit students from Nursery through Grade 10. Age requirements follow Punjab government guidelines.</p>
+        <div style="margin-top:32px;padding:24px;background:#fff;border-radius:12px;border:1px solid var(--border)">
+          <div style="font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Required Documents</div>
+          <ul class="checklist">
+            <li>Child's original B-Form (NADRA)</li>
+            <li>Previous school leaving certificate</li>
+            <li>Last two report cards / marksheets</li>
+            <li>2 recent passport-size photographs</li>
+            <li>Parent / Guardian CNIC (both)</li>
+            <li>Vaccination card (for Nursery–Grade 2)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="reveal d1">
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);overflow:hidden">
+          <table class="elig-table">
+            <thead>
+              <tr>
+                <th>Class / Grade</th>
+                <th>Age at Time of Admission</th>
+                <th>Prior Requirement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Nursery</td><td>3 – 4 years</td><td>None</td></tr>
+              <tr><td>Kindergarten (KG)</td><td>4 – 5 years</td><td>Nursery level readiness</td></tr>
+              <tr><td>Grade 1</td><td>5 – 6 years</td><td>KG completion</td></tr>
+              <tr><td>Grade 2</td><td>6 – 7 years</td><td>Grade 1 pass</td></tr>
+              <tr><td>Grade 3</td><td>7 – 8 years</td><td>Grade 2 pass</td></tr>
+              <tr><td>Grade 4</td><td>8 – 9 years</td><td>Grade 3 pass</td></tr>
+              <tr><td>Grade 5</td><td>9 – 10 years</td><td>Grade 4 pass</td></tr>
+              <tr><td>Grade 6</td><td>10 – 11 years</td><td>Grade 5 pass + assessment</td></tr>
+              <tr><td>Grade 7</td><td>11 – 12 years</td><td>Grade 6 pass + assessment</td></tr>
+              <tr><td>Grade 8</td><td>12 – 13 years</td><td>Grade 7 pass + assessment</td></tr>
+              <tr><td>Grade 9</td><td>13 – 14 years</td><td>Grade 8 pass + assessment</td></tr>
+              <tr><td>Grade 10</td><td>14 – 15 years</td><td>Grade 9 pass + assessment</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.78rem;color:var(--muted);margin-top:12px;line-height:1.7">Age is calculated as of <strong>1st April</strong> of the admission year. Exceptions may be considered on a case-by-case basis by the Principal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEE STRUCTURE -->
+<section class="section" id="fees">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px" class="reveal">
+      <span class="eyebrow">Transparent Pricing</span>
+      <h2 class="section-title">Fee Structure <em>2025–26</em></h2>
+      <p class="section-desc" style="margin:0 auto;text-align:center">All fees are in Pakistani Rupees. No hidden charges — every applicable fee is listed here.</p>
+    </div>
+
+    <!-- One-time fees -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;max-width:1100px;margin:0 auto 40px">
+      <div class="reveal">
+        <div style="padding:28px;background:var(--navy);border-radius:14px;color:#fff;margin-bottom:20px">
+          <div style="font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-l);margin-bottom:8px">One-Time Fees</div>
+          <div style="font-family:var(--ff-serif);font-size:1.2rem;margin-bottom:4px">Registration &amp; Admission</div>
+          <p style="font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.7">Paid once at the time of enrolment. Non-refundable.</p>
+        </div>
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);overflow:hidden">
+          <table class="fee-table">
+            <thead><tr><th>Description</th><th>Amount (PKR)</th></tr></thead>
+            <tbody>
+              <tr><td>Registration Fee</td><td>Rs. 5,000</td></tr>
+              <tr><td>Admission Fee (Nursery–Grade 5)</td><td>Rs. 15,000</td></tr>
+              <tr><td>Admission Fee (Grade 6–10)</td><td>Rs. 20,000</td></tr>
+              <tr><td>Security Deposit (refundable)</td><td>Rs. 10,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="reveal d1">
+        <div style="padding:28px;background:var(--gold);border-radius:14px;color:#fff;margin-bottom:20px">
+          <div style="font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:8px">Annual Fees</div>
+          <div style="font-family:var(--ff-serif);font-size:1.2rem;margin-bottom:4px">Paid Once Per Year</div>
+          <p style="font-size:.82rem;color:rgba(255,255,255,.7);line-height:1.7">Billed at the start of each academic year.</p>
+        </div>
+        <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);overflow:hidden">
+          <table class="fee-table">
+            <thead><tr><th>Description</th><th>Amount (PKR)</th></tr></thead>
+            <tbody>
+              <tr><td>Annual Fund</td><td>Rs. 8,000</td></tr>
+              <tr><td>Technology Fee (devices, LMS)</td><td>Rs. 6,000</td></tr>
+              <tr><td>Library &amp; Resources Fee</td><td>Rs. 4,000</td></tr>
+              <tr><td>Sports &amp; Co-curricular Fee</td><td>Rs. 5,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly tuition -->
+    <div class="reveal" style="max-width:1100px;margin:0 auto">
+      <div style="font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);margin-bottom:14px;padding:0 4px">Monthly Tuition Fee</div>
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);overflow:hidden">
+        <table class="fee-table">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Classes Included</th>
+              <th>Monthly Fee (PKR)</th>
+              <th>Includes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pre-Primary</td>
+              <td>Nursery &amp; KG</td>
+              <td>Rs. 8,500</td>
+              <td>All subjects, Tarbiyah, Physical Ed</td>
+            </tr>
+            <tr>
+              <td>Primary</td>
+              <td>Grade 1 – 5</td>
+              <td>Rs. 10,500</td>
+              <td>All subjects + Basic STREAM &amp; Robotics</td>
+            </tr>
+            <tr>
+              <td>Middle</td>
+              <td>Grade 6 – 8</td>
+              <td>Rs. 13,500</td>
+              <td>Full STREAM, Robotics Lab, Digital Campus</td>
+            </tr>
+            <tr>
+              <td>Secondary</td>
+              <td>Grade 9 – 10</td>
+              <td>Rs. 16,000</td>
+              <td>Board prep + Advanced Robotics + Projects</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fee-note">
+        ★ Sibling discount: 10% off monthly fee for second child, 15% off for third child and beyond. &nbsp;·&nbsp;
+        ★ Annual fee paid upfront: 5% discount on total monthly fees for the year. &nbsp;·&nbsp;
+        ★ Fees are revised annually. Current structure applies for Academic Year 2025–26. &nbsp;·&nbsp;
+        ★ Need-based financial assistance available — contact admissions office for details.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- IMPORTANT DATES -->
+<section class="section" style="background:var(--off)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:40px" class="reveal">
+      <span class="eyebrow">Calendar</span>
+      <h2 class="section-title">Important <em>Dates</em></h2>
+    </div>
+    <div class="dates-grid">
+      <div class="date-card reveal">
+        <div class="date-label">Applications Open</div>
+        <div class="date-val">1 March 2025</div>
+        <div class="date-desc">Inquiry forms and assessments begin</div>
+      </div>
+      <div class="date-card reveal d1">
+        <div class="date-label">Last Date to Apply</div>
+        <div class="date-val">31 July 2025</div>
+        <div class="date-desc">Subject to seat availability</div>
+      </div>
+      <div class="date-card reveal d2">
+        <div class="date-label">Enrolment Deadline</div>
+        <div class="date-val">15 August 2025</div>
+        <div class="date-desc">All documents and fees due</div>
+      </div>
+      <div class="date-card reveal d3">
+        <div class="date-label">School Session Starts</div>
+        <div class="date-val">1 September 2025</div>
+        <div class="date-desc">First day of Academic Year 2025–26</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:48px" class="reveal">
+      <span class="eyebrow">Common Questions</span>
+      <h2 class="section-title">Frequently Asked <em>Questions</em></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          <span>Is the assessment test difficult? Will my child fail?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Our assessment is not a pass/fail test — it's a diagnostic conversation. We want to see how your child approaches problems, not how much they've memorised. There is no "failing" the assessment. We use it to place your child in the right learning environment and to understand where they need support.</div>
+        </div>
+      </div>
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          <span>My child is currently in a Urdu-medium school. Can they join?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Yes. We have successfully transitioned many students from Urdu-medium backgrounds. We offer a structured English language support programme for the first term. Students typically adapt within 2–3 months. What matters more to us is intellectual curiosity — language is something we develop together.</div>
+        </div>
+      </div>
+      <div class="faq-item reveal d2">
+        <button class="faq-q">
+          <span>Do you follow the BISE / Punjab Board curriculum?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Yes, the core curriculum for Grades 9–10 is aligned with Punjab Board requirements so students can appear in Board examinations. However, we go significantly beyond the textbook — adding conceptual depth, project-based learning, STREAM integration, and Robotics that the standard curriculum lacks. Students leave AL Qalam both Board-ready and genuinely well-educated.</div>
+        </div>
+      </div>
+      <div class="faq-item reveal d3">
+        <button class="faq-q">
+          <span>What are the school hours?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            <strong>Monday to Friday:</strong><br>
+            Pre-Primary (Nursery–KG): 8:00 AM – 1:00 PM<br>
+            Primary (Grade 1–5): 8:00 AM – 2:30 PM<br>
+            Middle &amp; Secondary (Grade 6–10): 8:00 AM – 3:30 PM<br><br>
+            Extended Robotics and STREAM Lab sessions run on Monday and Wednesday afternoons from 3:30–5:00 PM for enrolled students.
+          </div>
+        </div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q">
+          <span>Is there a transport / van service available?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Yes. We have a registered transport service covering major routes in Lahore. Transport is managed by an outsourced, licensed operator. Monthly transport fee varies by distance (Rs. 2,000 – Rs. 4,500/month). Please ask our admissions office for the current route list and availability for your area.</div>
+        </div>
+      </div>
+      <div class="faq-item reveal d1">
+        <button class="faq-q">
+          <span>Can I visit the school before applying?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Absolutely — and we encourage it. Campus tours happen every Saturday between 10:00 AM and 12:00 PM. During the tour you will see an active STREAM lesson, visit the Robotics Lab, and have a chance to speak with our teachers. To book a tour, call us, WhatsApp us, or fill in the contact form on our website.</div>
+        </div>
+      </div>
+      <div class="faq-item reveal d2">
+        <button class="faq-q">
+          <span>Is there a uniform? Where do I get it?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Yes. AL Qalam has a formal school uniform (navy blue and white) and a separate sports kit. Uniform sets are available for purchase from the school's uniform counter at the time of enrolment. The uniform set (2 pairs) costs approximately Rs. 3,500 for primary students and Rs. 4,500 for middle and secondary students.</div>
+        </div>
+      </div>
+      <div class="faq-item reveal d3">
+        <button class="faq-q">
+          <span>What is the refund policy if we withdraw mid-year?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">Registration and admission fees are non-refundable. The security deposit (Rs. 10,000) is fully refunded upon withdrawal, subject to clearance. Monthly tuition fees paid in advance are refunded on a pro-rata basis after one month's notice period. Annual fees are not refunded if withdrawal occurs after the first term. Full details are in the Parent-School Agreement signed at enrolment.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section style="background:linear-gradient(135deg,var(--navy) 0%,var(--navy-l) 100%);padding:80px 24px;text-align:center;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(184,148,63,0.1) 0%,transparent 70%)"></div>
+  <div style="position:relative;z-index:1" class="reveal">
+    <span style="display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-l);margin-bottom:14px">Ready to Begin?</span>
+    <h2 style="font-family:var(--ff-serif);font-size:clamp(1.8rem,4vw,2.4rem);color:#fff;margin-bottom:16px">Secure Your Child's Place</h2>
+    <p style="color:rgba(255,255,255,0.55);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;font-size:.95rem;line-height:1.8">Seats are limited. Visit us, ask your questions, and let your child take the assessment. The first step is just getting in touch.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="contact.html" class="btn btn-gold">Contact Admissions Office</a>
+      <a href="contact.html#tour" class="btn btn-white">Book a Campus Tour</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo-mark">AQ</div>
+      <strong>AL Qalam International</strong>
+      <span>SCHOOL SYSTEM · LAHORE</span>
+      <p>Building thinkers, not memorisers. STREAM · Robotics · Digital Classrooms · Holistic Tarbiyah.</p>
+    </div>
+    <div class="footer-col"><h4>School</h4><ul><li><a href="about.html">About Us</a></li><li><a href="about.html#philosophy">Philosophy</a></li><li><a href="about.html#tarbiyah">Tarbiyah</a></li><li><a href="about.html#leadership">Leadership</a></li></ul></div>
+    <div class="footer-col"><h4>Academics</h4><ul><li><a href="programs.html#stream">STREAM</a></li><li><a href="programs.html#robotics">Robotics</a></li><li><a href="programs.html#digital">Digital Campus</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li><a href="admissions.html">Admissions</a></li><li><a href="contact.html">Get in Touch</a></li><li><a href="tel:+924212345678">042-XXXXXXX</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><p>© 2025 AL Qalam International School System</p><p style="color:rgba(255,255,255,0.3)">Lahore, Pakistan</p></div>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>50));
+const io=new IntersectionObserver(e=>e.forEach(x=>x.isIntersecting&&x.target.classList.add('up')),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.closest('.faq-item');
+    const wasOpen=item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>
