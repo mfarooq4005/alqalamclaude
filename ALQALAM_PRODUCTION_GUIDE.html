@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AL Qalam EMS — Production Deployment Guide</title>
+<style>
+  :root {
+    --gold:   #fbbf24;
+    --cyan:   #00e5ff;
+    --green:  #34d399;
+    --purple: #a78bfa;
+    --red:    #f87171;
+    --orange: #fb923c;
+    --bg:     #0d1117;
+    --bg2:    #161b22;
+    --bg3:    #21262d;
+    --bg4:    #30363d;
+    --border: #30363d;
+    --text:   #e6edf3;
+    --muted:  #8b949e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed; left: 0; top: 0; width: 260px; height: 100vh;
+    background: var(--bg2); border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 0; z-index: 100;
+  }
+  .sidebar-header {
+    padding: 20px 20px 16px;
+    background: linear-gradient(135deg, #161b22, #0d1117);
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .sidebar-logo-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(251,191,36,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .sidebar-title { font-size: 13px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px; }
+  .sidebar-sub { font-size: 11px; color: var(--muted); }
+  .sidebar-nav { padding: 12px 8px; }
+  .nav-section { padding: 8px 12px 4px; font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; color: var(--muted); transition: all 0.15s;
+    margin-bottom: 1px;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--gold); }
+  .nav-item .icon { width: 18px; text-align: center; font-size: 13px; }
+  .nav-badge { margin-left: auto; background: var(--green); color: #000; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 10px; }
+  .nav-badge.orange { background: var(--orange); }
+  .nav-badge.purple { background: var(--purple); }
+
+  /* ── Main Content ── */
+  .main { margin-left: 260px; min-height: 100vh; }
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    padding: 60px 48px 48px; border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -50px; right: -50px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(251,191,36,0.06) 0%, transparent 70%);
+  }
+  .hero-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px; margin-bottom: 20px; }
+  .hero h1 { font-size: 36px; font-weight: 900; line-height: 1.2; margin-bottom: 12px; }
+  .hero h1 span { color: var(--gold); }
+  .hero p { color: var(--muted); font-size: 15px; max-width: 600px; line-height: 1.7; }
+  .hero-badges { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  .hero-badge { display: flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--text); }
+
+  .content { padding: 40px 48px; max-width: 900px; }
+
+  /* ── Sections ── */
+  .section { margin-bottom: 56px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 28px;
+  }
+  .section-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .section-title { font-size: 22px; font-weight: 800; }
+  .section-sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  /* ── Cards ── */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .card.accent-gold { border-left: 3px solid var(--gold); }
+  .card.accent-cyan  { border-left: 3px solid var(--cyan);  }
+  .card.accent-green { border-left: 3px solid var(--green); }
+  .card.accent-purple { border-left: 3px solid var(--purple); }
+  .card.accent-red  { border-left: 3px solid var(--red);   }
+  .card.accent-orange { border-left: 3px solid var(--orange); }
+
+  /* ── Code blocks ── */
+  pre {
+    background: #0d1117; border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; overflow-x: auto; font-size: 12.5px; line-height: 1.7;
+    font-family: 'Consolas', 'Monaco', monospace; position: relative; margin: 12px 0;
+  }
+  .code-header { background: var(--bg3); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--muted); }
+  .code-header + pre { border-radius: 0 0 10px 10px; margin-top: 0; }
+  .copy-btn { background: var(--bg4); border: none; color: var(--muted); padding: 3px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.15s; }
+  .copy-btn:hover { background: var(--gold); color: #000; }
+  .comment { color: #6e7681; }
+  .kw  { color: var(--purple); }
+  .str { color: var(--green); }
+  .fn  { color: var(--cyan); }
+  .num { color: var(--orange); }
+  .hl  { color: var(--gold); }
+
+  /* ── Steps ── */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex; gap: 16px; margin-bottom: 20px;
+    padding: 18px 20px; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; transition: border-color 0.15s;
+  }
+  .step:hover { border-color: var(--gold); }
+  .step-num {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(251,191,36,0.12); border: 2px solid rgba(251,191,36,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; color: var(--gold);
+  }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .step-body { color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+  /* ── Alert boxes ── */
+  .alert { border-radius: 10px; padding: 14px 16px; margin: 14px 0; display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.6; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .alert.gold   { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25); color: var(--gold); }
+  .alert.green  { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.25);  color: var(--green);  }
+  .alert.red    { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); color: var(--red);   }
+  .alert.cyan   { background: rgba(0,229,255,0.06);   border: 1px solid rgba(0,229,255,0.2);    color: var(--cyan);  }
+  .alert.purple { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.25); color: var(--purple); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { background: var(--bg3); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+  td code { background: var(--bg3); padding: 2px 7px; border-radius: 4px; font-size: 12px; color: var(--cyan); }
+
+  /* ── Diagram ── */
+  .diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 16px 0; overflow-x: auto; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
+  .flow-box { text-align: center; padding: 12px 18px; border-radius: 10px; border: 1px solid; min-width: 110px; }
+  .flow-arrow { color: var(--muted); font-size: 20px; padding: 0 6px; }
+  .flow-stack { display: flex; flex-direction: column; gap: 8px; }
+  .flow-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; }
+  .flow-name { font-size: 13px; font-weight: 700; }
+  .flow-sub  { font-size: 10px; margin-top: 2px; opacity: 0.7; }
+
+  /* ── Grid ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* ── Badges ── */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge.gold   { background: rgba(251,191,36,0.15);  color: var(--gold);   border: 1px solid rgba(251,191,36,0.3);  }
+  .badge.green  { background: rgba(52,211,153,0.15);   color: var(--green);  border: 1px solid rgba(52,211,153,0.3);  }
+  .badge.cyan   { background: rgba(0,229,255,0.1);     color: var(--cyan);   border: 1px solid rgba(0,229,255,0.25); }
+  .badge.purple { background: rgba(167,139,250,0.15);  color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+  .badge.red    { background: rgba(248,113,113,0.15);  color: var(--red);    border: 1px solid rgba(248,113,113,0.3); }
+  .badge.orange { background: rgba(251,146,60,0.15);   color: var(--orange); border: 1px solid rgba(251,146,60,0.3); }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); cursor: pointer; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li.done { color: var(--text); }
+  .checklist li .ck { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
+  .checklist li.done .ck { background: var(--green); border-color: var(--green); color: #000; font-size: 10px; font-weight: 900; }
+
+  /* ── OTA highlight ── */
+  .ota-hero { background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(0,229,255,0.08)); border: 1px solid rgba(167,139,250,0.3); border-radius: 16px; padding: 28px; margin: 20px 0; text-align: center; }
+  .ota-hero h3 { font-size: 20px; font-weight: 800; color: var(--purple); margin-bottom: 8px; }
+  .ota-hero p { color: var(--muted); font-size: 13px; }
+  .ota-hero .big { font-size: 40px; margin-bottom: 12px; }
+
+  /* Progress bar */
+  .progress-track { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .progress-fill  { height: 6px; border-radius: 3px; transition: width 0.5s; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; margin-top: 20px; }
+  h4 { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 8px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+  p  { color: var(--muted); line-height: 1.7; margin-bottom: 10px; }
+  ul, ol { padding-left: 20px; color: var(--muted); line-height: 1.8; font-size: 13px; }
+  li { margin-bottom: 3px; }
+  strong { color: var(--text); }
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Print */
+  @media print { .sidebar { display: none; } .main { margin-left: 0; } }
+  @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .content { padding: 24px 20px; } .hero { padding: 32px 20px; } .grid2, .grid3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ SIDEBAR ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🎓</div>
+      <div>
+        <div class="sidebar-title">AL QALAM EMS</div>
+        <div class="sidebar-sub">Production Deployment Guide</div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="scrollTo('api')"><span class="icon">🔗</span> API Architecture</div>
+    <div class="nav-section">Web App</div>
+    <div class="nav-item" onclick="scrollTo('web-deploy')"><span class="icon">🌐</span> cPanel Deployment</div>
+    <div class="nav-item" onclick="scrollTo('web-config')"><span class="icon">⚙️</span> Production Config</div>
+    <div class="nav-section">Mobile App</div>
+    <div class="nav-item" onclick="scrollTo('api-connect')"><span class="icon">📡</span> Connect to API</div>
+    <div class="nav-item" onclick="scrollTo('expo-setup')"><span class="icon">🏗️</span> Expo Account + EAS</div>
+    <div class="nav-item" onclick="scrollTo('apk-build')"><span class="icon">📱</span> Build APK / AAB</div>
+    <div class="nav-item" onclick="scrollTo('play-store')"><span class="icon">🎮</span> Google Play Store<span class="nav-badge">NEW</span></div>
+    <div class="nav-item" onclick="scrollTo('app-store')"><span class="icon">🍎</span> Apple App Store</div>
+    <div class="nav-item" onclick="scrollTo('direct-apk')"><span class="icon">📦</span> Direct APK Share</div>
+    <div class="nav-section">Live Updates</div>
+    <div class="nav-item" onclick="scrollTo('ota')"><span class="icon">⚡</span> OTA Updates<span class="nav-badge purple">KEY</span></div>
+    <div class="nav-section">Final</div>
+    <div class="nav-item" onclick="scrollTo('env')"><span class="icon">🔐</span> Environment Vars</div>
+    <div class="nav-item" onclick="scrollTo('checklist')"><span class="icon">✅</span> Go-Live Checklist</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ MAIN ═══ -->
+<main class="main">
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-tag">🚀 Production Deployment</div>
+  <h1>AL Qalam EMS<br><span>Complete Production Guide</span></h1>
+  <p>Web app cPanel deployment + Mobile app EAS Build + OTA live updates. Sab kuch ek jagah — step-by-step.</p>
+  <div class="hero-badges">
+    <div class="hero-badge">🌐 Web App → cPanel</div>
+    <div class="hero-badge">📱 Android APK + Play Store</div>
+    <div class="hero-badge">🍎 iOS App Store</div>
+    <div class="hero-badge">⚡ OTA Live Updates</div>
+    <div class="hero-badge">🔗 PHP + Node.js API</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1: API ARCHITECTURE
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="api">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(251,191,36,0.12)">🔗</div>
+    <div>
+      <div class="section-title">API Architecture — Data Kahan Se Aata Hai?</div>
+      <div class="section-sub">Mobile app, web app, aur backends ka complete flow</div>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div style="text-align:center; margin-bottom: 20px; font-size:12px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase;">System Architecture</div>
+    <div class="flow" style="gap:4px; justify-content:center; flex-wrap:nowrap; overflow-x:auto; padding-bottom:8px;">
+      <!-- Users -->
+      <div class="flow-stack">
+        <div class="flow-box" style="border-color:rgba(251,191,36,0.4); background:rgba(251,191,36,0.08)">
+          <div class="flow-label" style="color:var(--gold)">Users</div>
+          <div class="flow-name" style="color:var(--gold)">📱 Mobile App</div>
+          <div class="flow-sub" style="color:var(--gold)">React Native + Expo</div>
+        </div>
+        <div class="flow-box" style="border-color:rgba(0,229,255,0.4); background:rgba(0,229,255,0.08)">
+          <div class="flow-label" style="color:var(--cyan)">Users</div>
+          <div class="flow-name" style="color:var(--cyan)">🌐 Web Browser</div>
+          <div class="flow-sub" style="color:var(--cyan)">alqalam_ems.html</div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <!-- Backends -->
+      <div class="flow-stack">
+        <div class="flow-box" style="border-color:rgba(167,139,250,0.4); background:rgba(167,139,250,0.08)">
+          <div class="flow-label" style="color:var(--purple)">Backend 1</div>
+          <div class="flow-name" style="color:var(--purple)">PHP API</div>
+          <div class="flow-sub" style="color:var(--purple)">cPanel · alqalam.edu.pk</div>
+        </div>
+        <div class="flow-box" style="border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.08)">
+          <div class="flow-label" style="color:var(--green)">Backend 2</div>
+          <div class="flow-name" style="color:var(--green)">Node.js + Socket.io</div>
+          <div class="flow-sub" style="color:var(--green)">AWS EC2 · api.alqalam.edu.pk</div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <!-- Database -->
+      <div class="flow-box" style="border-color:rgba(251,191,36,0.4); background:rgba(251,191,36,0.08); align-self:center">
+        <div class="flow-label" style="color:var(--gold)">Database</div>
+        <div class="flow-name" style="color:var(--gold)">🗄️ MySQL</div>
+        <div class="flow-sub" style="color:var(--gold)">AWS RDS · Shared</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert gold">
+    <div class="alert-icon">💡</div>
+    <div><strong>Key Point:</strong> PHP backend aur Node.js backend <strong>dono ek hi MySQL database</strong> use karte hain (AWS RDS). Koi data sync nahi karni — same tables, same data.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card accent-purple">
+      <div class="card-title">🔧 PHP Backend (CRUD)</div>
+      <p style="font-size:13px"><strong>Kya karta hai:</strong> Students, fee, attendance, results ka CRUD. Login/logout. Reports. WhatsApp SMS.</p>
+      <p style="font-size:13px; color:var(--muted)"><strong>URL:</strong> <code>https://alqalam.edu.pk/ems/alqalam_backend.php</code></p>
+    </div>
+    <div class="card accent-green">
+      <div class="card-title">⚡ Node.js Backend (Real-Time)</div>
+      <p style="font-size:13px"><strong>Kya karta hai:</strong> Socket.io live updates. Staff check-in/out notifications. Admin dashboard live feed. Push notifications.</p>
+      <p style="font-size:13px; color:var(--muted)"><strong>URL:</strong> <code>https://api.alqalam.edu.pk</code></p>
+    </div>
+  </div>
+
+  <h3>Mobile App Mein Data Flow</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">App Start → Auth Check</div>
+        <div class="step-body">App open hoti hai → <code>expo-secure-store</code> mein saved JWT token check hota hai → Agar token hai to seedha portal mein, warna login screen.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Login → PHP API Call</div>
+        <div class="step-body"><code>POST /auth/login</code> → PHP backend username/password check karta hai → JWT token return karta hai → Token secure store mein save hota hai → Role ke hisaab se portal open hota hai.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Dashboard Data → TanStack Query</div>
+        <div class="step-body">Har screen <code>useQuery</code> hook use karti hai → API call → Data cache hoti hai → 5 min tak same data dikhta hai (server hit nahi hota) → Pull-to-refresh se fresh data.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Real-Time Updates → Socket.io</div>
+        <div class="step-body">Login ke baad <code>SocketService.connect()</code> → Node.js server se WebSocket connection → Staff check-in/out, fee collection, attendance updates — sab live dikhte hain.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">Offline Mode → Mock Data Fallback</div>
+        <div class="step-body">Agar API available nahi → <code>try/catch</code> mein mock data return hota hai → App kaam karti rehti hai → Green online indicator dikhta hai jab connection wapas aata hai.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2: WEB APP DEPLOYMENT
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="web-deploy">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(0,229,255,0.12)">🌐</div>
+    <div>
+      <div class="section-title">Web App → cPanel Production Deployment</div>
+      <div class="section-sub">alqalam_ems.html + PHP backend — live karna</div>
+    </div>
+  </div>
+
+  <h3>Files Jo Upload Karni Hain</h3>
+  <table>
+    <tr><th>File</th><th>Upload Location</th><th>Purpose</th></tr>
+    <tr><td><code>alqalam_ems.html</code></td><td><code>public_html/ems/</code></td><td>Main web application</td></tr>
+    <tr><td><code>alqalam_backend.php</code></td><td><code>public_html/ems/</code></td><td>PHP API backend</td></tr>
+    <tr><td><code>alqalam_database.sql</code></td><td>phpMyAdmin import</td><td>Database tables</td></tr>
+    <tr><td><code>.env</code></td><td><code>public_html/ems/</code></td><td>Secrets (DB password etc.)</td></tr>
+    <tr><td><code>.htaccess</code></td><td><code>public_html/ems/</code></td><td>URL routing + security</td></tr>
+  </table>
+
+  <div class="steps" style="margin-top:16px">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">cPanel File Manager → Folder Banao</div>
+        <div class="step-body">cPanel → File Manager → <code>public_html</code> → New Folder → <code>ems</code> — Sab files yahan upload hongi.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Files Upload Karo</div>
+        <div class="step-body">File Manager → Upload → <code>alqalam_ems.html</code>, <code>alqalam_backend.php</code>, <code>.env</code>, <code>.htaccess</code> — sab ek saath select karke upload.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">MySQL Database Banao</div>
+        <div class="step-body">cPanel → MySQL Databases → New Database: <code>alqalam_ems</code> → New User: <code>alqalam_user</code> → Strong Password → User ko database assign karo → All Privileges.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">SQL Import Karo</div>
+        <div class="step-body">cPanel → phpMyAdmin → <code>alqalam_ems</code> database select → Import tab → <code>alqalam_database.sql</code> file choose → Go. 1600+ lines import hongi.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">.env File Configure Karo</div>
+        <div class="step-body">File Manager → <code>.env</code> file edit karo → DB credentials fill karo (neeche diya hua hai) → Save.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <div class="step-title">Test Karo</div>
+        <div class="step-body"><code>https://alqalam.edu.pk/ems/alqalam_ems.html</code> open karo → Login karo admin/AqAdmin@2024 → Dashboard dikhna chahiye!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3: WEB CONFIG FILES
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="web-config">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(167,139,250,0.12)">⚙️</div>
+    <div>
+      <div class="section-title">Production Config Files</div>
+      <div class="section-sub">.env, .htaccess — exact content</div>
+    </div>
+  </div>
+
+  <div class="code-header"><span>📄 .env — Production Config</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="comment"># ── Database (AWS RDS) ──────────────────────────────────────</span>
+<span class="hl">DB_HOST</span>=<span class="str">your-rds-endpoint.rds.amazonaws.com</span>
+<span class="hl">DB_NAME</span>=<span class="str">alqalam_ems</span>
+<span class="hl">DB_USER</span>=<span class="str">alqalam_user</span>
+<span class="hl">DB_PASS</span>=<span class="str">YourStrongPassword@2024</span>
+<span class="hl">DB_PORT</span>=<span class="num">3306</span>
+
+<span class="comment"># ── JWT Secret (generate: openssl rand -hex 32) ─────────────</span>
+<span class="hl">JWT_SECRET</span>=<span class="str">a8f3d9c2e1b7a4f0d8c5e3b1a9f2d6c4e7b0a3f1d5c8e2b6a4f9d3c7e1b5a2f0</span>
+<span class="hl">JWT_EXPIRE</span>=<span class="str">24h</span>
+
+<span class="comment"># ── App Settings ────────────────────────────────────────────</span>
+<span class="hl">APP_ENV</span>=<span class="str">production</span>
+<span class="hl">APP_URL</span>=<span class="str">https://alqalam.edu.pk</span>
+<span class="hl">SCHOOL_NAME</span>=<span class="str">AL Qalam International</span>
+
+<span class="comment"># ── Node.js Backend URL ─────────────────────────────────────</span>
+<span class="hl">NODE_API_URL</span>=<span class="str">https://api.alqalam.edu.pk</span>
+
+<span class="comment"># ── SMS/WhatsApp (optional) ──────────────────────────────────</span>
+<span class="hl">TWILIO_SID</span>=<span class="str">your_twilio_sid</span>
+<span class="hl">TWILIO_TOKEN</span>=<span class="str">your_twilio_token</span>
+<span class="hl">TWILIO_FROM</span>=<span class="str">+1234567890</span></pre>
+
+  <div class="code-header"><span>📄 .htaccess — Security + Routing</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="kw">Options</span> -Indexes
+<span class="kw">ServerSignature</span> Off
+
+<span class="comment"># ── Block .env from public access ──────────────────────────</span>
+&lt;<span class="fn">Files</span> <span class="str">".env"</span>&gt;
+    <span class="kw">Require</span> all denied
+&lt;/<span class="fn">Files</span>&gt;
+
+<span class="kw">RewriteEngine</span> On
+<span class="kw">RewriteCond</span> %{HTTPS} off
+<span class="kw">RewriteRule</span> ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+<span class="comment"># ── CORS Headers ────────────────────────────────────────────</span>
+<span class="kw">Header</span> always set Access-Control-Allow-Origin <span class="str">"https://alqalam.edu.pk"</span>
+<span class="kw">Header</span> always set Access-Control-Allow-Methods <span class="str">"GET, POST, PUT, DELETE, OPTIONS"</span>
+<span class="kw">Header</span> always set Access-Control-Allow-Headers <span class="str">"Authorization, Content-Type"</span>
+
+<span class="comment"># ── Security Headers ─────────────────────────────────────────</span>
+<span class="kw">Header</span> always set X-Content-Type-Options <span class="str">"nosniff"</span>
+<span class="kw">Header</span> always set X-Frame-Options <span class="str">"SAMEORIGIN"</span>
+<span class="kw">Header</span> always set X-XSS-Protection <span class="str">"1; mode=block"</span></pre>
+
+  <div class="alert red">
+    <div class="alert-icon">🔒</div>
+    <div><strong>Security:</strong> <code>.env</code> file ka permissions 600 set karo (File Manager → Right Click → Change Permissions → 600). Kabhi bhi .env ko git mein push mat karo.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 4: CONNECT MOBILE TO API
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="api-connect">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12)">📡</div>
+    <div>
+      <div class="section-title">Mobile App — Real API Se Connect Karo</div>
+      <div class="section-sub">Mock data hatao, real backend use karo</div>
+    </div>
+  </div>
+
+  <div class="alert gold">
+    <div class="alert-icon">ℹ️</div>
+    <div><strong>Abhi kya ho raha hai:</strong> Mobile app mein har screen try/catch use karti hai — API fail ho to mock data dikhata hai. Production mein API URL set karni hai.</div>
+  </div>
+
+  <h3>Step 1: API URLs Update Karo</h3>
+  <p><code>src/api/index.ts</code> file mein ye 2 lines update karo:</p>
+  <div class="code-header"><span>📄 src/api/index.ts — URL Update</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="kw">const</span> <span class="hl">API_URLS</span> = {
+  <span class="comment">// PHP Backend (cPanel) — CRUD, login, fee, attendance</span>
+  php:  <span class="str">'https://alqalam.edu.pk/ems/alqalam_backend.php'</span>,
+
+  <span class="comment">// Node.js Backend (AWS EC2) — Real-time, socket.io</span>
+  node: <span class="str">'https://api.alqalam.edu.pk'</span>,
+};</pre>
+
+  <h3>Step 2: Environment Variables (Best Practice)</h3>
+  <p>Project root mein <code>.env</code> file banao:</p>
+  <div class="code-header"><span>📄 alqalam_mobile/.env</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="hl">EXPO_PUBLIC_PHP_API</span>=<span class="str">https://alqalam.edu.pk/ems/alqalam_backend.php</span>
+<span class="hl">EXPO_PUBLIC_NODE_API</span>=<span class="str">https://api.alqalam.edu.pk</span>
+<span class="hl">EXPO_PUBLIC_SCHOOL_NAME</span>=<span class="str">AL Qalam International</span>
+<span class="hl">EXPO_PUBLIC_VERSION</span>=<span class="str">1.0.0</span></pre>
+
+  <p>Phir <code>src/api/index.ts</code> mein use karo:</p>
+  <div class="code-header"><span>📄 src/api/index.ts — .env se read karo</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="kw">const</span> <span class="hl">API_URLS</span> = {
+  php:  process.<span class="fn">env</span>.<span class="hl">EXPO_PUBLIC_PHP_API</span>  || <span class="str">'http://192.168.1.100/ems/backend.php'</span>,
+  node: process.<span class="fn">env</span>.<span class="hl">EXPO_PUBLIC_NODE_API</span> || <span class="str">'http://192.168.1.100:3000'</span>,
+};</pre>
+
+  <div class="alert green">
+    <div class="alert-icon">✅</div>
+    <div><strong>Expo Public Variables:</strong> <code>EXPO_PUBLIC_</code> prefix wali variables app bundle mein include hoti hain. Secret values (API keys, passwords) kabhi EXPO_PUBLIC nahi rakhna — sirf backend server pe rakho.</div>
+  </div>
+
+  <h3>Step 3: Production Mein Mock Data Remove Karo</h3>
+  <p>Abhi ye pattern use ho raha hai:</p>
+  <div class="code-header"><span>Current Code (with fallback)</span></div>
+  <pre><span class="kw">const</span> { data = <span class="hl">MOCK_STUDENTS</span> } = <span class="fn">useQuery</span>({
+  queryFn: <span class="kw">async</span> () => {
+    <span class="kw">try</span> { <span class="kw">return</span> (<span class="kw">await</span> StudentsAPI.<span class="fn">getAll</span>()).data; }
+    <span class="kw">catch</span> { <span class="kw">return</span> <span class="hl">MOCK_STUDENTS</span>; } <span class="comment">// ← Offline fallback</span>
+  }
+});</pre>
+  <p>Ye production mein bhi kaam karta hai — API available hogi to real data, nahi hogi to demo data. <strong>Kuch change nahi karna padega!</strong></p>
+
+  <div class="alert cyan">
+    <div class="alert-icon">💡</div>
+    <div>Agar <strong>sirf real data</strong> dikhana chahte ho (mock hata dena) to catch mein throw karo: <code>catch(e) { throw e; }</code> — TanStack Query error state dikhayega.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 5: EXPO ACCOUNT + EAS SETUP
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="expo-setup">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(251,191,36,0.12)">🏗️</div>
+    <div>
+      <div class="section-title">Expo Account + EAS CLI Setup</div>
+      <div class="section-sub">Build aur OTA updates ke liye zaruri — pehla step</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Expo Account Banao</div>
+        <div class="step-body"><a href="https://expo.dev" target="_blank">expo.dev</a> → Sign Up → Free account → Email verify karo. Username note karo — aapka Expo username (e.g., <code>alqalam</code>).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">EAS CLI Install Karo</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">npm</span> install -g eas-cli
+<span class="kw">eas</span> --version  <span class="comment"># verify install</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Login Karo</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">eas</span> login
+<span class="comment"># Username aur password enter karo</span>
+<span class="comment"># ✓ Logged in as alqalam</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Project Initialize Karo</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal — alqalam_mobile folder mein</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">cd</span> alqalam_mobile
+<span class="kw">eas</span> init
+<span class="comment"># Project name: AL Qalam EMS</span>
+<span class="comment"># ✓ Created project @alqalam/al-qalam-ems on expo.dev</span>
+<span class="comment"># ✓ Updated app.json with projectId</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">EAS Build Configure Karo</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">eas</span> build:configure
+<span class="comment"># Select: Android + iOS</span>
+<span class="comment"># ✓ Creates eas.json automatically</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>eas.json — Final Config</h3>
+  <div class="code-header"><span>📄 eas.json</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre>{
+  <span class="str">"cli"</span>: { <span class="str">"version"</span>: <span class="str">">= 7.0.0"</span> },
+  <span class="str">"build"</span>: {
+    <span class="str">"development"</span>: {
+      <span class="str">"developmentClient"</span>: <span class="kw">true</span>,
+      <span class="str">"distribution"</span>: <span class="str">"internal"</span>,
+      <span class="str">"android"</span>: { <span class="str">"buildType"</span>: <span class="str">"apk"</span> }
+    },
+    <span class="str">"preview"</span>: {
+      <span class="str">"distribution"</span>: <span class="str">"internal"</span>,
+      <span class="str">"android"</span>: { <span class="str">"buildType"</span>: <span class="str">"apk"</span> },
+      <span class="str">"channel"</span>: <span class="str">"preview"</span>
+    },
+    <span class="str">"production"</span>: {
+      <span class="str">"android"</span>: { <span class="str">"buildType"</span>: <span class="str">"app-bundle"</span> },
+      <span class="str">"channel"</span>: <span class="str">"production"</span>,
+      <span class="str">"autoIncrement"</span>: <span class="kw">true</span>
+    }
+  },
+  <span class="str">"submit"</span>: {
+    <span class="str">"production"</span>: {
+      <span class="str">"android"</span>: { <span class="str">"serviceAccountKeyPath"</span>: <span class="str">"./google-play-key.json"</span> },
+      <span class="str">"ios"</span>: { <span class="str">"appleId"</span>: <span class="str">"your@apple.id"</span>, <span class="str">"ascAppId"</span>: <span class="str">"1234567890"</span> }
+    }
+  }
+}</pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 6: APK BUILD
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="apk-build">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12)">📱</div>
+    <div>
+      <div class="section-title">Android APK / AAB Build Karo</div>
+      <div class="section-sub">EAS Cloud build — local Android Studio install ki zarurat nahi</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card accent-orange">
+      <div class="card-title">📦 Preview APK</div>
+      <p style="font-size:13px">Direct install ke liye. Staff/parents ko WhatsApp ya email par share karo. Play Store nahi chahiye.</p>
+      <div class="code-header"><span>Command</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre style="font-size:11px"><span class="kw">eas</span> build \
+  --platform android \
+  --profile preview</pre>
+    </div>
+    <div class="card accent-green">
+      <div class="card-title">🏆 Production AAB</div>
+      <p style="font-size:13px">Google Play Store ke liye. Optimized bundle. Play Store require karta hai AAB format.</p>
+      <div class="code-header"><span>Command</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre style="font-size:11px"><span class="kw">eas</span> build \
+  --platform android \
+  --profile production</pre>
+    </div>
+  </div>
+
+  <div class="alert gold">
+    <div class="alert-icon">☁️</div>
+    <div><strong>EAS Cloud Build:</strong> Build Expo ke servers par hoti hai — aapke computer par kuch install nahi karna. Command run karo, link milega, 10-15 minutes mein APK/AAB ready. Free tier mein <strong>30 builds/month</strong> free hain.</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Build Start Karo</div>
+        <div class="step-body">
+<pre style="font-size:12px"><span class="kw">eas</span> build --platform android --profile preview
+<span class="comment"># ✓ Compressing project files...
+# ✓ Uploading to EAS Build...
+# ✓ Build queued. Check progress:</span>
+<span class="comment"># https://expo.dev/accounts/alqalam/projects/al-qalam-ems/builds/...</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Wait Karo (10-15 min)</div>
+        <div class="step-body">expo.dev par jaake build progress dekho. Email notification bhi ayega. Build complete hone par download link milega.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">APK Download + Test Karo</div>
+        <div class="step-body">expo.dev → Your Project → Builds → Download APK → Physical Android device par install karke test karo. <strong>Release hone se pehle zaruri hai!</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>app.json — Production Config</h3>
+  <div class="code-header"><span>📄 app.json (production ke liye update karo)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre>{
+  <span class="str">"expo"</span>: {
+    <span class="str">"name"</span>: <span class="str">"AL Qalam EMS"</span>,
+    <span class="str">"slug"</span>: <span class="str">"al-qalam-ems"</span>,
+    <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+    <span class="str">"scheme"</span>: <span class="str">"alqalam"</span>,
+    <span class="str">"owner"</span>: <span class="str">"alqalam"</span>,             <span class="comment">// ← aapka expo username</span>
+    <span class="str">"userInterfaceStyle"</span>: <span class="str">"dark"</span>,
+    <span class="str">"android"</span>: {
+      <span class="str">"package"</span>: <span class="str">"pk.edu.alqalam.ems"</span>,  <span class="comment">// ← unique app ID</span>
+      <span class="str">"versionCode"</span>: <span class="num">1</span>,
+      <span class="str">"adaptiveIcon"</span>: {
+        <span class="str">"foregroundImage"</span>: <span class="str">"./assets/icon.png"</span>,
+        <span class="str">"backgroundColor"</span>: <span class="str">"#0d1117"</span>
+      },
+      <span class="str">"permissions"</span>: [<span class="str">"INTERNET"</span>, <span class="str">"CAMERA"</span>, <span class="str">"READ_EXTERNAL_STORAGE"</span>]
+    },
+    <span class="str">"ios"</span>: {
+      <span class="str">"bundleIdentifier"</span>: <span class="str">"pk.edu.alqalam.ems"</span>,
+      <span class="str">"buildNumber"</span>: <span class="str">"1"</span>
+    },
+    <span class="str">"updates"</span>: {
+      <span class="str">"url"</span>: <span class="str">"https://u.expo.dev/YOUR-PROJECT-ID"</span>, <span class="comment">// ← eas init ke baad milega</span>
+      <span class="str">"enabled"</span>: <span class="kw">true</span>,
+      <span class="str">"fallbackToCacheTimeout"</span>: <span class="num">0</span>
+    },
+    <span class="str">"runtimeVersion"</span>: { <span class="str">"policy"</span>: <span class="str">"appVersion"</span> }
+  }
+}</pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 7: GOOGLE PLAY STORE
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="play-store">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12)">🎮</div>
+    <div>
+      <div class="section-title">Google Play Store Publish</div>
+      <div class="section-sub">Android AAB → Play Console → Live</div>
+    </div>
+  </div>
+
+  <div class="alert gold">
+    <div class="alert-icon">💰</div>
+    <div><strong>One-time fee:</strong> Google Play Developer account ke liye <strong>$25 (one-time)</strong> — <a href="https://play.google.com/console/signup" target="_blank">play.google.com/console/signup</a></div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Play Console Account Banao</div>
+        <div class="step-body">play.google.com/console → Sign up → $25 pay → Developer profile fill karo (name: "AL Qalam International") → Verify.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">New App Create Karo</div>
+        <div class="step-body">Play Console → Create App → App name: "AL Qalam EMS" → Category: "Education" → Free app → Default language: English.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Store Listing Fill Karo</div>
+        <div class="step-body">
+          <strong>Short description:</strong> AL Qalam International School Management System<br>
+          <strong>Full description:</strong> Complete EMS for students, parents, teachers and admin — attendance, results, fee, timetable<br>
+          <strong>Screenshots:</strong> 2-8 screenshots from emulator (1080x1920)<br>
+          <strong>Icon:</strong> 512x512 PNG, no rounded corners (Play Store crops automatically)<br>
+          <strong>Feature graphic:</strong> 1024x500 PNG
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Service Account Key Banao (EAS Auto-Submit)</div>
+        <div class="step-body">
+          Play Console → Setup → API access → Link Google Cloud project → Create service account → Grant access (Release Manager) → Download JSON key → Save as <code>google-play-key.json</code> in project root.
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">Build + Submit (Automatic)</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal — Build + Auto Submit</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre style="font-size:12px"><span class="kw">eas</span> build --platform android --profile production --auto-submit
+<span class="comment"># OR: build aur submit alag alag</span>
+<span class="kw">eas</span> build --platform android --profile production
+<span class="kw">eas</span> submit --platform android --latest</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <div class="step-title">Internal Testing → Production</div>
+        <div class="step-body">Play Console → Testing → Internal testing → Upload AAB → Add testers → Test → Phir Production track par move karo → Review (1-3 days) → Live!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 8: APPLE APP STORE
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="app-store">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(248,113,113,0.12)">🍎</div>
+    <div>
+      <div class="section-title">Apple App Store (iOS)</div>
+      <div class="section-sub">iPhone users ke liye — Apple Developer Program</div>
+    </div>
+  </div>
+
+  <div class="alert red">
+    <div class="alert-icon">💰</div>
+    <div><strong>Annual fee:</strong> Apple Developer Program <strong>$99/year</strong> — <a href="https://developer.apple.com/programs/" target="_blank">developer.apple.com/programs</a>. Mac zaruri nahi — EAS Cloud build karta hai.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card accent-red">
+      <div class="card-title">📋 Requirements</div>
+      <ul style="font-size:13px; line-height:2">
+        <li>Apple Developer account ($99/year)</li>
+        <li>App Store Connect profile</li>
+        <li>Bundle ID registered</li>
+        <li>Privacy policy URL</li>
+        <li>Screenshots (6.5" + 5.5")</li>
+      </ul>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-title">🚀 EAS iOS Build + Submit</div>
+      <div class="code-header"><span>Commands</span></div>
+      <pre style="font-size:11px"><span class="comment"># iOS build</span>
+<span class="kw">eas</span> build \
+  --platform ios \
+  --profile production
+
+<span class="comment"># Submit to App Store</span>
+<span class="kw">eas</span> submit \
+  --platform ios --latest</pre>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Apple Developer Account + App Store Connect</div>
+        <div class="step-body">developer.apple.com → Enroll → $99 pay → App Store Connect → New App → Bundle ID: <code>pk.edu.alqalam.ems</code> → SKU: <code>alqalam-ems-001</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">EAS iOS Build</div>
+        <div class="step-body">
+<pre style="font-size:12px"><span class="kw">eas</span> build --platform ios --profile production
+<span class="comment"># First time: EAS will ask for Apple ID + password</span>
+<span class="comment"># Certificates aur provisioning profiles automatically banate hain</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">TestFlight → Production</div>
+        <div class="step-body">Build complete → EAS submit → App Store Connect → TestFlight mein nazar ayega → Test karo → App Review submit → 24-48 hours review → Live!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 9: DIRECT APK SHARE
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="direct-apk">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(251,146,60,0.12)">📦</div>
+    <div>
+      <div class="section-title">Direct APK Share (Without Play Store)</div>
+      <div class="section-sub">Staff aur parents ko seedha APK dena — instant, free</div>
+    </div>
+  </div>
+
+  <p>Play Store approve hone ka wait nahi karna — preview APK banao aur share karo:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Preview APK Build Karo</div>
+        <div class="step-body">
+<pre style="font-size:12px"><span class="kw">eas</span> build --platform android --profile preview
+<span class="comment"># ~15 min → APK download link milega</span></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">APK Share Options</div>
+        <div class="step-body">
+          <strong>Option A — WhatsApp:</strong> APK file directly WhatsApp par send karo (max 100MB).<br><br>
+          <strong>Option B — Google Drive / School Website:</strong> APK upload karo Google Drive mein → Shareable link → WhatsApp group mein link share karo.<br><br>
+          <strong>Option C — School Website:</strong> <code>alqalam.edu.pk/app</code> par APK download page banao.
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">User APK Install Kaise Kare</div>
+        <div class="step-body">
+          Android device → Settings → Security → <strong>"Install from Unknown Sources"</strong> enable karo → APK file open karo → Install. <em>(User ko ek baar yahi karna hoga)</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert cyan">
+    <div class="alert-icon">💡</div>
+    <div><strong>Internal Use Tip:</strong> School ke sab phones par pehle unknown sources enable karo phir APK install karo. OTA updates ke baad bar bar nahi karna padega — app automatically update ho jayegi!</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 10: OTA LIVE UPDATES ← KEY SECTION
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="ota">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(167,139,250,0.12)">⚡</div>
+    <div>
+      <div class="section-title">OTA Live Updates — Bar Bar Install Nahi Karni</div>
+      <div class="section-sub">Expo EAS Update — JS changes seedha app mein push honge</div>
+    </div>
+  </div>
+
+  <div class="ota-hero">
+    <div class="big">⚡</div>
+    <h3>Over-The-Air (OTA) Updates</h3>
+    <p>Aap koi bhi <strong>UI change, bug fix, ya new feature</strong> add karo → ek command run karo → Users ka app automatically update ho jaye. <strong>Play Store / App Store submission nahi karni.</strong> User ko kuch nahi karna padega.</p>
+    <div style="margin-top:20px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+      <span class="badge green">✓ No Reinstall</span>
+      <span class="badge cyan">✓ Instant Delivery</span>
+      <span class="badge purple">✓ Background Update</span>
+      <span class="badge gold">✓ Free Tier Available</span>
+    </div>
+  </div>
+
+  <h3>Kya Update Ho Sakta Hai OTA?</h3>
+  <div class="grid2">
+    <div class="card accent-green">
+      <div class="card-title" style="color:var(--green)">✅ OTA Update Hoga</div>
+      <ul style="font-size:13px; line-height:2">
+        <li>UI changes (colors, layout, text)</li>
+        <li>Bug fixes in TypeScript/JS code</li>
+        <li>New screens / features add karna</li>
+        <li>API URL changes</li>
+        <li>New components add karna</li>
+        <li>Business logic changes</li>
+        <li>Styles update karna</li>
+      </ul>
+    </div>
+    <div class="card accent-red">
+      <div class="card-title" style="color:var(--red)">❌ New APK Chahiye</div>
+      <ul style="font-size:13px; line-height:2">
+        <li>Native modules add karna (e.g., new camera)</li>
+        <li>app.json mein permissions change</li>
+        <li>Expo SDK version upgrade</li>
+        <li>New native dependencies</li>
+        <li>App icon / splash screen change</li>
+        <li>Bundle identifier change</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Setup (Ek Baar)</h3>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">expo-updates Install Karo</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">npx</span> expo install expo-updates</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">app.json Mein Updates Config Karo</div>
+        <div class="step-body">
+          <div class="code-header"><span>📄 app.json — updates section</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="str">"updates"</span>: {
+  <span class="str">"url"</span>: <span class="str">"https://u.expo.dev/YOUR-PROJECT-ID"</span>,
+  <span class="str">"enabled"</span>: <span class="kw">true</span>,
+  <span class="str">"checkAutomatically"</span>: <span class="str">"ON_LOAD"</span>,
+  <span class="str">"fallbackToCacheTimeout"</span>: <span class="num">3000</span>
+},
+<span class="str">"runtimeVersion"</span>: {
+  <span class="str">"policy"</span>: <span class="str">"appVersion"</span>
+}</pre>
+          <p style="font-size:12px; margin-top:8px">Project ID <code>eas init</code> ke baad app.json mein automatically add hoga: <code>"extra": {"eas": {"projectId": "xxxx-xxxx"}}</code></p>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Update Channels Banao</div>
+        <div class="step-body">
+          <div class="code-header"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <pre><span class="kw">eas</span> channel:create production
+<span class="kw">eas</span> channel:create preview
+<span class="comment"># Production builds → production channel updates milenge
+# Preview builds → preview channel updates milenge</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Daily Use — Update Push Karna</h3>
+  <div class="alert purple">
+    <div class="alert-icon">🎯</div>
+    <div>Ye sirf <strong>3 commands</strong> hain jo aapko regularly use karni hongi. Ek baar setup ke baad sab automatic hai.</div>
+  </div>
+
+  <div class="code-header"><span>🚀 Update Push Karo (Production)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="comment"># Bug fix ya feature add karne ke baad:</span>
+<span class="kw">eas</span> update --branch production --message <span class="str">"Fix: Fee screen crash fixed"</span>
+
+<span class="comment"># ✓ Bundling JavaScript...
+# ✓ Uploading assets...
+# ✓ Published update on branch: production
+# ✓ Users will receive this update next time they open the app</span></pre>
+
+  <div class="code-header"><span>🧪 Preview/Testing Channel</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="comment"># Testing ke liye — sirf preview builds par update jayega</span>
+<span class="kw">eas</span> update --branch preview --message <span class="str">"Test: New attendance UI"</span></pre>
+
+  <h3>User Ka Experience — Kya Hoga?</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">App Open Kare</div>
+        <div class="step-body">User apna phone uthaye aur AL Qalam EMS app open kare.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Background Check (Automatic)</div>
+        <div class="step-body">App startup par automatically Expo update server se check hota hai — koi naya update hai? (2-3 seconds, internet se)</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Update Download</div>
+        <div class="step-body">Update available hai → Background mein download hota hai (typically &lt;1MB JS bundle) → User ko koi popup ya notification nahi dikhti.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Next Open → Updated Version</div>
+        <div class="step-body">User agla baar app open kare to updated version automatically load hoga. <strong>Koi install nahi, koi prompt nahi.</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Optional: Custom Update UI (Recommended)</h3>
+  <p>Agar aap chahte ho ke user ko update dikhay, to <code>app/_layout.tsx</code> mein add karo:</p>
+  <div class="code-header"><span>📄 app/_layout.tsx — OTA Update Hook</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="kw">import</span> * <span class="kw">as</span> Updates <span class="kw">from</span> <span class="str">'expo-updates'</span>;
+
+<span class="kw">export default function</span> <span class="fn">RootLayout</span>() {
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">async function</span> <span class="fn">checkForUpdates</span>() {
+      <span class="kw">if</span> (!Updates.isEnabled) <span class="kw">return</span>; <span class="comment">// dev mode mein skip</span>
+      <span class="kw">const</span> update = <span class="kw">await</span> Updates.<span class="fn">checkForUpdateAsync</span>();
+      <span class="kw">if</span> (update.isAvailable) {
+        <span class="kw">await</span> Updates.<span class="fn">fetchUpdateAsync</span>();
+        <span class="comment">// Optional: user ko batao</span>
+        Alert.<span class="fn">alert</span>(
+          <span class="str">'Update Available'</span>,
+          <span class="str">'Naya version available hai. App restart karein?'</span>,
+          [{
+            text: <span class="str">'Restart'</span>,
+            onPress: () => Updates.<span class="fn">reloadAsync</span>()
+          }, {
+            text: <span class="str">'Bad mein'</span>, style: <span class="str">'cancel'</span>
+          }]
+        );
+      }
+    }
+    <span class="fn">checkForUpdates</span>();
+  }, []);
+
+  <span class="comment">// ... rest of layout</span>
+}</pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 11: ENVIRONMENT VARS
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="env">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(248,113,113,0.12)">🔐</div>
+    <div>
+      <div class="section-title">Environment Variables</div>
+      <div class="section-sub">Secrets safely manage karna</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card accent-red">
+      <div class="card-title" style="color:var(--red)">❌ Kabhi Mat Karo</div>
+      <ul style="font-size:13px; line-height:2">
+        <li>DB password hardcode karna</li>
+        <li>JWT secret git mein push karna</li>
+        <li>.env file commit karna</li>
+        <li>API keys in EXPO_PUBLIC</li>
+        <li>Credentials WhatsApp par share karna</li>
+      </ul>
+    </div>
+    <div class="card accent-green">
+      <div class="card-title" style="color:var(--green)">✅ Best Practice</div>
+      <ul style="font-size:13px; line-height:2">
+        <li>Server secrets → backend .env</li>
+        <li>Mobile URLs → EXPO_PUBLIC prefix</li>
+        <li>.gitignore mein .env add karo</li>
+        <li>EAS Secrets for sensitive mobile vars</li>
+        <li>Separate dev/staging/production</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>EAS Secrets (Mobile Sensitive Variables)</h3>
+  <p>Koi bhi secret jo app mein hona chahiye but EXPO_PUBLIC nahi banna chahiye:</p>
+  <div class="code-header"><span>Terminal — EAS Secrets Set Karo</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="comment"># EAS mein secret add karo (build time mein available)</span>
+<span class="kw">eas</span> secret:create --scope project --name GOOGLE_MAPS_KEY --value <span class="str">"your-key"</span>
+<span class="kw">eas</span> secret:create --scope project --name FCM_SERVER_KEY  --value <span class="str">"your-fcm-key"</span>
+
+<span class="comment"># List all secrets</span>
+<span class="kw">eas</span> secret:list</pre>
+
+  <h3>.gitignore — Zaruri</h3>
+  <div class="code-header"><span>📄 .gitignore</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><span class="comment"># Environment files</span>
+.env
+.env.local
+.env.production
+
+<span class="comment"># Google Play key</span>
+google-play-key.json
+
+<span class="comment"># Node modules</span>
+node_modules/
+
+<span class="comment"># Expo</span>
+.expo/
+dist/
+web-build/
+
+<span class="comment"># iOS/Android generated</span>
+ios/
+android/</pre>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 12: GO-LIVE CHECKLIST
+══════════════════════════════════════════════════════════ -->
+<div class="section" id="checklist">
+  <div class="section-header">
+    <div class="section-icon" style="background:rgba(52,211,153,0.12)">✅</div>
+    <div>
+      <div class="section-title">Go-Live Checklist</div>
+      <div class="section-sub">Production se pehle sab check karo — click to tick</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌐 Web App</div>
+    <ul class="checklist">
+      <li onclick="toggleCheck(this)"><div class="ck"></div> cPanel mein <code>ems/</code> folder banaya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>alqalam_ems.html</code> upload kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>alqalam_backend.php</code> upload kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> MySQL database <code>alqalam_ems</code> banaya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> SQL file import kiya (phpMyAdmin)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>.env</code> mein DB credentials fill kiye</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>.htaccess</code> upload kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> SSL certificate active hai (Let's Encrypt)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Admin login test kiya: admin / AqAdmin@2024</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Fee collection test transaction kiya</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📡 API Backends</div>
+    <ul class="checklist">
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Node.js EC2 par running hai (PM2)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Nginx reverse proxy configured</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>api.alqalam.edu.pk</code> SSL active</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>/auth/login</code> API test kiya (Postman/curl)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Socket.io connection working hai</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> AWS RDS security group port 3306 open hai</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📱 Mobile App</div>
+    <ul class="checklist">
+      <li onclick="toggleCheck(this)"><div class="ck"></div> expo.dev account banaya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>eas-cli</code> install aur login kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>eas init</code> run kiya — project ID mila</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>src/api/index.ts</code> mein real API URLs daali</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>.env</code> mein EXPO_PUBLIC vars set kiye</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Preview APK build kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Physical device par install + test kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Login test kiya (all 4 portals)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> API calls real data return kar rahi hain</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> <code>expo-updates</code> install kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> OTA channels banaye (production, preview)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚡ OTA + Stores</div>
+    <ul class="checklist">
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Production APK/AAB build kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Play Console account banaya ($25)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Store listing fill kiya (description, screenshots)</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Internal testing track par upload kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Test users ne test kiya ✓</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Production track par submit kiya</li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> OTA first update push kiya: <code>eas update --branch production</code></li>
+      <li onclick="toggleCheck(this)"><div class="ck"></div> Direct APK WhatsApp par share kiya (staff)</li>
+    </ul>
+  </div>
+
+  <div id="checklist-progress" style="margin-top:20px">
+    <div style="display:flex; justify-content:space-between; margin-bottom:6px">
+      <span style="color:var(--muted); font-size:13px">Progress</span>
+      <span id="progress-text" style="color:var(--gold); font-size:13px; font-weight:700">0 / 27</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-bar" style="width:0%; background:var(--gold)"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="card" style="text-align:center; padding:32px; border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.04); margin-bottom:48px">
+  <div style="font-size:36px; margin-bottom:12px">🎓</div>
+  <div style="font-size:20px; font-weight:800; color:var(--gold); margin-bottom:8px">AL Qalam EMS — Production Ready</div>
+  <div style="color:var(--muted); font-size:13px; line-height:1.8">
+    Web: <strong style="color:var(--text)">alqalam.edu.pk/ems</strong> &nbsp;·&nbsp;
+    API: <strong style="color:var(--text)">api.alqalam.edu.pk</strong> &nbsp;·&nbsp;
+    App: <strong style="color:var(--text)">Play Store + Direct APK</strong>
+  </div>
+  <div style="margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+    <span class="badge green">✓ Web Live</span>
+    <span class="badge cyan">✓ API Connected</span>
+    <span class="badge purple">✓ OTA Updates</span>
+    <span class="badge gold">✓ Play Store</span>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main><!-- /main -->
+
+<script>
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.target.closest('.nav-item')?.classList.add('active');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-header').nextElementSibling;
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!';
+    btn.style.background = 'var(--green)';
+    btn.style.color = '#000';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.background = ''; btn.style.color = ''; }, 1800);
+  });
+}
+
+function toggleCheck(li) {
+  li.classList.toggle('done');
+  if (li.classList.contains('done')) li.querySelector('.ck').textContent = '✓';
+  else li.querySelector('.ck').textContent = '';
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = document.querySelectorAll('.checklist li').length;
+  const done  = document.querySelectorAll('.checklist li.done').length;
+  document.getElementById('progress-text').textContent = `${done} / ${total}`;
+  document.getElementById('progress-bar').style.width = `${(done/total)*100}%`;
+  if (done === total) {
+    document.getElementById('progress-bar').style.background = 'var(--green)';
+    document.getElementById('progress-text').style.color = 'var(--green)';
+  }
+}
+
+// Highlight active section on scroll
+window.addEventListener('scroll', () => {
+  const sections = ['api','web-deploy','web-config','api-connect','expo-setup','apk-build','play-store','app-store','direct-apk','ota','env','checklist'];
+  const navItems = document.querySelectorAll('.nav-item');
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 120) current = id;
+  });
+  navItems.forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('onclick')?.includes(current)) item.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

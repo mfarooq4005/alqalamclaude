@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Portal – AL Qalam International</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+:root{--bg:#050b1a;--card:#0d1b35;--card2:#0a1628;--sidebar:#050f12;--cyan:#00d4ff;--gold:#ffd700;--green:#00ff88;--orange:#ff6b35;--purple:#7c3aed;--red:#ef4444;--muted:#8892b0;--border:rgba(0,255,136,.15)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:#fff;display:flex;min-height:100vh}
+.sidebar{width:220px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column}
+.sb-brand{padding:1.1rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.sb-logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:11px;color:var(--bg);flex-shrink:0}
+.sb-brand-text .t1{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--green);line-height:1.2}
+.sb-brand-text .t2{font-size:9px;color:var(--muted);letter-spacing:1px}
+.sb-user{padding:1rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.sb-uname{font-size:.82rem;font-weight:700}.sb-urole{font-size:.71rem;color:var(--green)}
+.sb-nav{flex:1;padding:.8rem 0;overflow-y:auto}
+.sb-section{padding:.35rem 1rem .2rem;font-size:.63rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-top:.4rem}
+.sb-link{display:flex;align-items:center;gap:9px;padding:.62rem 1.3rem;color:var(--muted);text-decoration:none;font-size:.84rem;transition:.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Exo 2',sans-serif}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sb-link.active{color:var(--green);background:rgba(0,255,136,.08);border-right:3px solid var(--green)}
+.sb-link i{width:17px;text-align:center;font-size:.88rem}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:.67rem;font-weight:700}
+.sb-footer{padding:1rem 1.3rem;border-top:1px solid var(--border)}
+.sb-logout{display:flex;align-items:center;gap:7px;color:var(--muted);text-decoration:none;font-size:.82rem;cursor:pointer;transition:.2s}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{height:58px;background:rgba(5,15,18,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.8rem;position:sticky;top:0;z-index:99}
+.topbar h2{font-family:'Orbitron',sans-serif;font-size:.9rem}.topbar p{font-size:.72rem;color:var(--muted)}
+.tb-right{display:flex;align-items:center;gap:1rem}
+.tb-btn{background:none;border:none;color:var(--muted);font-size:1.05rem;cursor:pointer;position:relative;padding:.3rem}
+.tb-btn:hover{color:#fff}
+.tb-notif-dot{position:absolute;top:2px;right:2px;width:7px;height:7px;background:var(--red);border-radius:50%}
+.content{padding:1.5rem 1.8rem;flex:1}
+.page-tab{display:none}.page-tab.active{display:block}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-bottom:1.4rem}
+.stat-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:13px;padding:1.2rem;border:1px solid var(--border);transition:.3s}
+.stat-card:hover{transform:translateY(-2px)}
+.stat-icon{font-size:1.5rem;margin-bottom:.5rem}
+.stat-num{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;line-height:1.1;margin-bottom:.15rem}
+.sc-g .stat-num{color:var(--green)}.sc-c .stat-num{color:var(--cyan)}.sc-y .stat-num{color:var(--gold)}.sc-r .stat-num{color:var(--red)}
+.stat-lbl{color:var(--muted);font-size:.76rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.dash-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:1.2rem}
+.dc-head{padding:.9rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.dc-title{font-family:'Orbitron',sans-serif;font-size:.83rem;font-weight:700}
+.dc-sub{font-size:.72rem;color:var(--muted)}
+.dc-action{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25);padding:4px 12px;border-radius:8px;font-size:.75rem;cursor:pointer;font-family:'Exo 2',sans-serif}
+.dc-body{padding:1.1rem}
+.dash-table{width:100%;border-collapse:collapse}
+.dash-table th{background:rgba(0,255,136,.07);color:var(--green);padding:8px 10px;text-align:left;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.dash-table td{padding:8px 10px;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.dash-table tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.68rem;font-weight:700}
+.bg{background:rgba(0,255,136,.15);color:var(--green)}.by{background:rgba(255,215,0,.15);color:var(--gold)}.bc{background:rgba(0,212,255,.15);color:var(--cyan)}.br{background:rgba(239,68,68,.15);color:var(--red)}.bp{background:rgba(124,58,237,.15);color:var(--purple)}.bo{background:rgba(255,107,53,.15);color:var(--orange)}
+.prog-bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:.3rem}
+.prog-fill{height:100%;border-radius:3px}
+.info-row{display:flex;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.83rem}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--muted)}
+.info-value{color:#fff;font-weight:600}
+.msg-item{padding:.8rem;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:.7rem}
+.msg-from{font-size:.78rem;color:var(--green);font-weight:700;margin-bottom:.2rem}
+.msg-text{font-size:.82rem;margin-bottom:.3rem}
+.msg-time{font-size:.7rem;color:var(--muted)}
+.finput{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:'Exo 2',sans-serif;outline:none;transition:.25s}
+.finput:focus{border-color:var(--green)}
+.form-grp{margin-bottom:1rem}
+.form-grp label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.4rem;font-weight:600}
+.btn-s{background:linear-gradient(135deg,var(--green),var(--cyan));color:var(--bg);padding:10px 22px;border:none;border-radius:9px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:'Exo 2',sans-serif;transition:.25s}
+.btn-s:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,255,136,.3)}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stats-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.content{padding:1rem}.topbar{padding:0 1rem}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">AQ</div>
+    <div class="sb-brand-text"><div class="t1">AL QALAM</div><div class="t2">Parent Portal</div></div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">👨‍👩‍👧</div>
+    <div><div class="sb-uname">Mr. Imran Khan</div><div class="sb-urole">Parent of Muhammad Ali</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Dashboard</div>
+    <button class="sb-link active" onclick="sw('dashboard',this)"><i class="fas fa-th-large"></i> Dashboard</button>
+    <button class="sb-link" onclick="sw('child',this)"><i class="fas fa-child"></i> Child Profile</button>
+    <div class="sb-section">Academics</div>
+    <button class="sb-link" onclick="sw('progress',this)"><i class="fas fa-chart-line"></i> Academic Progress</button>
+    <button class="sb-link" onclick="sw('attendance',this)"><i class="fas fa-calendar-check"></i> Attendance</button>
+    <button class="sb-link" onclick="sw('results',this)"><i class="fas fa-scroll"></i> Results</button>
+    <div class="sb-section">Finance & Admin</div>
+    <button class="sb-link" onclick="sw('fee',this)"><i class="fas fa-wallet"></i> Fee Payment</button>
+    <button class="sb-link" onclick="sw('messages',this)"><i class="fas fa-comments"></i> Messages <span class="sb-badge">1</span></button>
+    <button class="sb-link" onclick="sw('ptm',this)"><i class="fas fa-handshake"></i> PTM Schedule</button>
+    <button class="sb-link" onclick="sw('notices',this)"><i class="fas fa-bell"></i> Notices</button>
+  </nav>
+  <div class="sb-footer">
+    <a class="sb-logout" href="alqalam_website.html"><i class="fas fa-sign-out-alt"></i> Back to Website</a>
+  </div>
+</aside>
+<div class="main">
+  <div class="topbar">
+    <div><h2 id="t-title">Parent Dashboard</h2><p>Mr. Imran Khan | Child: Muhammad Ali Khan | Grade 9-A | April 18, 2026</p></div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="alert('1 notification:\nNew message from Ms. Aisha Siddiqui (Mathematics Teacher)')"><i class="fas fa-bell"></i><span class="tb-notif-dot"></span></button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page-tab active" id="tab-dashboard">
+      <div style="background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,212,255,.05));border:1px solid rgba(0,255,136,.2);border-radius:14px;padding:1.2rem;margin-bottom:1.4rem;display:flex;align-items:center;gap:1.2rem">
+        <div style="font-size:3rem">👨‍🎓</div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--green)">Muhammad Ali Khan</div><div style="font-size:.85rem;color:rgba(255,255,255,.8)">Grade 9-A &nbsp;|&nbsp; Roll: AQ-2024-1045 &nbsp;|&nbsp; AL Qalam Main Campus</div><div style="font-size:.78rem;color:var(--green);margin-top:.3rem">✓ Active Student | Admitted: April 2024</div></div>
+        <div style="margin-left:auto;text-align:right"><div style="font-family:'Orbitron',sans-serif;font-size:1.5rem;font-weight:900;color:var(--green)">84.7%</div><div style="font-size:.75rem;color:var(--muted)">Last Exam Average</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card sc-g"><div class="stat-icon">📅</div><div class="stat-num">95%</div><div class="stat-lbl">This Month Attendance</div></div>
+        <div class="stat-card sc-c"><div class="stat-icon">🏆</div><div class="stat-num">3rd</div><div class="stat-lbl">Class Position</div></div>
+        <div class="stat-card sc-y"><div class="stat-icon">💰</div><div class="stat-num">Paid</div><div class="stat-lbl">Fee Status</div></div>
+        <div class="stat-card sc-r"><div class="stat-icon">📝</div><div class="stat-num">3</div><div class="stat-lbl">Pending Homeworks</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📊 Subject Performance</div><div class="dc-sub">Monthly Exam — Apr 2026</div></div>
+          <div class="dc-body">
+            <div style="margin-bottom:.8rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem"><span>Mathematics</span><span style="color:var(--green);font-weight:700">87% — A</span></div><div class="prog-bar"><div class="prog-fill" style="width:87%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div></div>
+            <div style="margin-bottom:.8rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem"><span>English</span><span style="color:var(--green);font-weight:700">91% — A+</span></div><div class="prog-bar"><div class="prog-fill" style="width:91%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div></div>
+            <div style="margin-bottom:.8rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem"><span>Chemistry</span><span style="color:var(--green);font-weight:700">82% — A</span></div><div class="prog-bar"><div class="prog-fill" style="width:82%;background:linear-gradient(90deg,var(--cyan),var(--purple))"></div></div></div>
+            <div style="margin-bottom:.8rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem"><span>Physics</span><span style="color:var(--cyan);font-weight:700">79% — B+</span></div><div class="prog-bar"><div class="prog-fill" style="width:79%;background:linear-gradient(90deg,var(--cyan),var(--purple))"></div></div></div>
+            <div style="margin-bottom:.8rem"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem"><span>Urdu</span><span style="color:var(--cyan);font-weight:700">74% — B</span></div><div class="prog-bar"><div class="prog-fill" style="width:74%;background:linear-gradient(90deg,var(--gold),var(--orange))"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.25rem"><span>Islamiat</span><span style="color:var(--green);font-weight:700">95% — A+</span></div><div class="prog-bar"><div class="prog-fill" style="width:95%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="dash-card">
+            <div class="dc-head"><div class="dc-title">💰 Fee Status</div></div>
+            <div class="dc-body">
+              <div style="background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);border-radius:10px;padding:1rem;margin-bottom:.8rem"><p style="color:var(--green);font-size:.82rem;font-weight:700">✓ April 2026 — Paid</p><p style="font-size:.78rem;color:var(--muted)">Rs. 4,500 | Paid Apr 8 | Receipt: RCT-2026-0412</p></div>
+              <div style="background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:1rem"><p style="color:var(--gold);font-size:.82rem;font-weight:700">⏳ Exam Fee — Due Jan 10, 2027</p><p style="font-size:.78rem;color:var(--muted)">Rs. 1,200 — Annual examination fee</p></div>
+              <button class="btn-s" style="width:100%;margin-top:1rem;justify-content:center" onclick="sw('fee',document.querySelector('[onclick*=fee]'))">💳 Pay Fee Online</button>
+            </div>
+          </div>
+          <div class="dash-card" style="margin-top:0">
+            <div class="dc-head"><div class="dc-title">📢 School Notice</div></div>
+            <div class="dc-body">
+              <div style="padding:.7rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;margin-bottom:.6rem"><p style="font-size:.78rem;color:var(--red);font-weight:700;margin-bottom:.2rem">🚨 Annual Exams</p><p style="font-size:.78rem">Exams begin Jan 20. Please ensure regular study.</p></div>
+              <div style="padding:.7rem;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:8px"><p style="font-size:.78rem;color:var(--cyan);font-weight:700;margin-bottom:.2rem">📌 PTM This Saturday</p><p style="font-size:.78rem">Parent-Teacher Meeting at 10 AM. Attendance required.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE TAB -->
+    <div class="page-tab" id="tab-attendance">
+      <div class="grid-2">
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📅 Attendance Overview — Apr 2026</div></div>
+          <div class="dc-body">
+            <div style="text-align:center;margin:1rem 0">
+              <div style="width:110px;height:110px;border-radius:50%;background:conic-gradient(var(--green) 0% 95%, rgba(255,255,255,.06) 95% 100%);display:flex;align-items:center;justify-content:center;margin:0 auto">
+                <div style="width:84px;height:84px;border-radius:50%;background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:center">
+                  <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:var(--green)">95%</div>
+                  <div style="font-size:.65rem;color:var(--muted)">Present</div>
+                </div>
+              </div>
+              <p style="font-size:.8rem;color:var(--muted);margin-top:.8rem">19 present / 20 working days</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;text-align:center">
+              <div style="background:rgba(0,255,136,.08);border-radius:10px;padding:.8rem"><div style="font-family:'Orbitron',sans-serif;font-size:1.3rem;color:var(--green);font-weight:900">19</div><div style="font-size:.72rem;color:var(--muted)">Days Present</div></div>
+              <div style="background:rgba(239,68,68,.08);border-radius:10px;padding:.8rem"><div style="font-family:'Orbitron',sans-serif;font-size:1.3rem;color:var(--red);font-weight:900">1</div><div style="font-size:.72rem;color:var(--muted)">Days Absent</div></div>
+              <div style="background:rgba(255,215,0,.08);border-radius:10px;padding:.8rem"><div style="font-family:'Orbitron',sans-serif;font-size:1.3rem;color:var(--gold);font-weight:900">0</div><div style="font-size:.72rem;color:var(--muted)">Days Late</div></div>
+            </div>
+            <div style="margin-top:1rem;padding:.8rem;background:rgba(239,68,68,.07);border-radius:10px;border:1px solid rgba(239,68,68,.2)">
+              <p style="font-size:.78rem;color:var(--red);font-weight:700">⚠️ Absence on April 14, 2026</p>
+              <p style="font-size:.78rem;color:rgba(255,255,255,.7);margin-top:.2rem">Marked absent. School was notified by SMS. Reason: Sick Leave.</p>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📋 Monthly Log</div></div>
+          <div class="dc-body" style="padding:0">
+            <table class="dash-table">
+              <tr><th>Date</th><th>Status</th><th>Note</th></tr>
+              <tr><td>Apr 18</td><td><span class="badge bg">Present</span></td><td></td></tr>
+              <tr><td>Apr 17</td><td><span class="badge bg">Present</span></td><td></td></tr>
+              <tr><td>Apr 16</td><td><span class="badge bg">Present</span></td><td></td></tr>
+              <tr><td>Apr 15</td><td><span class="badge bg">Present</span></td><td></td></tr>
+              <tr><td>Apr 14</td><td><span class="badge br">Absent</span></td><td style="color:var(--muted);font-size:.73rem">Sick</td></tr>
+              <tr><td>Apr 13</td><td><span class="badge bg">Present</span></td><td></td></tr>
+              <tr><td>Apr 12</td><td><span class="badge bg">Present</span></td><td></td></tr>
+              <tr><td>Apr 11</td><td><span class="badge bg">Present</span></td><td></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEE TAB -->
+    <div class="page-tab" id="tab-fee">
+      <div class="dash-card">
+        <div class="dc-head"><div class="dc-title">💰 Fee Management</div></div>
+        <div class="dc-body">
+          <table class="dash-table" style="margin-bottom:1.5rem">
+            <tr><th>Month</th><th>Fee Type</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Receipt</th></tr>
+            <tr><td>Apr 2026</td><td>Tuition</td><td>Rs. 4,500</td><td>Apr 10</td><td><span class="badge bg">Paid</span></td><td style="font-size:.73rem;color:var(--cyan)">RCT-0412</td></tr>
+            <tr><td>Mar 2026</td><td>Tuition</td><td>Rs. 4,500</td><td>Mar 10</td><td><span class="badge bg">Paid</span></td><td style="font-size:.73rem;color:var(--cyan)">RCT-0389</td></tr>
+            <tr><td>Feb 2026</td><td>Tuition</td><td>Rs. 4,500</td><td>Feb 10</td><td><span class="badge bg">Paid</span></td><td style="font-size:.73rem;color:var(--cyan)">RCT-0362</td></tr>
+            <tr><td>Jan 2027</td><td>Exam Fee</td><td>Rs. 1,200</td><td>Jan 10</td><td><span class="badge by">Upcoming</span></td><td>—</td></tr>
+          </table>
+          <div style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);border-radius:12px;padding:1.2rem">
+            <h4 style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:var(--green);margin-bottom:1rem">💳 Online Fee Payment</h4>
+            <p style="color:var(--muted);font-size:.82rem;margin-bottom:1rem">Pay fees securely via bank transfer or online payment. Receipt will be emailed automatically.</p>
+            <div class="form-grp"><label>Select Fee</label><select class="finput" style="background:#0d1b35"><option>Exam Fee — Rs. 1,200 (Jan 2027)</option></select></div>
+            <div class="form-grp"><label>Payment Method</label><select class="finput" style="background:#0d1b35"><option>Bank Transfer</option><option>Easypaisa</option><option>JazzCash</option><option>HBL Online</option></select></div>
+            <button class="btn-s" onclick="alert('Payment portal will open here. For now, please visit school accounts office or contact:\n📞 +92-21-34xxxxxx\n✉️ accounts@alqalam.edu.pk')">Proceed to Payment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MESSAGES TAB -->
+    <div class="page-tab" id="tab-messages">
+      <div class="grid-2">
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">💬 Messages from Teachers</div></div>
+          <div class="dc-body">
+            <div class="msg-item" style="border-color:rgba(0,255,136,.3)"><div class="msg-from">📚 Ms. Aisha Siddiqui (Mathematics)</div><div class="msg-text">Muhammad Ali is performing very well in Mathematics. His class test score of 87% shows great improvement. Please encourage him to continue practicing daily.</div><div class="msg-time">April 16, 2026 — 2:30 PM</div></div>
+            <div class="msg-item"><div class="msg-from">📖 Mr. Asim Khan (English)</div><div class="msg-text">Please ensure Muhammad Ali completes his essay assignment by April 22. It's an important part of his monthly assessment.</div><div class="msg-time">April 17, 2026 — 11:00 AM</div></div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">✉️ Send Message to Teacher</div></div>
+          <div class="dc-body">
+            <div class="form-grp"><label>Select Teacher</label><select class="finput" style="background:#0d1b35"><option>Ms. Aisha Siddiqui — Mathematics</option><option>Mr. Asim Khan — English</option><option>Mr. Bilal Hashmi — Physics</option><option>Class Teacher</option></select></div>
+            <div class="form-grp"><label>Subject</label><input class="finput" placeholder="e.g. Regarding homework"></div>
+            <div class="form-grp"><label>Message</label><textarea class="finput" style="min-height:80px;resize:vertical" placeholder="Write your message here..."></textarea></div>
+            <button class="btn-s" style="width:100%" onclick="alert('✅ Message sent to teacher. You will receive a reply within 24 hours.')">Send Message</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDERS -->
+    <div class="page-tab" id="tab-child"><div class="dash-card"><div class="dc-body"><h4 style="font-family:'Orbitron',sans-serif;color:var(--green);margin-bottom:1.5rem;font-size:.95rem">👨‍🎓 Child Profile</h4><div class="info-row"><span class="info-label">Full Name</span><span class="info-value">Muhammad Ali Khan</span></div><div class="info-row"><span class="info-label">Roll Number</span><span class="info-value">AQ-2024-1045</span></div><div class="info-row"><span class="info-label">Class</span><span class="info-value">Grade 9 — Section A</span></div><div class="info-row"><span class="info-label">Gender</span><span class="info-value">Male</span></div><div class="info-row"><span class="info-label">Date of Birth</span><span class="info-value">March 12, 2010</span></div><div class="info-row"><span class="info-label">B-Form No</span><span class="info-value">42201-1234567-1</span></div><div class="info-row"><span class="info-label">Blood Group</span><span class="info-value">O+</span></div><div class="info-row"><span class="info-label">Admission Date</span><span class="info-value">April 1, 2024</span></div><div class="info-row"><span class="info-label">Status</span><span class="info-value" style="color:var(--green)">Active ✓</span></div></div></div></div>
+    <div class="page-tab" id="tab-progress"><div class="dash-card"><div class="dc-head"><div class="dc-title">📈 Academic Progress</div></div><div class="dc-body"><table class="dash-table"><tr><th>Exam</th><th>Total</th><th>%</th><th>Grade</th><th>Position</th></tr><tr><td>Monthly — Apr 2026</td><td>508/600</td><td style="color:var(--green)">84.7%</td><td><span class="badge bg">A</span></td><td>3rd / 40</td></tr><tr><td>Monthly — Mar 2026</td><td>491/600</td><td style="color:var(--cyan)">81.8%</td><td><span class="badge bg">A</span></td><td>4th / 40</td></tr><tr><td>Monthly — Feb 2026</td><td>468/600</td><td style="color:var(--cyan)">78.0%</td><td><span class="badge bc">B+</span></td><td>6th / 40</td></tr><tr><td>Mid-Term 2025-26</td><td>455/600</td><td style="color:var(--cyan)">75.8%</td><td><span class="badge bc">B+</span></td><td>7th / 40</td></tr></table><div style="margin-top:1rem;padding:.8rem;background:rgba(0,255,136,.07);border-radius:10px;border:1px solid rgba(0,255,136,.2)"><p style="color:var(--green);font-size:.82rem;font-weight:700">📈 Improving Trend</p><p style="font-size:.8rem;color:rgba(255,255,255,.8);margin-top:.2rem">Muhammad Ali has improved by 8.9% over the last 4 exams. Class position improved from 7th to 3rd.</p></div></div></div></div>
+    <div class="page-tab" id="tab-results"><div class="dash-card"><div class="dc-head"><div class="dc-title">📊 Result Card</div></div><div class="dc-body"><table class="dash-table"><tr><th>Subject</th><th>Marks</th><th>%</th><th>Grade</th></tr><tr><td>Mathematics</td><td>87/100</td><td>87%</td><td><span class="badge bg">A</span></td></tr><tr><td>Physics</td><td>79/100</td><td>79%</td><td><span class="badge bc">B+</span></td></tr><tr><td>Chemistry</td><td>82/100</td><td>82%</td><td><span class="badge bg">A</span></td></tr><tr><td>English</td><td>91/100</td><td>91%</td><td><span class="badge bg">A+</span></td></tr><tr><td>Urdu</td><td>74/100</td><td>74%</td><td><span class="badge bc">B</span></td></tr><tr><td>Islamiat</td><td>95/100</td><td>95%</td><td><span class="badge bg">A+</span></td></tr><tr><td><b>Total</b></td><td><b>508/600</b></td><td><b style="color:var(--green)">84.7%</b></td><td><span class="badge bg">A</span></td></tr></table></div></div></div>
+    <div class="page-tab" id="tab-ptm"><div class="dash-card"><div class="dc-head"><div class="dc-title">🤝 PTM Schedule</div></div><div class="dc-body"><div style="background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);border-radius:12px;padding:1.2rem;margin-bottom:1rem"><p style="color:var(--green);font-size:.85rem;font-weight:700;margin-bottom:.5rem">📅 Next PTM — April 26, 2026</p><p style="font-size:.82rem;color:rgba(255,255,255,.85)">Saturday, 10:00 AM – 2:00 PM<br>Venue: School Hall — Grade 9 parents<br>Please bring: Child's ID card, last result card</p><button class="btn-s" style="margin-top:1rem" onclick="alert('PTM appointment confirmed for April 26, 2026 at 10:30 AM.\nYou will meet: Class Teacher + Math & Physics Teacher')">Confirm Attendance</button></div><p style="color:var(--muted);font-size:.8rem">PTMs are held monthly on the last Saturday of each month. Your feedback matters to us.</p></div></div></div>
+    <div class="page-tab" id="tab-notices"><div class="dash-card"><div class="dc-head"><div class="dc-title">🔔 School Notices</div></div><div class="dc-body"><div style="margin-bottom:1rem;padding:1rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px"><p style="color:var(--red);font-size:.8rem;font-weight:700;margin-bottom:.3rem">🚨 Annual Exam — Important</p><p style="font-size:.82rem">Annual exams begin January 20, 2026. Admit cards available from January 10. Ensure your child is well-prepared.</p></div><div style="margin-bottom:1rem;padding:1rem;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);border-radius:10px"><p style="color:var(--gold);font-size:.8rem;font-weight:700;margin-bottom:.3rem">📌 Fee Reminder</p><p style="font-size:.82rem">April fee due by April 10. Late fee of Rs. 50/day applies after due date.</p></div><div style="padding:1rem;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:10px"><p style="color:var(--cyan);font-size:.8rem;font-weight:700;margin-bottom:.3rem">📌 Winter Uniform</p><p style="font-size:.82rem">Winter uniform mandatory from November 1. Available at school store for Rs. 2,200.</p></div></div></div></div>
+
+  </div>
+</div>
+<script>
+function sw(id,el){
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  const tab=document.getElementById('tab-'+id);
+  if(tab)tab.classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Parent Dashboard',child:'Child Profile',progress:'Academic Progress',attendance:'Attendance Record',results:'Results',fee:'Fee Management',messages:'Messages',ptm:'PTM Schedule',notices:'Notices'};
+  document.getElementById('t-title').textContent=titles[id]||id;
+}
+</script>
+</body>
+</html>

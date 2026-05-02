@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Portal – AL Qalam International</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+:root{--bg:#050b1a;--card:#0d1b35;--card2:#0a1628;--sidebar:#070f22;--cyan:#00d4ff;--gold:#ffd700;--green:#00ff88;--orange:#ff6b35;--purple:#7c3aed;--pink:#f72585;--red:#ef4444;--muted:#8892b0;--border:rgba(0,212,255,.15)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:#fff;display:flex;min-height:100vh}
+.sidebar{width:230px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column}
+.sb-brand{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:12px;color:#fff;flex-shrink:0}
+.sb-brand-text .t1{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--cyan);line-height:1.2}
+.sb-brand-text .t2{font-size:9px;color:var(--muted);letter-spacing:1px}
+.sb-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sb-uname{font-size:.82rem;font-weight:700;color:#fff}
+.sb-urole{font-size:.72rem;color:var(--cyan);letter-spacing:.5px}
+.sb-nav{flex:1;padding:.8rem 0;overflow-y:auto}
+.sb-section{padding:.4rem 1rem .2rem;font-size:.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-top:.4rem}
+.sb-link{display:flex;align-items:center;gap:10px;padding:.65rem 1.5rem;color:var(--muted);text-decoration:none;font-size:.85rem;transition:.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Exo 2',sans-serif}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sb-link.active{color:var(--cyan);background:rgba(0,212,255,.08);border-right:3px solid var(--cyan)}
+.sb-link i{width:18px;text-align:center;font-size:.9rem}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:700}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.sb-logout{display:flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.83rem;cursor:pointer;transition:.2s}
+.sb-logout:hover{color:var(--red)}
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column}
+.topbar{height:60px;background:rgba(7,15,34,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:99}
+.topbar h2{font-family:'Orbitron',sans-serif;font-size:.95rem}
+.topbar p{font-size:.73rem;color:var(--muted)}
+.tb-right{display:flex;align-items:center;gap:1rem}
+.tb-btn{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;position:relative;padding:.3rem}
+.tb-btn:hover{color:#fff}
+.tb-notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--red);border-radius:50%}
+.content{padding:1.5rem 2rem;flex:1}
+.page-tab{display:none}.page-tab.active{display:block}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:1.5rem}
+.stat-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;padding:1.3rem;border:1px solid var(--border)}
+.stat-card:hover{transform:translateY(-2px)}
+.stat-icon{font-size:1.5rem;margin-bottom:.5rem}
+.sc-c .stat-icon{color:var(--cyan)}.sc-g .stat-icon{color:var(--green)}.sc-y .stat-icon{color:var(--gold)}.sc-p .stat-icon{color:var(--purple)}
+.stat-num{font-family:'Orbitron',sans-serif;font-size:1.7rem;font-weight:900;line-height:1.1;margin-bottom:.2rem}
+.sc-c .stat-num{color:var(--cyan)}.sc-g .stat-num{color:var(--green)}.sc-y .stat-num{color:var(--gold)}.sc-p .stat-num{color:var(--purple)}
+.stat-lbl{color:var(--muted);font-size:.77rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.dash-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:1.2rem}
+.dc-head{padding:1rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.dc-title{font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700}
+.dc-sub{font-size:.73rem;color:var(--muted)}
+.dc-action{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.25);padding:4px 12px;border-radius:8px;font-size:.75rem;cursor:pointer;font-family:'Exo 2',sans-serif}
+.dc-body{padding:1.2rem}
+.dash-table{width:100%;border-collapse:collapse}
+.dash-table th{background:rgba(0,212,255,.07);color:var(--cyan);padding:9px 12px;text-align:left;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.dash-table td{padding:9px 12px;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.dash-table tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.7rem;font-weight:700}
+.bg{background:rgba(0,255,136,.15);color:var(--green)}.by{background:rgba(255,215,0,.15);color:var(--gold)}.bc{background:rgba(0,212,255,.15);color:var(--cyan)}.br{background:rgba(239,68,68,.15);color:var(--red)}.bp{background:rgba(124,58,237,.15);color:var(--purple)}
+.prog-bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:.3rem}
+.prog-fill{height:100%;border-radius:3px}
+.form-grp{margin-bottom:1rem}
+.form-grp label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.4rem;font-weight:600}
+.finput{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:'Exo 2',sans-serif;outline:none;transition:.25s}
+.finput:focus{border-color:var(--cyan)}
+.fselect{width:100%;background:#0d1b35;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#fff;font-size:.85rem;outline:none}
+.fselect option{background:#0d1b35}
+.btn-s{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;padding:10px 22px;border:none;border-radius:9px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:'Exo 2',sans-serif;transition:.25s}
+.btn-s:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,212,255,.3)}
+.att-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-bottom:1rem}
+.att-btn{border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;font-size:.75rem;transition:.2s;background:rgba(255,255,255,.03)}
+.att-btn:hover{background:rgba(255,255,255,.06)}
+.att-btn.present{background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.4);color:var(--green)}
+.att-btn.absent{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4);color:var(--red)}
+.att-btn.late{background:rgba(255,215,0,.12);border-color:rgba(255,215,0,.4);color:var(--gold)}
+.wallet-item{display:flex;align-items:center;justify-content:space-between;padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.wallet-item:last-child{border-bottom:none}
+.wi-name{font-size:.85rem;font-weight:600}
+.wi-meta{font-size:.73rem;color:var(--muted)}
+.wi-qty{font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:700;color:var(--cyan)}
+.timetable-grid{display:grid;grid-template-columns:80px repeat(6,1fr);gap:4px}
+.tt-header{background:rgba(0,212,255,.08);border-radius:6px;padding:.5rem;text-align:center;font-size:.72rem;color:var(--cyan);font-weight:700}
+.tt-cell{background:rgba(255,255,255,.03);border-radius:6px;padding:.5rem;text-align:center;font-size:.7rem;color:var(--muted)}
+.tt-cell.active-class{background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:#fff}
+.tt-cell.my-class{background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:var(--purple)}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.stats-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.content{padding:1rem}.topbar{padding:0 1rem}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">AQ</div>
+    <div class="sb-brand-text"><div class="t1">AL QALAM</div><div class="t2">Teacher Portal</div></div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">📚</div>
+    <div><div class="sb-uname">Ms. Aisha Siddiqui</div><div class="sb-urole">Mathematics Teacher</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">My Dashboard</div>
+    <button class="sb-link active" onclick="sw('dashboard',this)"><i class="fas fa-th-large"></i> Dashboard</button>
+    <button class="sb-link" onclick="sw('timetable',this)"><i class="fas fa-calendar-alt"></i> My Timetable</button>
+    <button class="sb-link" onclick="sw('attendance',this)"><i class="fas fa-user-check"></i> Mark Attendance</button>
+    <div class="sb-section">Academic</div>
+    <button class="sb-link" onclick="sw('results',this)"><i class="fas fa-chart-bar"></i> Enter Results</button>
+    <button class="sb-link" onclick="sw('plans',this)"><i class="fas fa-book-open"></i> Lesson Plans</button>
+    <button class="sb-link" onclick="sw('homework',this)"><i class="fas fa-tasks"></i> Homework <span class="sb-badge">3</span></button>
+    <div class="sb-section">My Requests</div>
+    <button class="sb-link" onclick="sw('wallet',this)"><i class="fas fa-wallet"></i> Item Wallet</button>
+    <button class="sb-link" onclick="sw('request',this)"><i class="fas fa-box"></i> Request Item</button>
+    <div class="sb-section">Other</div>
+    <button class="sb-link" onclick="sw('leave',this)"><i class="fas fa-calendar-times"></i> Apply Leave</button>
+    <button class="sb-link" onclick="sw('notices',this)"><i class="fas fa-bell"></i> Notices <span class="sb-badge">2</span></button>
+  </nav>
+  <div class="sb-footer">
+    <a class="sb-logout" href="alqalam_website.html"><i class="fas fa-sign-out-alt"></i> Back to Website</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div><h2 id="t-title">Teacher Dashboard</h2><p>Ms. Aisha Siddiqui | Mathematics | AQ-T-001 | Saturday, 18 Apr 2026</p></div>
+    <div class="tb-right">
+      <button class="tb-btn" onclick="alert('2 new notifications:\n1. Your item request approved\n2. New notice: Exam Schedule')"><i class="fas fa-bell"></i><span class="tb-notif-dot"></span></button>
+      <button class="tb-btn"><i class="fas fa-envelope"></i></button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD TAB -->
+    <div class="page-tab active" id="tab-dashboard">
+      <div class="stats-row">
+        <div class="stat-card sc-c"><div class="stat-icon">👩‍🎓</div><div class="stat-num">120</div><div class="stat-lbl">My Students (3 classes)</div></div>
+        <div class="stat-card sc-g"><div class="stat-icon">📅</div><div class="stat-num">6</div><div class="stat-lbl">Periods Today</div></div>
+        <div class="stat-card sc-y"><div class="stat-icon">📋</div><div class="stat-num">3</div><div class="stat-lbl">Pending Plans</div></div>
+        <div class="stat-card sc-p"><div class="stat-icon">📦</div><div class="stat-num">5</div><div class="stat-lbl">Items in My Wallet</div></div>
+      </div>
+      <div class="grid-2">
+        <!-- Today's Schedule -->
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📅 Today's Schedule</div><div class="dc-sub">Saturday — 6 periods</div></div>
+          <div class="dc-body" style="padding:0">
+            <table class="dash-table">
+              <tr><th>Period</th><th>Time</th><th>Class</th><th>Subject</th><th>Room</th></tr>
+              <tr><td>1</td><td>08:00–08:40</td><td><b>Grade 9-A</b></td><td>Mathematics</td><td>R-12</td></tr>
+              <tr><td>2</td><td>08:45–09:25</td><td><b>Grade 10-B</b></td><td>Mathematics</td><td>R-14</td></tr>
+              <tr style="background:rgba(0,212,255,.05)"><td>3 ▶</td><td>09:30–10:10</td><td><b style="color:var(--cyan)">Grade 9-B</b></td><td>Mathematics</td><td>R-12</td></tr>
+              <tr><td>–</td><td>10:10–10:30</td><td colspan="3" style="color:var(--muted)">Break</td></tr>
+              <tr><td>4</td><td>10:30–11:10</td><td><b>Grade 8-A</b></td><td>Mathematics</td><td>R-10</td></tr>
+              <tr><td>5</td><td>11:15–11:55</td><td><b>Grade 7-C</b></td><td>Mathematics</td><td>R-08</td></tr>
+              <tr><td>6</td><td>12:00–12:40</td><td><b>Grade 6-A</b></td><td>Mathematics</td><td>R-06</td></tr>
+            </table>
+          </div>
+        </div>
+        <!-- Class Performance -->
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📊 Class Performance</div><div class="dc-sub">Last monthly exam avg</div></div>
+          <div class="dc-body">
+            <div style="margin-bottom:1rem">
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span>Grade 9-A</span><span style="color:var(--green);font-weight:700">81.4%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:81%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+            </div>
+            <div style="margin-bottom:1rem">
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span>Grade 10-B</span><span style="color:var(--cyan);font-weight:700">74.2%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:74%;background:linear-gradient(90deg,var(--cyan),var(--purple))"></div></div>
+            </div>
+            <div style="margin-bottom:1rem">
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.3rem"><span>Grade 9-B</span><span style="color:var(--gold);font-weight:700">68.8%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:68%;background:linear-gradient(90deg,var(--gold),var(--orange))"></div></div>
+            </div>
+            <div style="margin-top:1.2rem;padding:1rem;background:rgba(0,255,136,.06);border-radius:10px;border:1px solid rgba(0,255,136,.2)">
+              <p style="font-size:.78rem;color:var(--green);font-weight:700">Top Student (Grade 9-A)</p>
+              <p style="font-size:.82rem;color:#fff">Hassan Raza — 94% avg</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Pending Items -->
+      <div class="grid-2">
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📋 Pending Lesson Plans</div><div class="dc-sub">Awaiting submission</div></div>
+          <div class="dc-body">
+            <div style="padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center">
+              <div><div style="font-size:.83rem;font-weight:600">Week 3 Plan — Grade 9-A</div><div style="font-size:.73rem;color:var(--muted)">Due: This Friday</div></div>
+              <button class="dc-action" onclick="sw('plans',document.querySelector('[onclick*=plans]'))">Create</button>
+            </div>
+            <div style="padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center">
+              <div><div style="font-size:.83rem;font-weight:600">Monthly Plan — April</div><div style="font-size:.73rem;color:var(--muted)">Due: Apr 20</div></div>
+              <button class="dc-action" onclick="sw('plans',document.querySelector('[onclick*=plans]'))">Create</button>
+            </div>
+            <div style="padding:.7rem 0;display:flex;justify-content:space-between;align-items:center">
+              <div><div style="font-size:.83rem;font-weight:600">Result Entry — Monthly Exam</div><div style="font-size:.73rem;color:var(--muted)">Due: Apr 22</div></div>
+              <button class="dc-action" onclick="sw('results',document.querySelector('[onclick*=results]'))">Enter</button>
+            </div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">🔔 Notices</div></div>
+          <div class="dc-body">
+            <div style="background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:.8rem;margin-bottom:.8rem"><p style="color:var(--gold);font-size:.78rem;font-weight:700">📌 Exam Schedule</p><p style="font-size:.8rem;color:rgba(255,255,255,.8);margin-top:.3rem">Annual exams from January 20. Submit syllabus by Jan 10.</p></div>
+            <div style="background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:.8rem"><p style="color:var(--cyan);font-size:.78rem;font-weight:700">📌 Staff Meeting</p><p style="font-size:.8rem;color:rgba(255,255,255,.8);margin-top:.3rem">Monthly staff meeting Friday 2:00 PM in conference room.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE TAB -->
+    <div class="page-tab" id="tab-attendance">
+      <div class="dash-card">
+        <div class="dc-head"><div class="dc-title">✅ Mark Attendance</div><div class="dc-sub">Click student name to toggle P/A/L</div></div>
+        <div class="dc-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+            <div><label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Class</label>
+              <select class="fselect"><option>Grade 9-A (40 students)</option><option>Grade 10-B</option><option>Grade 9-B</option></select></div>
+            <div><label style="font-size:.78rem;color:var(--muted);display:block;margin-bottom:.3rem">Date</label>
+              <input class="finput" type="date" value="2026-04-18"></div>
+            <div style="display:flex;align-items:flex-end;gap:.5rem">
+              <button class="btn-s" onclick="markAll('present')">✓ All Present</button>
+              <button style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid var(--red);padding:10px 14px;border-radius:9px;cursor:pointer;font-family:'Exo 2',sans-serif;font-size:.82rem" onclick="markAll('absent')">✗ All Absent</button>
+            </div>
+          </div>
+          <div class="att-grid" id="attGrid"></div>
+          <div style="display:flex;gap:1.5rem;margin-top:1rem;font-size:.78rem">
+            <span><span style="color:var(--green)">■</span> Present: <b id="pCount" style="color:var(--green)">0</b></span>
+            <span><span style="color:var(--red)">■</span> Absent: <b id="aCount" style="color:var(--red)">0</b></span>
+            <span><span style="color:var(--gold)">■</span> Late: <b id="lCount" style="color:var(--gold)">0</b></span>
+          </div>
+          <button class="btn-s" style="margin-top:1rem;width:100%" onclick="alert('✅ Attendance saved for Grade 9-A | April 18, 2026!\nParents of absent students will receive SMS notification.')">💾 Save Attendance</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS TAB -->
+    <div class="page-tab" id="tab-results">
+      <div class="dash-card">
+        <div class="dc-head"><div class="dc-title">📊 Enter Exam Results</div></div>
+        <div class="dc-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+            <div class="form-grp" style="margin:0"><label>Exam</label><select class="fselect"><option>Monthly Exam — April 2026</option><option>Weekly Test W3</option><option>Mid-Term 2026</option></select></div>
+            <div class="form-grp" style="margin:0"><label>Class</label><select class="fselect"><option>Grade 9-A</option><option>Grade 10-B</option><option>Grade 9-B</option></select></div>
+            <div class="form-grp" style="margin:0"><label>Subject</label><input class="finput" value="Mathematics" readonly></div>
+          </div>
+          <table class="dash-table">
+            <tr><th>#</th><th>Student Name</th><th>Roll No</th><th>Marks (out of 100)</th><th>Grade</th></tr>
+            <tr><td>1</td><td>Muhammad Ali Khan</td><td>AQ-1045</td><td><input type="number" class="finput" style="width:80px;padding:5px 8px" placeholder="--" min="0" max="100" oninput="calcGrade(this)"></td><td class="grade-cell" style="color:var(--cyan);font-weight:700">–</td></tr>
+            <tr><td>2</td><td>Fatima Zahra</td><td>AQ-1046</td><td><input type="number" class="finput" style="width:80px;padding:5px 8px" placeholder="--" min="0" max="100" oninput="calcGrade(this)"></td><td class="grade-cell" style="color:var(--cyan);font-weight:700">–</td></tr>
+            <tr><td>3</td><td>Hassan Raza</td><td>AQ-1047</td><td><input type="number" class="finput" style="width:80px;padding:5px 8px" placeholder="--" min="0" max="100" oninput="calcGrade(this)"></td><td class="grade-cell" style="color:var(--cyan);font-weight:700">–</td></tr>
+            <tr><td>4</td><td>Ayesha Siddiqui</td><td>AQ-1048</td><td><input type="number" class="finput" style="width:80px;padding:5px 8px" placeholder="--" min="0" max="100" oninput="calcGrade(this)"></td><td class="grade-cell" style="color:var(--cyan);font-weight:700">–</td></tr>
+            <tr><td>5</td><td>Usman Tariq</td><td>AQ-1049</td><td><input type="number" class="finput" style="width:80px;padding:5px 8px" placeholder="--" min="0" max="100" oninput="calcGrade(this)"></td><td class="grade-cell" style="color:var(--cyan);font-weight:700">–</td></tr>
+          </table>
+          <button class="btn-s" style="margin-top:1.2rem;width:100%" onclick="alert('✅ Results saved! Principal will be notified for approval before publishing to student portal.')">💾 Submit Results</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LESSON PLANS TAB -->
+    <div class="page-tab" id="tab-plans">
+      <div class="dash-card">
+        <div class="dc-head"><div class="dc-title">📖 Create Lesson Plan</div></div>
+        <div class="dc-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem">
+            <div class="form-grp" style="margin:0"><label>Plan Type</label><select class="fselect" onchange="updatePlanFields(this.value)"><option value="weekly">Weekly Plan</option><option value="monthly">Monthly Plan</option><option value="yearly">Yearly Plan</option></select></div>
+            <div class="form-grp" style="margin:0"><label>Class</label><select class="fselect"><option>Grade 9-A</option><option>Grade 10-B</option><option>Grade 9-B</option></select></div>
+            <div class="form-grp" style="margin:0" id="planPeriodField"><label>Week Number</label><input class="finput" placeholder="e.g. Week 3 (Apr 14–18)"></div>
+          </div>
+          <div class="form-grp"><label>Topic / Chapter</label><input class="finput" placeholder="e.g. Chapter 5: Quadratic Equations"></div>
+          <div class="form-grp"><label>Learning Objectives</label><textarea class="finput" style="min-height:70px;resize:vertical" placeholder="Students will be able to..."></textarea></div>
+          <div class="form-grp"><label>Teaching Activities & Methods</label><textarea class="finput" style="min-height:70px;resize:vertical" placeholder="Board work, group activity, problem solving..."></textarea></div>
+          <div class="form-grp"><label>Resources Required</label><input class="finput" placeholder="Textbook pg 120-135, whiteboard, graph paper..."></div>
+          <div class="form-grp"><label>Homework / Assignment</label><textarea class="finput" style="min-height:50px;resize:vertical" placeholder="Exercise 5.1 Q1-Q10..."></textarea></div>
+          <div style="display:flex;gap:1rem">
+            <button class="btn-s" onclick="alert('📋 Plan saved as Draft. Submit when ready for approval.')">Save Draft</button>
+            <button class="btn-s" style="background:linear-gradient(135deg,var(--green),var(--cyan))" onclick="alert('✅ Lesson plan submitted to Vice Principal for approval!')">Submit for Approval</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALLET TAB -->
+    <div class="page-tab" id="tab-wallet">
+      <div class="grid-2">
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">💼 My Item Wallet</div><div class="dc-sub">Items currently with me</div></div>
+          <div class="dc-body">
+            <div class="wallet-item"><div><div class="wi-name">Glue Gun</div><div class="wi-meta">Issued: Apr 10, 2026 | Non-Consumable</div><div class="wi-meta" style="color:var(--orange)">Return by: Apr 30, 2026</div></div><div><div class="wi-qty">1 unit</div><button style="background:rgba(0,255,136,.1);color:var(--green);border:1px solid var(--green);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;margin-top:.4rem" onclick="alert('Return request submitted to store keeper!')">Return</button></div></div>
+            <div class="wallet-item"><div><div class="wi-name">Markers (Set)</div><div class="wi-meta">Issued: Apr 12, 2026 | Consumable</div></div><div><div class="wi-qty">2 sets</div></div></div>
+            <div class="wallet-item"><div><div class="wi-name">A4 Paper</div><div class="wi-meta">Issued: Apr 14, 2026 | Consumable</div></div><div><div class="wi-qty">1 ream</div></div></div>
+            <div class="wallet-item"><div><div class="wi-name">Scotch Tape</div><div class="wi-meta">Issued: Apr 15, 2026 | Consumable</div></div><div><div class="wi-qty">3 pcs</div></div></div>
+            <div class="wallet-item"><div><div class="wi-name">Ruler (30cm)</div><div class="wi-meta">Issued: Apr 1, 2026 | Non-Consumable</div><div class="wi-meta" style="color:var(--green)">No return deadline</div></div><div><div class="wi-qty">1 unit</div><button style="background:rgba(0,255,136,.1);color:var(--green);border:1px solid var(--green);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer;margin-top:.4rem" onclick="alert('Return submitted!')">Return</button></div></div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">📜 Request History</div></div>
+          <div class="dc-body" style="padding:0">
+            <table class="dash-table">
+              <tr><th>Item</th><th>Qty</th><th>Status</th></tr>
+              <tr><td>Glue Gun</td><td>1</td><td><span class="badge bg">Issued</span></td></tr>
+              <tr><td>Markers</td><td>2 sets</td><td><span class="badge bg">Issued</span></td></tr>
+              <tr><td>Graph Paper</td><td>50 sheets</td><td><span class="badge by">Pending</span></td></tr>
+              <tr><td>Calculator</td><td>2</td><td><span class="badge bc">Approved</span></td></tr>
+              <tr><td>Glue Sticks</td><td>5</td><td><span class="badge bg">Issued</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REQUEST ITEM TAB -->
+    <div class="page-tab" id="tab-request">
+      <div class="dash-card" style="max-width:550px">
+        <div class="dc-head"><div class="dc-title">📦 Request New Item</div><div class="dc-sub">Request goes to admin for approval, then store keeper issues</div></div>
+        <div class="dc-body">
+          <div style="background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:.8rem;margin-bottom:1.2rem;font-size:.8rem;color:rgba(255,255,255,.8)">
+            <b style="color:var(--cyan)">How it works:</b> You submit a request → Admin approves → Store Keeper issues item → You get notification → Confirm receipt → Item added to your wallet.
+          </div>
+          <div class="form-grp"><label>Item Category</label><select class="fselect"><option>Stationary</option><option>Lab Equipment</option><option>Grocery</option><option>Cleaning</option><option>Other</option></select></div>
+          <div class="form-grp"><label>Item Name</label><input class="finput" placeholder="e.g. Glue Gun, A4 Paper, Marker..."></div>
+          <div class="form-grp"><label>Quantity</label><input class="finput" type="number" min="1" placeholder="e.g. 2"></div>
+          <div class="form-grp"><label>Purpose / Reason</label><textarea class="finput" style="min-height:70px;resize:vertical" placeholder="For Grade 9-A science project on Monday..."></textarea></div>
+          <button class="btn-s" style="width:100%" onclick="alert('✅ Request submitted!\n\nFlow:\n1. Admin will review and approve\n2. Store Keeper will issue the item\n3. You will receive a notification\n4. Confirm receipt to complete\n\nExpected: Within 24 hours')">📤 Submit Request</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDERS -->
+    <div class="page-tab" id="tab-timetable"><div class="dash-card"><div class="dc-head"><div class="dc-title">📅 My Full Timetable</div></div><div class="dc-body"><p style="color:var(--muted);font-size:.85rem;margin-bottom:1rem">Your complete weekly schedule across all classes.</p><table class="dash-table"><tr><th>Period</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr><tr><td>1 (8:00)</td><td>9-A Math</td><td>10-B Math</td><td>9-A Math</td><td>10-B Math</td><td>Assembly</td><td>9-A Math</td></tr><tr><td>2 (8:45)</td><td>10-B Math</td><td>9-B Math</td><td>10-B Math</td><td>9-B Math</td><td>9-A Math</td><td>10-B Math</td></tr><tr><td>3 (9:30)</td><td>9-B Math</td><td>8-A Math</td><td>9-B Math</td><td>8-A Math</td><td>10-B Math</td><td>9-B Math</td></tr><tr><td>Break</td><td colspan="6" style="text-align:center;color:var(--muted)">10:10 – 10:30</td></tr><tr><td>4 (10:30)</td><td>8-A Math</td><td>Free</td><td>8-A Math</td><td>Free</td><td>9-B Math</td><td>8-A Math</td></tr></table></div></div></div>
+    <div class="page-tab" id="tab-homework"><div class="dash-card"><div class="dc-head"><div class="dc-title">📝 Assign Homework</div></div><div class="dc-body"><div class="form-grp"><label>Class</label><select class="fselect"><option>Grade 9-A</option><option>Grade 10-B</option><option>Grade 9-B</option></select></div><div class="form-grp"><label>Title</label><input class="finput" placeholder="e.g. Chapter 5 Exercise 5.1"></div><div class="form-grp"><label>Instructions</label><textarea class="finput" style="min-height:80px;resize:vertical" placeholder="Solve Q1–Q10, show all working..."></textarea></div><div class="form-grp"><label>Due Date</label><input class="finput" type="date"></div><div class="form-grp"><label>Marks</label><input class="finput" type="number" placeholder="10" style="width:120px"></div><button class="btn-s" onclick="alert('✅ Homework assigned! Students will see it in their portal.')">Assign Homework</button></div></div></div>
+    <div class="page-tab" id="tab-leave"><div class="dash-card" style="max-width:500px"><div class="dc-head"><div class="dc-title">🏖️ Leave Application</div></div><div class="dc-body"><div class="form-grp"><label>Leave Type</label><select class="fselect"><option>Casual Leave</option><option>Sick Leave</option><option>Emergency Leave</option></select></div><div class="form-grp"><label>From Date</label><input class="finput" type="date"></div><div class="form-grp"><label>To Date</label><input class="finput" type="date"></div><div class="form-grp"><label>Reason</label><textarea class="finput" style="min-height:80px;resize:vertical" placeholder="Reason for leave..."></textarea></div><button class="btn-s" style="width:100%" onclick="alert('✅ Leave application submitted to Principal for approval.')">Submit Application</button></div></div></div>
+    <div class="page-tab" id="tab-notices"><div class="dash-card"><div class="dc-head"><div class="dc-title">🔔 School Notices</div></div><div class="dc-body"><div style="margin-bottom:1rem;padding:1rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px"><p style="color:var(--red);font-size:.8rem;font-weight:700;margin-bottom:.3rem">🚨 URGENT — Annual Exam Schedule</p><p style="font-size:.82rem;color:rgba(255,255,255,.8)">Annual exams begin January 20, 2026. Submit complete syllabus to principal by January 10. No changes after submission.</p></div><div style="padding:1rem;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);border-radius:10px"><p style="color:var(--gold);font-size:.8rem;font-weight:700;margin-bottom:.3rem">📌 Staff Meeting</p><p style="font-size:.82rem;color:rgba(255,255,255,.8)">Monthly staff meeting Friday 2:00 PM in conference room. Attendance mandatory.</p></div></div></div></div>
+
+  </div>
+</div>
+
+<script>
+function sw(id, el){
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  const tab = document.getElementById('tab-'+id);
+  if(tab) tab.classList.add('active');
+  if(el) el.classList.add('active');
+  const titles={dashboard:'Teacher Dashboard',timetable:'My Timetable',attendance:'Mark Attendance',results:'Enter Results',plans:'Lesson Plans',homework:'Homework',wallet:'My Item Wallet',request:'Request Item',leave:'Leave Application',notices:'Notices'};
+  document.getElementById('t-title').textContent = titles[id]||id;
+}
+// Build attendance grid
+(function(){
+  const names=['Ali Khan','Fatima Z','Hassan R','Ayesha S','Usman T','Sara M','Ahmad K','Zainab A','Bilal H','Nadia F','Kamran R','Maria Q','Faisal A','Huma N','Tariq M','Sana B','Imran J','Layla K','Omer S','Raza P'];
+  const grid = document.getElementById('attGrid');
+  if(!grid) return;
+  names.forEach(name=>{
+    const btn = document.createElement('div');
+    btn.className='att-btn present';
+    btn.innerHTML=`<div style="font-weight:600">${name}</div><div>✓ P</div>`;
+    btn.onclick=function(){
+      if(btn.classList.contains('present')){btn.classList.replace('present','absent');btn.innerHTML=`<div style="font-weight:600">${name}</div><div>✗ A</div>`}
+      else if(btn.classList.contains('absent')){btn.classList.replace('absent','late');btn.innerHTML=`<div style="font-weight:600">${name}</div><div>⏱ L</div>`}
+      else{btn.classList.replace('late','present');btn.innerHTML=`<div style="font-weight:600">${name}</div><div>✓ P</div>`}
+      updateCounts();
+    };
+    grid.appendChild(btn);
+  });
+  updateCounts();
+})();
+function updateCounts(){
+  document.getElementById('pCount').textContent=document.querySelectorAll('.att-btn.present').length;
+  document.getElementById('aCount').textContent=document.querySelectorAll('.att-btn.absent').length;
+  document.getElementById('lCount').textContent=document.querySelectorAll('.att-btn.late').length;
+}
+function markAll(status){
+  document.querySelectorAll('.att-btn').forEach(b=>{
+    b.className='att-btn '+status;
+    const n=b.querySelector('div').textContent;
+    b.innerHTML=`<div style="font-weight:600">${n}</div><div>${status==='present'?'✓ P':status==='absent'?'✗ A':'⏱ L'}</div>`;
+  });
+  updateCounts();
+}
+function calcGrade(input){
+  const v=parseInt(input.value);
+  let g='–';
+  if(!isNaN(v)){
+    if(v>=90)g='A+';else if(v>=80)g='A';else if(v>=70)g='B+';else if(v>=60)g='B';else if(v>=50)g='C';else if(v>=33)g='D';else g='F';
+  }
+  const cell=input.closest('tr').querySelector('.grade-cell');
+  if(cell) cell.textContent=g;
+}
+</script>
+</body>
+</html>

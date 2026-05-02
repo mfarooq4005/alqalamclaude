@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AL Qalam EMS — Deployment Guide</title>
+<style>
+  :root{--gold:#fbbf24;--cyan:#00e5ff;--green:#34d399;--red:#f87171;--purple:#a78bfa;--bg:#0f172a;--bg2:#1e293b;--bg3:#334155;--text:#e2e8f0;--text-muted:#94a3b8;--border:rgba(255,255,255,.1)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+  .hero{background:linear-gradient(135deg,#1e293b,#0f172a);padding:60px 40px;text-align:center;border-bottom:1px solid var(--border)}
+  .hero h1{font-size:2.2rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+  .hero p{color:var(--text-muted);font-size:1rem}
+  .container{max-width:1000px;margin:0 auto;padding:40px 20px}
+  .section{margin-bottom:48px}
+  h2{font-size:1.4rem;font-weight:700;color:var(--gold);margin-bottom:20px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  h3{font-size:1.1rem;font-weight:600;color:var(--cyan);margin:20px 0 10px}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+  .card.green{border-color:rgba(52,211,153,.3)}
+  .card.gold{border-color:rgba(251,191,36,.3)}
+  .card.red{border-color:rgba(248,113,113,.3)}
+  .card.cyan{border-color:rgba(0,229,255,.3)}
+  pre,code{font-family:'Cascadia Code','Fira Code',monospace;font-size:.87rem}
+  pre{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto;margin:10px 0;line-height:1.6}
+  code{background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px;color:var(--cyan)}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.78rem;font-weight:600}
+  .badge-php{background:rgba(100,110,200,.2);color:#7b89f0}
+  .badge-node{background:rgba(52,211,153,.15);color:var(--green)}
+  .badge-both{background:rgba(251,191,36,.15);color:var(--gold)}
+  .step{display:flex;gap:16px;margin-bottom:20px}
+  .step-num{min-width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--cyan));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#000;font-size:.9rem;flex-shrink:0}
+  .step-content h4{font-size:.95rem;font-weight:600;margin-bottom:4px}
+  .step-content p{color:var(--text-muted);font-size:.88rem}
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .alert{padding:12px 16px;border-radius:10px;margin:12px 0;font-size:.87rem}
+  .alert-warning{background:rgba(251,191,36,.1);border-left:3px solid var(--gold);color:#fde68a}
+  .alert-info{background:rgba(0,229,255,.08);border-left:3px solid var(--cyan);color:#bae6fd}
+  .alert-success{background:rgba(52,211,153,.1);border-left:3px solid var(--green);color:#a7f3d0}
+  .alert-danger{background:rgba(248,113,113,.1);border-left:3px solid var(--red);color:#fecaca}
+  table{width:100%;border-collapse:collapse;font-size:.87rem}
+  th{background:var(--bg3);padding:10px 14px;text-align:left;color:var(--gold)}
+  td{padding:9px 14px;border-bottom:1px solid var(--border);color:var(--text-muted)}
+  tr:last-child td{border-bottom:none}
+  .highlight{color:var(--text);font-weight:500}
+  .nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border)}
+  .nav a{padding:7px 14px;border-radius:8px;background:var(--bg3);color:var(--text-muted);text-decoration:none;font-size:.83rem;transition:.2s}
+  .nav a:hover{background:rgba(251,191,36,.15);color:var(--gold)}
+  .file-tree{background:var(--bg3);border-radius:10px;padding:16px;font-family:monospace;font-size:.85rem;line-height:2}
+  .ft-dir{color:var(--cyan)}
+  .ft-file{color:var(--text-muted)}
+  .ft-important{color:var(--gold);font-weight:600}
+  @media(max-width:600px){.compare-grid{grid-template-columns:1fr}.hero{padding:40px 20px}.hero h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🏫 AL Qalam International EMS</h1>
+  <p>Server Deployment Guide — PHP + Node.js | Version 2.0</p>
+  <p style="color:var(--text-muted);font-size:.85rem;margin-top:8px">cPanel · XAMPP · VPS · PM2 · Nginx</p>
+</div>
+
+<div class="container">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="#comparison">📊 PHP vs Node.js</a>
+    <a href="#xampp">🖥️ XAMPP Local</a>
+    <a href="#cpanel">🌐 cPanel Deploy</a>
+    <a href="#vps">🚀 VPS / Ubuntu</a>
+    <a href="#nodejs-setup">⚡ Node.js Setup</a>
+    <a href="#env-config">⚙️ .env Config</a>
+    <a href="#htaccess">.htaccess</a>
+    <a href="#testing">🧪 API Testing</a>
+    <a href="#security">🔒 Security</a>
+  </nav>
+
+  <!-- ═══ COMPARISON ═══ -->
+  <section class="section" id="comparison">
+    <h2>📊 PHP vs Node.js — Aapke Liye Kaunsa Better Hai?</h2>
+    <table>
+      <thead><tr><th>Feature</th><th>PHP Backend <span class="badge badge-php">Current</span></th><th>Node.js <span class="badge badge-node">Recommended for Mobile</span></th></tr></thead>
+      <tbody>
+        <tr><td class="highlight">Shared Hosting (cPanel)</td><td style="color:var(--green)">✅ Bilkul kaam karta hai</td><td style="color:var(--red)">❌ Nahi hota — VPS chahiye</td></tr>
+        <tr><td class="highlight">Mobile App APIs</td><td>✅ Achha kaam karta hai</td><td style="color:var(--green)">⚡ Zyada fast (async I/O)</td></tr>
+        <tr><td class="highlight">Real-time (Live Attendance)</td><td style="color:var(--red)">❌ WebSocket nahi hota</td><td style="color:var(--green)">✅ Socket.io built-in</td></tr>
+        <tr><td class="highlight">Setup Difficulty</td><td style="color:var(--green)">Easy — file upload karo</td><td>Medium — npm + pm2</td></tr>
+        <tr><td class="highlight">Pakistani Hosting Support</td><td style="color:var(--green)">Har jagah milta hai</td><td>Sirf VPS per</td></tr>
+        <tr><td class="highlight">Already Built</td><td style="color:var(--green)">✅ Complete hai</td><td>Nayi file ready hai</td></tr>
+        <tr><td class="highlight">Cost (Hosting)</td><td>Rs. 2,000–5,000/year</td><td>Rs. 1,200–3,000/month (VPS)</td></tr>
+        <tr><td class="highlight">Database</td><td>MySQL (PDO)</td><td>MySQL (mysql2 pool)</td></tr>
+        <tr><td class="highlight">WhatsApp</td><td>Twilio (curl)</td><td>Twilio (axios)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-warning" style="margin-top:16px">
+      <strong>🎯 Meri Recommendation:</strong> Abhi PHP deploy karein — cPanel per easy aur cheap hai. Jab mobile app banani ho tab Node.js server separately VPS per host karein sirf real-time features ke liye (Socket.io attendance dashboard). Dono backends ek hi database share kar sakte hain.
+    </div>
+  </section>
+
+  <!-- ═══ XAMPP ═══ -->
+  <section class="section" id="xampp">
+    <h2>🖥️ Option 1: XAMPP (Local Testing)</h2>
+    <p style="color:var(--text-muted);margin-bottom:16px">School computer per test karne ke liye — bilkul free</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>XAMPP Download karein</h4>
+        <p>apachefriends.org se XAMPP download karein (Windows). Install karein, Apache + MySQL start karein.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Files Copy karein</h4>
+        <pre>C:\xampp\htdocs\alqalam\
+    ├── alqalam_backend.php   ← Main API file
+    ├── config.php             ← Database + JWT config
+    ├── .env                   ← Settings (edit this)
+    └── alqalam_ems.html       ← Frontend (optional)</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Database Create karein</h4>
+        <p>Browser mein <code>http://localhost/phpmyadmin</code> kholen</p>
+        <pre>1. New Database → Name: alqalam_db → Create
+2. alqalam_db select karein
+3. Import tab → alqalam_database.sql upload karein → Go</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>.env Edit karein</h4>
+        <pre>DB_HOST=127.0.0.1
+DB_DATABASE=alqalam_db
+DB_USERNAME=root
+DB_PASSWORD=          ← XAMPP mein blank chhodein
+APP_URL=http://localhost/alqalam
+JWT_SECRET=AlQalamSecretKey2024MakeItLongAndRandom</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Test karein</h4>
+        <p>Browser mein open karein:</p>
+        <pre>http://localhost/alqalam/alqalam_backend.php/health</pre>
+        <p>Response aana chahiye: <code>{"success":true,"data":{"status":"ok"}}</code></p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>EMS se Connect karein</h4>
+        <p>Browser mein <code>alqalam_ems.html</code> kholen → API status button (top right) → Settings → URL enter karein:</p>
+        <pre>http://localhost/alqalam/alqalam_backend.php</pre>
+        <p>Test Connection → ✅ Connected → Save</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ CPANEL ═══ -->
+  <section class="section" id="cpanel">
+    <h2>🌐 Option 2: cPanel Shared Hosting (Live Server)</h2>
+    <p style="color:var(--text-muted);margin-bottom:16px">Pakistan mein sabse common hosting — Hostinger, NayaTel, TechAnswer etc.</p>
+
+    <div class="alert alert-info">
+      <strong>Hosting Recommendation:</strong> Hostinger Business plan — Rs. 550/month. PHP 8.1+, MySQL included, SSL free.
+      Domain: alqalam.edu.pk (domain register karna hoga PKNIC se Rs. 2,000/year)
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Files Upload karein (File Manager ya FTP)</h4>
+        <p>cPanel → File Manager → <code>public_html/ems/</code> folder banayein → ye files upload karein:</p>
+        <div class="file-tree">
+          <div class="ft-dir">📁 public_html/ems/</div>
+          <div class="ft-file">│ ├── 📄 <span class="ft-important">alqalam_backend.php</span> ← API</div>
+          <div class="ft-file">│ ├── 📄 <span class="ft-important">config.php</span></div>
+          <div class="ft-file">│ ├── 📄 <span class="ft-important">.env</span> ← PRIVATE — edit karo</div>
+          <div class="ft-file">│ ├── 📄 .htaccess ← zaroor upload karo</div>
+          <div class="ft-file">│ └── 📄 alqalam_ems.html ← Frontend</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>MySQL Database Create karein</h4>
+        <pre>cPanel → MySQL Databases
+1. Database Name: alqalamdb (prefix auto lagta hai: user_alqalamdb)
+2. User Create: alqalamuser / StrongPass@123
+3. Privileges: ALL PRIVILEGES
+4. phpMyAdmin → Import → alqalam_database.sql</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>.env Production ke liye Update karein</h4>
+        <pre># cPanel par in values change karein:
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://alqalam.edu.pk/ems
+
+DB_HOST=localhost          # cPanel mein localhost hota hai
+DB_DATABASE=user_alqalamdb # cPanel prefix ke saath
+DB_USERNAME=user_alqalamuser
+DB_PASSWORD=StrongPass@123
+
+JWT_SECRET=AlQalamPROD_VeryLong_RandomString_64chars_ChangeThis!
+
+# IMPORTANT: Production mein ye zaroor karo:
+ALLOWED_ORIGINS=https://alqalam.edu.pk</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>.htaccess file upload karein</h4>
+        <p>neeche .htaccess section dekhin — is file ko copy kar ke <code>public_html/ems/.htaccess</code> mein save karein</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>SSL Enable karein</h4>
+        <pre>cPanel → SSL/TLS → Let's Encrypt → Domain select → Issue
+Phir:  APP_URL=https://... update karein</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Test karein</h4>
+        <pre>https://alqalam.edu.pk/ems/alqalam_backend.php/health</pre>
+        <p>EMS mein API URL: <code>https://alqalam.edu.pk/ems/alqalam_backend.php</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ VPS ═══ -->
+  <section class="section" id="vps">
+    <h2>🚀 Option 3: VPS Ubuntu (Professional Setup)</h2>
+    <p style="color:var(--text-muted);margin-bottom:16px">Node.js ke liye zaruri hai. DigitalOcean / Vultr / Contabo — $6–12/month</p>
+
+    <h3>PHP + Nginx on VPS</h3>
+    <pre><code># Ubuntu 22.04 per</code>
+sudo apt update && sudo apt upgrade -y
+sudo apt install nginx php8.2-fpm php8.2-mysql php8.2-curl php8.2-mbstring -y
+sudo apt install mysql-server -y
+
+# MySQL setup
+sudo mysql_secure_installation
+sudo mysql -u root
+CREATE DATABASE alqalam_db CHARACTER SET utf8mb4;
+CREATE USER 'alqalam'@'localhost' IDENTIFIED BY 'StrongPass@2024';
+GRANT ALL ON alqalam_db.* TO 'alqalam'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+# Import database
+mysql -u alqalam -p alqalam_db &lt; alqalam_database.sql
+
+# Files copy karein
+sudo mkdir -p /var/www/alqalam
+sudo cp alqalam_backend.php config.php .env /var/www/alqalam/
+sudo chown -R www-data:www-data /var/www/alqalam</pre>
+
+    <h3>Nginx Config</h3>
+    <pre>sudo nano /etc/nginx/sites-available/alqalam
+
+<span style="color:var(--gold)">server {</span>
+    listen 80;
+    server_name api.alqalam.edu.pk;
+    root /var/www/alqalam;
+    index alqalam_backend.php;
+
+    location / {
+        try_files $uri $uri/ /alqalam_backend.php$is_args$args;
+    }
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+    # .env ko public access se protect karo
+    location ~ /\.env { deny all; return 404; }
+<span style="color:var(--gold)">}</span>
+
+sudo ln -s /etc/nginx/sites-available/alqalam /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+
+# SSL with Certbot
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d api.alqalam.edu.pk</pre>
+  </section>
+
+  <!-- ═══ NODE.JS ═══ -->
+  <section class="section" id="nodejs-setup">
+    <h2>⚡ Node.js Setup (VPS per)</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Node.js Install (VPS per)</h4>
+        <pre>curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+node --version    # v20.x.x hona chahiye
+npm --version</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Files Upload + Dependencies Install</h4>
+        <pre>mkdir /var/www/alqalam-node && cd /var/www/alqalam-node
+# FTP ya SCP se upload karein:
+#   alqalam_node_server.js
+#   package.json
+#   .env
+
+npm install          # Ye sab packages download karega
+# ✅ express, mysql2, jsonwebtoken, bcryptjs, socket.io etc.</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>PM2 se Run karein (Background + Auto-restart)</h4>
+        <pre>sudo npm install -g pm2
+
+# Start
+pm2 start alqalam_node_server.js --name alqalam-ems
+
+# Server restart hone par auto-start
+pm2 startup
+pm2 save
+
+# Status check
+pm2 status
+pm2 logs alqalam-ems
+pm2 monit</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Nginx Reverse Proxy (Node.js ke liye)</h4>
+        <pre><span style="color:var(--gold)">server {</span>
+    listen 80;
+    server_name api.alqalam.edu.pk;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';   # Socket.io
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+    }
+<span style="color:var(--gold)">}</span>
+
+sudo certbot --nginx -d api.alqalam.edu.pk  # SSL</pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>EMS mein URL update karein</h4>
+        <p>Browser mein EMS kholein → API Settings → URL set karein:</p>
+        <pre>https://api.alqalam.edu.pk</pre>
+        <p>Test → <code>/health</code> check → Connected! ✅</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ .ENV CONFIG ═══ -->
+  <section class="section" id="env-config">
+    <h2>⚙️ .env Complete Configuration Guide</h2>
+
+    <div class="compare-grid">
+      <div class="card gold">
+        <h3 style="color:var(--gold);margin-top:0">🏠 Local / XAMPP</h3>
+        <pre style="font-size:.78rem">APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost/alqalam
+
+DB_HOST=127.0.0.1
+DB_DATABASE=alqalam_db
+DB_USERNAME=root
+DB_PASSWORD=
+
+JWT_SECRET=any_secret_ok_for_local
+ATTENDANCE_LATE_TIME=08:30</pre>
+      </div>
+      <div class="card cyan">
+        <h3 style="color:var(--cyan);margin-top:0">🌐 Production (cPanel/VPS)</h3>
+        <pre style="font-size:.78rem">APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://alqalam.edu.pk/ems
+
+DB_HOST=localhost
+DB_DATABASE=cpanel_alqalamdb
+DB_USERNAME=cpanel_user
+DB_PASSWORD=VeryStrongPass@2024
+
+JWT_SECRET=64_character_random_string_here!
+ATTENDANCE_LATE_TIME=08:30</pre>
+      </div>
+    </div>
+
+    <h3>WhatsApp (Twilio) Setup</h3>
+    <div class="card">
+      <div class="step">
+        <div class="step-num" style="background:linear-gradient(135deg,#25d366,#128c7e)">1</div>
+        <div class="step-content">
+          <h4>Twilio Account</h4>
+          <p>twilio.com per free account banayein → WhatsApp Sandbox enable karein</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:linear-gradient(135deg,#25d366,#128c7e)">2</div>
+        <div class="step-content">
+          <h4>.env mein values add karein</h4>
+          <pre>TWILIO_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_32chars
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:linear-gradient(135deg,#25d366,#128c7e)">3</div>
+        <div class="step-content">
+          <h4>Production ke liye Meta WhatsApp Business API</h4>
+          <pre>META_WA_TOKEN=your_permanent_token
+META_WA_PHONE_ID=your_phone_number_id</pre>
+          <p style="color:var(--text-muted)">business.facebook.com → WhatsApp → Create App</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Email (SMTP) Setup</h3>
+    <pre>MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=alqalam.ems@gmail.com
+MAIL_PASSWORD=your_app_password    # Gmail App Password (2FA enable karo pehle)
+MAIL_FROM=noreply@alqalam.edu.pk</pre>
+  </section>
+
+  <!-- ═══ HTACCESS ═══ -->
+  <section class="section" id="htaccess">
+    <h2>📄 .htaccess (PHP ke liye zaruri)</h2>
+    <p style="color:var(--text-muted);margin-bottom:12px">Is file ko <code>public_html/ems/.htaccess</code> ke naam se save karein:</p>
+    <pre>Options -Indexes
+RewriteEngine On
+
+# Security: .env ko hide karein
+&lt;Files ".env"&gt;
+    Order allow,deny
+    Deny from all
+&lt;/Files&gt;
+
+# API routing — /auth/login ko backend.php per forward karo
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ alqalam_backend.php/$1 [QSA,L]
+
+# CORS Headers (agar PHP mein na ho)
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Device-Type"
+
+# Security Headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# Disable PHP error display in production
+php_flag display_errors off
+php_value error_reporting 0</pre>
+
+    <div class="alert alert-warning">
+      <strong>⚠️ Important:</strong> .htaccess sirf Apache per kaam karta hai (cPanel/XAMPP). Nginx per alag config chahiye (upar dekhin).
+    </div>
+  </section>
+
+  <!-- ═══ TESTING ═══ -->
+  <section class="section" id="testing">
+    <h2>🧪 API Endpoints Testing</h2>
+
+    <h3>Postman ya Browser se Test karein</h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Auth?</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>/health</code></td><td>GET</td><td>❌</td><td>Server + DB status check</td></tr>
+        <tr><td><code>/auth/login</code></td><td>POST</td><td>❌</td><td>Login → JWT token milega</td></tr>
+        <tr><td><code>/students</code></td><td>GET</td><td>✅ Bearer</td><td>All students list</td></tr>
+        <tr><td><code>/fee/challans</code></td><td>GET</td><td>✅ Bearer</td><td>Fee challans</td></tr>
+        <tr><td><code>/fee/collect</code></td><td>POST</td><td>✅ Bearer</td><td>Fee collect karo</td></tr>
+        <tr><td><code>/attendance/today</code></td><td>GET</td><td>✅ Bearer</td><td>Aaj ki attendance</td></tr>
+        <tr><td><code>/staff/checkin</code></td><td>POST</td><td>✅ Bearer</td><td>Staff self check-in</td></tr>
+        <tr><td><code>/library/books</code></td><td>GET</td><td>✅ Bearer</td><td>Library catalog</td></tr>
+        <tr><td><code>/transport/routes</code></td><td>GET</td><td>✅ Bearer</td><td>Transport routes</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Quick Test Commands (curl)</h3>
+    <pre><span style="color:var(--text-muted)"># 1. Health check</span>
+curl https://alqalam.edu.pk/ems/alqalam_backend.php/health
+
+<span style="color:var(--text-muted)"># 2. Login karein (Token milega)</span>
+curl -X POST https://alqalam.edu.pk/ems/alqalam_backend.php/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"AqAdmin@2024"}'
+
+<span style="color:var(--text-muted)"># 3. Token se students fetch karein</span>
+curl -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  https://alqalam.edu.pk/ems/alqalam_backend.php/students
+
+<span style="color:var(--text-muted)"># 4. Staff check-in</span>
+curl -X POST -H "Authorization: Bearer TOKEN" \
+  https://alqalam.edu.pk/ems/alqalam_backend.php/staff/checkin</pre>
+  </section>
+
+  <!-- ═══ SECURITY ═══ -->
+  <section class="section" id="security">
+    <h2>🔒 Production Security Checklist</h2>
+
+    <div class="card green">
+      <h3 style="color:var(--green);margin-top:0">✅ Zaruri Steps</h3>
+      <div class="step">
+        <div class="step-num" style="background:var(--green);color:#000">1</div>
+        <div class="step-content"><h4>.env never public nahi hona chahiye</h4><p>Upar .htaccess mein <code>&lt;Files ".env"&gt; Deny from all</code> lagao</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:var(--green);color:#000">2</div>
+        <div class="step-content"><h4>JWT_SECRET strong banao</h4><p>Kam az kam 64 characters ka random string: <code>openssl rand -base64 64</code></p></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:var(--green);color:#000">3</div>
+        <div class="step-content"><h4>HTTPS / SSL zarur lagao</h4><p>cPanel → SSL → Let's Encrypt (Free) ya certbot</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:var(--green);color:#000">4</div>
+        <div class="step-content"><h4>APP_DEBUG=false production mein</h4><p>Error messages mein sensitive info show hoti hai</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:var(--green);color:#000">5</div>
+        <div class="step-content"><h4>DB passwords strong rakho</h4><p>Database user ke liye sirf alqalam database ka access do</p></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:var(--green);color:#000">6</div>
+        <div class="step-content"><h4>Regular Backup</h4><p>cPanel → Backup → Weekly automatic backup enable karo. Ya: <code>mysqldump alqalam_db > backup_$(date +%Y%m%d).sql</code></p></div>
+      </div>
+    </div>
+
+    <div class="alert alert-danger" style="margin-top:16px">
+      <strong>⛔ Kabhi mat karo:</strong> .env file ko Git mein commit mat karo. Database password public_html mein hardcode mat karo. root MySQL user ko directly use mat karo.
+    </div>
+
+    <h3>ALLOWED_ORIGINS (CORS Lock)</h3>
+    <pre># .env mein add karo production ke liye:
+ALLOWED_ORIGINS=https://alqalam.edu.pk,https://www.alqalam.edu.pk
+
+# PHP backend mein ye already handle hota hai:
+# header("Access-Control-Allow-Origin: " . env('ALLOWED_ORIGINS','*'));</pre>
+  </section>
+
+  <!-- ═══ SUMMARY ═══ -->
+  <section class="section">
+    <h2>📋 Quick Summary — Kya Karna Hai?</h2>
+    <div class="compare-grid">
+      <div class="card gold">
+        <h3 style="color:var(--gold);margin-top:0">Abhi (PHP — Cheap &amp; Easy)</h3>
+        <p style="font-size:.87rem;color:var(--text-muted)">1. Hostinger cPanel hosting lein (Rs. 550/month)</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">2. Files upload karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">3. MySQL database create + import karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">4. .env production ke liye update karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">5. .htaccess upload karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">6. SSL enable karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">7. EMS mein API URL set karein ✅</p>
+        <div class="badge badge-php" style="margin-top:8px">~2 hours ka kaam</div>
+      </div>
+      <div class="card cyan">
+        <h3 style="color:var(--cyan);margin-top:0">Baad Mein (Node.js — Mobile App ke liye)</h3>
+        <p style="font-size:.87rem;color:var(--text-muted)">1. VPS lein ($6/month — Contabo/Vultr)</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">2. Node.js + PM2 install karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">3. alqalam_node_server.js upload karein</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">4. npm install → pm2 start</p>
+        <p style="font-size:.87htm;color:var(--text-muted)">5. Nginx reverse proxy lagao</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">6. SSL (certbot) → Live! ✅</p>
+        <p style="font-size:.87rem;color:var(--text-muted)">7. Socket.io real-time attendance ready</p>
+        <div class="badge badge-node" style="margin-top:8px">Mobile app build karte waqt</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div style="background:var(--bg2);border-top:1px solid var(--border);padding:20px;text-align:center;color:var(--text-muted);font-size:.83rem">
+  🏫 AL Qalam International EMS — Deployment Guide v2.0 &nbsp;|&nbsp; claude@alqalam.edu.pk
+</div>
+
+</body>
+</html>

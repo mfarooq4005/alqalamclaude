@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AL Qalam EMS — Live Server Deployment</title>
+<style>
+:root{
+  --gold:#fbbf24;--cyan:#00e5ff;--green:#34d399;--red:#f87171;
+  --purple:#a78bfa;--orange:#fb923c;--aws:#ff9900;
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
+  --text:#e6edf3;--text-muted:#8b949e;--border:rgba(255,255,255,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#161b22 0%,#0d1117 60%);padding:56px 40px 40px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(251,191,36,.08),transparent)}
+.hero-badge{display:inline-block;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:var(--gold);padding:4px 14px;border-radius:20px;font-size:.78rem;font-weight:600;letter-spacing:.5px;margin-bottom:16px}
+.hero h1{font-size:2.4rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--orange),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;line-height:1.2}
+.hero p{color:var(--text-muted);font-size:.95rem;max-width:600px;margin:0 auto}
+
+/* LAYOUT */
+.container{max-width:1050px;margin:0 auto;padding:40px 20px}
+
+/* PHASE TABS */
+.phase-tabs{display:flex;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:32px}
+.phase-tab{flex:1;padding:16px 20px;cursor:pointer;text-align:center;border-right:1px solid var(--border);transition:.2s;font-size:.88rem}
+.phase-tab:last-child{border-right:none}
+.phase-tab.active{background:rgba(251,191,36,.08);border-bottom:2px solid var(--gold)}
+.phase-tab .tab-num{font-size:1.4rem;font-weight:800;display:block;margin-bottom:2px}
+.phase-tab .tab-label{color:var(--text-muted);font-size:.78rem}
+.phase-tab.active .tab-label{color:var(--gold)}
+.phase-content{display:none}
+.phase-content.active{display:block}
+
+/* ARCHITECTURE DIAGRAM */
+.arch-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:32px}
+.arch-title{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:16px}
+.arch-diagram{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;row-gap:16px}
+.arch-node{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 18px;text-align:center;min-width:140px}
+.arch-node.gold{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.05)}
+.arch-node.cyan{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.04)}
+.arch-node.green{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.04)}
+.arch-node.aws{border-color:rgba(255,153,0,.4);background:rgba(255,153,0,.05)}
+.arch-node .an-icon{font-size:1.6rem;margin-bottom:4px;display:block}
+.arch-node .an-label{font-size:.78rem;font-weight:600;color:var(--text)}
+.arch-node .an-sub{font-size:.7rem;color:var(--text-muted);margin-top:2px}
+.arch-arrow{color:var(--text-muted);font-size:1.4rem;padding:0 8px;align-self:center}
+
+/* STEPS */
+.step-list{display:flex;flex-direction:column;gap:20px}
+.step{display:flex;gap:16px}
+.step-num{min-width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;margin-top:3px}
+.step-num.gold{background:linear-gradient(135deg,var(--gold),var(--orange));color:#000}
+.step-num.cyan{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#000}
+.step-num.aws{background:linear-gradient(135deg,var(--aws),#e07000);color:#000}
+.step-num.green{background:linear-gradient(135deg,var(--green),#059669);color:#000}
+.step-body h4{font-size:.95rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.step-body p{font-size:.85rem;color:var(--text-muted);margin-bottom:8px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.card.gold{border-color:rgba(251,191,36,.25)}
+.card.cyan{border-color:rgba(0,229,255,.2)}
+.card.green{border-color:rgba(52,211,153,.2)}
+.card.aws{border-color:rgba(255,153,0,.3)}
+.card.red{border-color:rgba(248,113,113,.25)}
+.card-title{font-size:.88rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+
+/* CODE */
+pre,code{font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+pre{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;overflow-x:auto;font-size:.82rem;line-height:1.7;margin:10px 0;position:relative}
+code{background:rgba(255,255,255,.06);padding:2px 7px;border-radius:5px;font-size:.82rem;color:var(--cyan)}
+.cmd{color:var(--green)}
+.cmt{color:var(--text-muted)}
+.key{color:var(--gold)}
+.val{color:var(--orange)}
+.str{color:var(--purple)}
+
+/* COPY BUTTON */
+.pre-wrap{position:relative}
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--bg4);border:1px solid var(--border);color:var(--text-muted);padding:4px 10px;border-radius:6px;font-size:.73rem;cursor:pointer;transition:.2s}
+.copy-btn:hover{background:var(--gold);color:#000}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:10px;margin:12px 0;font-size:.85rem;line-height:1.6}
+.alert-warning{background:rgba(251,191,36,.08);border-left:3px solid var(--gold);color:#fde68a}
+.alert-info{background:rgba(0,229,255,.07);border-left:3px solid var(--cyan);color:#bae6fd}
+.alert-success{background:rgba(52,211,153,.08);border-left:3px solid var(--green);color:#a7f3d0}
+.alert-danger{background:rgba(248,113,113,.08);border-left:3px solid var(--red);color:#fecaca}
+.alert-aws{background:rgba(255,153,0,.08);border-left:3px solid var(--aws);color:#fed7aa}
+
+/* SECTION */
+.section{margin-bottom:44px}
+h2{font-size:1.25rem;font-weight:700;color:var(--gold);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+h3{font-size:1rem;font-weight:600;color:var(--cyan);margin:18px 0 10px}
+
+/* COMPARE */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{background:var(--bg3);padding:9px 13px;text-align:left;color:var(--gold);border-bottom:1px solid var(--border)}
+td{padding:8px 13px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text-muted)}
+tr:last-child td{border-bottom:none}
+.hl{color:var(--text);font-weight:500}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:700}
+.b-green{background:rgba(52,211,153,.12);color:var(--green)}
+.b-gold{background:rgba(251,191,36,.12);color:var(--gold)}
+.b-cyan{background:rgba(0,229,255,.1);color:var(--cyan)}
+.b-aws{background:rgba(255,153,0,.12);color:var(--aws)}
+.b-red{background:rgba(248,113,113,.1);color:var(--red)}
+
+/* NAV DOTS */
+.toc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:28px;font-size:.83rem}
+.toc-title{font-weight:700;color:var(--gold);margin-bottom:10px;font-size:.85rem}
+.toc-list{display:flex;flex-wrap:wrap;gap:8px}
+.toc-list a{color:var(--text-muted);text-decoration:none;padding:4px 12px;background:var(--bg3);border-radius:20px;transition:.2s}
+.toc-list a:hover{color:var(--gold);background:rgba(251,191,36,.08)}
+
+/* PROGRESS */
+.progress-bar{background:var(--bg3);border-radius:20px;height:6px;margin:8px 0}
+.progress-fill{height:6px;border-radius:20px;transition:width .4s}
+
+/* FILE TREE */
+.ftree{background:var(--bg3);border-radius:10px;padding:14px 18px;font-family:monospace;font-size:.83rem;line-height:2;border:1px solid var(--border)}
+.ftree .d{color:var(--cyan)} .ftree .f{color:var(--text-muted)} .ftree .fi{color:var(--gold);font-weight:600}
+
+@media(max-width:700px){
+  .hero h1{font-size:1.7rem}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .arch-diagram{flex-direction:column}
+  .arch-arrow{transform:rotate(90deg)}
+  .phase-tab .tab-num{font-size:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">🚀 LIVE SERVER DEPLOYMENT</div>
+  <h1>AL Qalam EMS — Server Setup</h1>
+  <p>cPanel se AWS tak — PHP + Node.js dono saath, same database, step-by-step guide</p>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">📋 Is Guide Mein Kya Hai</div>
+    <div class="toc-list">
+      <a href="#architecture">🏗️ Architecture</a>
+      <a href="#phase1">📦 Phase 1: cPanel</a>
+      <a href="#env-prod">⚙️ .env Production</a>
+      <a href="#htaccess">📄 .htaccess</a>
+      <a href="#phase2">☁️ Phase 2: AWS</a>
+      <a href="#rds">🗄️ AWS RDS</a>
+      <a href="#ec2">🖥️ EC2 + Node.js</a>
+      <a href="#nginx">🔧 Nginx + SSL</a>
+      <a href="#dns">🌐 DNS Setup</a>
+      <a href="#both">🔗 Both Running</a>
+      <a href="#checklist">✅ Final Checklist</a>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE -->
+  <section class="section" id="architecture">
+    <h2>🏗️ Final Architecture — Dono Saath</h2>
+
+    <div class="arch-box">
+      <div class="arch-title">Phase 1 — Abhi (cPanel Only)</div>
+      <div class="arch-diagram">
+        <div class="arch-node gold">
+          <span class="an-icon">🌐</span>
+          <div class="an-label">alqalam.edu.pk</div>
+          <div class="an-sub">cPanel DNS</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node gold">
+          <span class="an-icon">🐘</span>
+          <div class="an-label">PHP Backend</div>
+          <div class="an-sub">cPanel Apache</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node green">
+          <span class="an-icon">🗄️</span>
+          <div class="an-label">MySQL DB</div>
+          <div class="an-sub">cPanel MySQL</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arch-box">
+      <div class="arch-title">Phase 2 — AWS Migration (Mobile App + Real-time)</div>
+      <div class="arch-diagram">
+        <div class="arch-node gold">
+          <span class="an-icon">🌐</span>
+          <div class="an-label">alqalam.edu.pk</div>
+          <div class="an-sub">Domain</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node" style="display:flex;flex-direction:column;gap:8px;background:transparent;border:none;padding:0">
+          <div class="arch-node gold">
+            <span class="an-icon">🐘</span>
+            <div class="an-label">ems.alqalam.edu.pk</div>
+            <div class="an-sub">PHP — cPanel (EMS HTML)</div>
+          </div>
+          <div class="arch-node aws">
+            <span class="an-icon">⚡</span>
+            <div class="an-label">api.alqalam.edu.pk</div>
+            <div class="an-sub">Node.js — AWS EC2</div>
+          </div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node aws">
+          <span class="an-icon">🗄️</span>
+          <div class="an-label">AWS RDS</div>
+          <div class="an-sub">MySQL — Shared DB</div>
+        </div>
+      </div>
+      <div class="alert alert-info" style="margin-top:16px">
+        <strong>🔑 Key Point:</strong> Dono backends — PHP aur Node.js — ek hi AWS RDS database se connect honge. Data sync ki zarurat nahi, same tables hain.
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card gold">
+        <div class="card-title">🐘 PHP (cPanel)</div>
+        <p style="font-size:.82rem;color:var(--text-muted)">EMS frontend, fee, students, attendance, reports — main backend</p>
+        <div class="badge b-gold">Production Ready</div>
+      </div>
+      <div class="card aws">
+        <div class="card-title" style="color:var(--aws)">⚡ Node.js (AWS)</div>
+        <p style="font-size:.82rem;color:var(--text-muted)">Real-time dashboard, Socket.io, mobile app APIs, WebSocket</p>
+        <div class="badge b-aws">Phase 2</div>
+      </div>
+      <div class="card green">
+        <div class="card-title">🗄️ AWS RDS MySQL</div>
+        <p style="font-size:.82rem;color:var(--text-muted)">Single database — dono backends use karein. Automated backup, Multi-AZ</p>
+        <div class="badge b-green">Shared</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 1: cPanel -->
+  <section class="section" id="phase1">
+    <h2>📦 Phase 1 — cPanel Deploy (Aaj Ka Kaam)</h2>
+    <div class="alert alert-success">
+      ✅ <strong>Timeline: 2–3 ghante</strong> mein live ho sakta hai. Ye sab steps karein.
+    </div>
+
+    <h3>Step 1 — Files Upload (File Manager)</h3>
+    <div class="card">
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:12px">cPanel → File Manager → <code>public_html</code> mein <code>ems</code> folder banayein phir ye files upload karein:</p>
+      <div class="ftree">
+        <div class="d">📁 public_html/</div>
+        <div class="d">│ └── 📁 ems/  ← naya folder banayein</div>
+        <div class="fi">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── alqalam_backend.php ← MAIN API</div>
+        <div class="fi">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── config.php</div>
+        <div class="fi">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── .env ← PRIVATE (neeche edit karein)</div>
+        <div class="fi">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── .htaccess ← zaroor chahiye</div>
+        <div class="f">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── alqalam_ems.html ← Frontend (optional)</div>
+      </div>
+      <div class="alert alert-warning" style="margin-top:10px">
+        ⚠️ <strong>.env file</strong> hidden hoti hai. File Manager mein "Show Hidden Files" enable karein upload karne ke liye.
+      </div>
+    </div>
+
+    <h3>Step 2 — MySQL Database (cPanel → MySQL Databases)</h3>
+    <div class="card cyan">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num cyan">1</div>
+          <div class="step-body">
+            <h4>Database Create karein</h4>
+            <p>cPanel → MySQL Databases → "Create New Database"</p>
+            <pre><span class="cmt"># Database naam dein (cPanel prefix auto lagata hai)</span>
+Database Name: <span class="val">alqalamdb</span>
+<span class="cmt"># cPanel save karega as: yourusername_alqalamdb</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num cyan">2</div>
+          <div class="step-body">
+            <h4>Database User Create karein</h4>
+            <pre>Username: <span class="val">alqalamuser</span>
+Password: <span class="val">AlQalam@Db2024!</span>  <span class="cmt">← strong password</span>
+<span class="cmt"># Full name: yourusername_alqalamuser</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num cyan">3</div>
+          <div class="step-body">
+            <h4>User ko Database se Add karein</h4>
+            <p>"Add User to Database" section mein → User: alqalamuser → DB: alqalamdb → ALL PRIVILEGES ✓</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num cyan">4</div>
+          <div class="step-body">
+            <h4>SQL Import karein (phpMyAdmin)</h4>
+            <pre>cPanel → phpMyAdmin
+→ Left panel: yourusername_alqalamdb (click)
+→ Top menu: Import
+→ Choose File: alqalam_database.sql
+→ Format: SQL
+→ GO button click karein ✅</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="env-prod">Step 3 — .env Production ke liye Update</h3>
+    <div class="card gold">
+      <div class="card-title">⚙️ .env — Ye values zaroor change karein</div>
+      <div class="pre-wrap">
+<pre><span class="cmt"># ── APP SETTINGS ──────────────────────────────────</span>
+<span class="key">APP_ENV</span>=<span class="val">production</span>
+<span class="key">APP_DEBUG</span>=<span class="val">false</span>
+<span class="key">APP_URL</span>=<span class="val">https://alqalam.edu.pk/ems</span>
+
+<span class="cmt"># ── DATABASE (cPanel ke actual values daalein) ───</span>
+<span class="key">DB_HOST</span>=<span class="val">localhost</span>             <span class="cmt"># cPanel par hamesha localhost</span>
+<span class="key">DB_DATABASE</span>=<span class="val">cpanelusername_alqalamdb</span>   <span class="cmt">← apna actual naam</span>
+<span class="key">DB_USERNAME</span>=<span class="val">cpanelusername_alqalamuser</span> <span class="cmt">← apna actual naam</span>
+<span class="key">DB_PASSWORD</span>=<span class="val">AlQalam@Db2024!</span>
+
+<span class="cmt"># ── JWT (Strong secret daalein — 64+ chars) ──────</span>
+<span class="key">JWT_SECRET</span>=<span class="val">ALQalamPROD2024_ChangeThis_MustBe64CharsLong_RandomString_Here!</span>
+<span class="key">JWT_EXPIRY</span>=<span class="val">86400</span>
+
+<span class="cmt"># ── ATTENDANCE LATE TIME ──────────────────────────</span>
+<span class="key">ATTENDANCE_LATE_TIME</span>=<span class="val">08:30</span>
+
+<span class="cmt"># ── SCHOOL INFO ──────────────────────────────────</span>
+<span class="key">SCHOOL_NAME</span>=<span class="val">"AL Qalam International"</span>
+<span class="key">SCHOOL_EMAIL</span>=<span class="val">info@alqalam.edu.pk</span>
+<span class="key">SCHOOL_PHONE</span>=<span class="val">021-XXXXXXXX</span>
+
+<span class="cmt"># ── CORS (sirf aapki website allow karo) ─────────</span>
+<span class="key">ALLOWED_ORIGINS</span>=<span class="val">https://alqalam.edu.pk,https://www.alqalam.edu.pk</span></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3 id="htaccess">Step 4 — .htaccess File</h3>
+    <div class="card">
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:10px">
+        Is content ko copy kar ke <code>public_html/ems/.htaccess</code> mein save karein:
+      </p>
+      <div class="pre-wrap">
+<pre><span class="cmt"># AL Qalam EMS — Apache Config</span>
+Options -Indexes
+RewriteEngine On
+
+<span class="cmt"># .env ko kabhi public nahi hone dena — CRITICAL!</span>
+&lt;Files <span class="str">".env"</span>&gt;
+    Order allow,deny
+    Deny from all
+&lt;/Files&gt;
+
+<span class="cmt"># config.php bhi hide karein</span>
+&lt;Files <span class="str">"config.php"</span>&gt;
+    Order allow,deny
+    Deny from all
+&lt;/Files&gt;
+
+<span class="cmt"># API routing — /students ko alqalam_backend.php per forward</span>
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ alqalam_backend.php/$1 [QSA,L]
+
+<span class="cmt"># CORS Headers</span>
+Header always set Access-Control-Allow-Origin <span class="str">"*"</span>
+Header always set Access-Control-Allow-Methods <span class="str">"GET, POST, PUT, DELETE, OPTIONS"</span>
+Header always set Access-Control-Allow-Headers <span class="str">"Content-Type, Authorization, X-Device-Type"</span>
+
+<span class="cmt"># Security Headers</span>
+Header always set X-Content-Type-Options <span class="str">"nosniff"</span>
+Header always set X-Frame-Options <span class="str">"SAMEORIGIN"</span>
+Header always set X-XSS-Protection <span class="str">"1; mode=block"</span>
+
+<span class="cmt"># Production: Errors hide karein</span>
+php_flag display_errors off
+php_value error_reporting 0
+php_value upload_max_filesize 10M
+php_value post_max_size 10M</pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+    </div>
+
+    <h3>Step 5 — SSL Certificate (Free)</h3>
+    <div class="card green">
+      <pre>cPanel → Security → SSL/TLS
+→ "Let's Encrypt SSL" (ya AutoSSL)
+→ Domain: alqalam.edu.pk ✓
+→ www.alqalam.edu.pk ✓
+→ Install Certificate
+
+<span class="cmt"># Phir .env update karein:</span>
+<span class="key">APP_URL</span>=<span class="val">https://alqalam.edu.pk/ems</span>  <span class="cmt">← https ho gaya</span></pre>
+    </div>
+
+    <h3>Step 6 — Test karein</h3>
+    <div class="card">
+      <pre><span class="cmt"># Browser mein open karein:</span>
+<span class="cmd">https://alqalam.edu.pk/ems/alqalam_backend.php/health</span>
+
+<span class="cmt"># Expected response:</span>
+{
+  <span class="str">"success"</span>: true,
+  <span class="str">"data"</span>: {
+    <span class="str">"status"</span>: <span class="str">"ok"</span>,
+    <span class="str">"db"</span>: <span class="str">"connected"</span>,
+    <span class="str">"version"</span>: <span class="str">"2.0"</span>
+  }
+}</pre>
+
+      <div class="alert alert-success" style="margin-top:10px">
+        ✅ Agar ye response aaye to <strong>Phase 1 complete!</strong> Ab EMS mein API Settings kholein → URL enter karein → Connected!
+      </div>
+
+      <p style="color:var(--text-muted);font-size:.84rem;margin-top:10px">EMS URL (API Settings mein daalein):</p>
+      <pre><span class="cmd">https://alqalam.edu.pk/ems/alqalam_backend.php</span></pre>
+    </div>
+
+    <div class="alert alert-warning">
+      ⚠️ <strong>Common Problems aur Solutions:</strong><br>
+      <br>
+      <strong>500 Error</strong> → .htaccess syntax galat hai ya PHP version mismatch. cPanel → PHP Version → 8.1 select karein.<br>
+      <strong>403 Forbidden</strong> → File permissions. File Manager mein files select → Permissions → 644 set karein.<br>
+      <strong>DB Connection Error</strong> → .env mein DB_USERNAME aur DB_DATABASE mein cPanel prefix check karein (cpanelusername_dbname format).<br>
+      <strong>CORS Error</strong> → .htaccess upload hua? Headers properly lag rahe hain?
+    </div>
+  </section>
+
+  <!-- PHASE 2: AWS -->
+  <section class="section" id="phase2">
+    <h2>☁️ Phase 2 — AWS Setup (Node.js + Real-time)</h2>
+
+    <div class="alert alert-aws">
+      ☁️ <strong>AWS Free Tier available hai 12 months ke liye:</strong> EC2 t2.micro (750 hrs/month), RDS db.t3.micro (750 hrs/month), 30GB storage — bilkul free! Account: aws.amazon.com
+    </div>
+
+    <div class="grid-2">
+      <div class="card aws">
+        <div class="card-title" style="color:var(--aws)">☁️ AWS Services Jo Chahiye</div>
+        <table>
+          <tr><td class="hl">EC2 t2.micro</td><td>Node.js server (free tier)</td></tr>
+          <tr><td class="hl">RDS MySQL</td><td>Database (free tier)</td></tr>
+          <tr><td class="hl">Elastic IP</td><td>Fixed IP address (free)</td></tr>
+          <tr><td class="hl">Security Group</td><td>Firewall rules</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Cost Estimate</div>
+        <table>
+          <tr><td class="hl">Year 1 (Free Tier)</td><td style="color:var(--green)">$0/month</td></tr>
+          <tr><td class="hl">Year 2 onwards</td><td style="color:var(--gold)">~$15–25/month</td></tr>
+          <tr><td class="hl">cPanel (rakhein)</td><td>Rs. 550/month</td></tr>
+          <tr><td class="hl">Domain renewal</td><td>Rs. 2,000/year</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3 id="rds">🗄️ AWS RDS MySQL Setup</h3>
+    <div class="card aws">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num aws">1</div>
+          <div class="step-body">
+            <h4>AWS Console → RDS → Create Database</h4>
+            <pre>Engine: MySQL 8.0
+Template: <span class="val">Free tier</span>
+DB identifier: alqalam-db
+Master username: alqalamadmin
+Master password: AlQalam@AWS2024!
+Instance: db.t3.micro (free tier)
+Storage: 20 GB gp2
+<span class="cmt">Public access: YES (baad mein band karein, abhi testing ke liye)</span>
+VPC Security Group: <span class="val">New → alqalam-db-sg</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">2</div>
+          <div class="step-body">
+            <h4>Security Group mein Port 3306 Allow karein</h4>
+            <pre>RDS Console → DB → Security Group → Inbound Rules → Edit
+Add Rule:
+  Type: MySQL/Aurora
+  Port: 3306
+  Source: <span class="val">EC2 Security Group ID</span>  <span class="cmt">← EC2 banane ke baad</span>
+
+<span class="cmt"># Pehle testing ke liye apna IP daal saktey hain:</span>
+  Source: My IP</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">3</div>
+          <div class="step-body">
+            <h4>Database aur Tables Create karein</h4>
+            <pre><span class="cmt"># MySQL Workbench (apne computer pe) ya terminal se connect:</span>
+<span class="cmd">mysql -h your-rds-endpoint.rds.amazonaws.com -u alqalamadmin -p</span>
+
+<span class="cmt"># SQL commands:</span>
+CREATE DATABASE alqalam_db CHARACTER SET utf8mb4;
+<span class="cmd">mysql -h endpoint -u alqalamadmin -p alqalam_db &lt; alqalam_database.sql</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">4</div>
+          <div class="step-body">
+            <h4>RDS Endpoint Note kar lein</h4>
+            <pre><span class="cmt"># RDS Console → DB → Connectivity → Endpoint</span>
+<span class="cmt"># Kuch aisa dikhega:</span>
+alqalam-db.abc123xyz.ap-south-1.rds.amazonaws.com
+
+<span class="cmt"># Ye .env mein DB_HOST mein daalein gay</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="ec2">🖥️ EC2 Instance — Node.js Server</h3>
+    <div class="card">
+      <div class="step-list">
+        <div class="step">
+          <div class="step-num aws">1</div>
+          <div class="step-body">
+            <h4>EC2 → Launch Instance</h4>
+            <pre>Name: alqalam-ems-server
+AMI: <span class="val">Ubuntu Server 22.04 LTS (Free tier eligible)</span>
+Instance type: <span class="val">t2.micro</span> (free tier)
+Key pair: Create new → <span class="val">alqalam-key</span> → Download .pem file
+Security Group: Create new → alqalam-ec2-sg
+  Inbound:
+    SSH:   Port 22  → My IP only
+    HTTP:  Port 80  → Anywhere
+    HTTPS: Port 443 → Anywhere
+    Node:  Port 3000 → Anywhere (baad mein band karein)</pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">2</div>
+          <div class="step-body">
+            <h4>Elastic IP Assign karein</h4>
+            <pre>EC2 → Elastic IPs → Allocate → Associate
+→ Instance: alqalam-ems-server
+→ Associate
+
+<span class="cmt"># Ab aapke paas fixed IP hai, jaise:</span>
+Public IP: <span class="val">54.123.45.67</span>  <span class="cmt">← ye DNS mein use hoga</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">3</div>
+          <div class="step-body">
+            <h4>SSH se Connect karein</h4>
+            <pre><span class="cmt"># Windows: PuTTY ya Windows Terminal</span>
+<span class="cmt"># Mac/Linux: Terminal</span>
+
+<span class="cmd">chmod 400 alqalam-key.pem</span>
+<span class="cmd">ssh -i alqalam-key.pem ubuntu@54.123.45.67</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">4</div>
+          <div class="step-body">
+            <h4>Server Setup — Node.js Install</h4>
+            <pre><span class="cmt"># Ubuntu update</span>
+<span class="cmd">sudo apt update && sudo apt upgrade -y</span>
+
+<span class="cmt"># Node.js 20 LTS install</span>
+<span class="cmd">curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -</span>
+<span class="cmd">sudo apt install -y nodejs</span>
+<span class="cmd">node --version</span>   <span class="cmt"># v20.x.x</span>
+
+<span class="cmt"># PM2 install (background process manager)</span>
+<span class="cmd">sudo npm install -g pm2</span>
+
+<span class="cmt"># Nginx install (reverse proxy)</span>
+<span class="cmd">sudo apt install -y nginx certbot python3-certbot-nginx</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">5</div>
+          <div class="step-body">
+            <h4>Files Upload karein</h4>
+            <pre><span class="cmt"># Apne computer se EC2 per files bhejein:</span>
+<span class="cmd">scp -i alqalam-key.pem alqalam_node_server.js ubuntu@54.123.45.67:~/</span>
+<span class="cmd">scp -i alqalam-key.pem package.json ubuntu@54.123.45.67:~/</span>
+<span class="cmd">scp -i alqalam-key.pem .env ubuntu@54.123.45.67:~/</span>
+
+<span class="cmt"># EC2 per:</span>
+<span class="cmd">mkdir /var/www/alqalam-api</span>
+<span class="cmd">mv ~/alqalam_node_server.js ~/package.json ~/.env /var/www/alqalam-api/</span>
+<span class="cmd">cd /var/www/alqalam-api</span>
+<span class="cmd">npm install</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">6</div>
+          <div class="step-body">
+            <h4>.env AWS ke liye Update karein (EC2 per)</h4>
+            <pre><span class="cmd">nano /var/www/alqalam-api/.env</span>
+
+<span class="cmt"># Ye values set karein:</span>
+<span class="key">APP_ENV</span>=<span class="val">production</span>
+<span class="key">APP_URL</span>=<span class="val">https://api.alqalam.edu.pk</span>
+<span class="key">PORT</span>=<span class="val">3000</span>
+
+<span class="cmt"># RDS Database (cPanel wala nahi, AWS RDS)</span>
+<span class="key">DB_HOST</span>=<span class="val">alqalam-db.abc123.ap-south-1.rds.amazonaws.com</span>
+<span class="key">DB_DATABASE</span>=<span class="val">alqalam_db</span>
+<span class="key">DB_USERNAME</span>=<span class="val">alqalamadmin</span>
+<span class="key">DB_PASSWORD</span>=<span class="val">AlQalam@AWS2024!</span>
+
+<span class="key">JWT_SECRET</span>=<span class="val">AlQalamAWS_ProductionSecret_64chars_Random!</span>
+<span class="cmt"># Ctrl+X → Y → Enter (save)</span></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num aws">7</div>
+          <div class="step-body">
+            <h4>PM2 se Start karein</h4>
+            <pre><span class="cmd">cd /var/www/alqalam-api</span>
+<span class="cmd">pm2 start alqalam_node_server.js --name alqalam-api</span>
+<span class="cmd">pm2 status</span>    <span class="cmt"># online dikhna chahiye ✅</span>
+<span class="cmd">pm2 logs alqalam-api</span>  <span class="cmt"># errors check karein</span>
+
+<span class="cmt"># Server restart pe auto-start:</span>
+<span class="cmd">pm2 startup</span>   <span class="cmt"># jo command aaye wo run karein</span>
+<span class="cmd">pm2 save</span>
+
+<span class="cmt"># Test (EC2 pe hi):</span>
+<span class="cmd">curl http://localhost:3000/health</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="nginx">🔧 Nginx + SSL Setup</h3>
+    <div class="card cyan">
+      <pre><span class="cmt"># Nginx config file banayein</span>
+<span class="cmd">sudo nano /etc/nginx/sites-available/alqalam-api</span>
+
+<span class="cmt"># Ye content paste karein:</span>
+server {
+    listen 80;
+    server_name <span class="val">api.alqalam.edu.pk</span>;
+
+    <span class="cmt"># Node.js ko forward karein</span>
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection <span class="str">'upgrade'</span>;  <span class="cmt">← Socket.io ke liye zaruri</span>
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+    }
+}
+
+<span class="cmt"># Enable karein</span>
+<span class="cmd">sudo ln -s /etc/nginx/sites-available/alqalam-api /etc/nginx/sites-enabled/</span>
+<span class="cmd">sudo nginx -t</span>  <span class="cmt"># OK aana chahiye</span>
+<span class="cmd">sudo systemctl reload nginx</span>
+
+<span class="cmt"># SSL Certificate (FREE — Let's Encrypt)</span>
+<span class="cmd">sudo certbot --nginx -d api.alqalam.edu.pk</span>
+<span class="cmt"># Email daalein → Agree → Y → HTTPS select karein</span>
+
+<span class="cmt"># Test:</span>
+<span class="cmd">curl https://api.alqalam.edu.pk/health</span>  <span class="cmt"># ✅</span></pre>
+    </div>
+
+    <h3 id="dns">🌐 DNS — alqalam.edu.pk Domain Setup</h3>
+    <div class="card">
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:12px">
+        Domain registrar (PKNIC ya cPanel DNS Manager) mein ye A records add karein:
+      </p>
+      <table>
+        <thead><tr><th>Type</th><th>Name (Host)</th><th>Value (Points To)</th><th>TTL</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td class="hl">@</td><td class="hl">cPanel IP</td><td>3600</td><td>Main website</td></tr>
+          <tr><td>A</td><td class="hl">www</td><td class="hl">cPanel IP</td><td>3600</td><td>www.alqalam.edu.pk</td></tr>
+          <tr><td>A</td><td class="hl">ems</td><td class="hl">cPanel IP</td><td>3600</td><td>EMS frontend</td></tr>
+          <tr><td>A</td><td class="hl"><strong>api</strong></td><td class="hl"><strong>AWS EC2 Elastic IP</strong></td><td>3600</td><td>🔑 Node.js API</td></tr>
+        </tbody>
+      </table>
+      <div class="alert alert-info" style="margin-top:12px">
+        ℹ️ <strong>DNS propagation</strong> mein 10 min se 24 ghante lag saktay hain. Check karein: <code>nslookup api.alqalam.edu.pk</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTH RUNNING -->
+  <section class="section" id="both">
+    <h2>🔗 Dono Saath Run Karna — Architecture</h2>
+
+    <div class="card gold">
+      <div class="card-title">📌 Dono Backends ko Same RDS Database Connect karein</div>
+      <div class="grid-2" style="margin-top:10px">
+        <div>
+          <h3 style="margin-top:0">PHP Backend (.env — cPanel)</h3>
+          <pre style="font-size:.78rem"><span class="cmt"># cPanel .env mein RDS connect karein</span>
+<span class="key">DB_HOST</span>=<span class="val">alqalam-db.abc123.ap-south-1.rds.amazonaws.com</span>
+<span class="key">DB_DATABASE</span>=<span class="val">alqalam_db</span>
+<span class="key">DB_USERNAME</span>=<span class="val">alqalamadmin</span>
+<span class="key">DB_PASSWORD</span>=<span class="val">AlQalam@AWS2024!</span>
+
+<span class="cmt"># RDS Security Group mein cPanel IP allow karein</span></pre>
+        </div>
+        <div>
+          <h3 style="margin-top:0">Node.js (.env — EC2)</h3>
+          <pre style="font-size:.78rem"><span class="cmt"># EC2 .env mein same RDS</span>
+<span class="key">DB_HOST</span>=<span class="val">alqalam-db.abc123.ap-south-1.rds.amazonaws.com</span>
+<span class="key">DB_DATABASE</span>=<span class="val">alqalam_db</span>
+<span class="key">DB_USERNAME</span>=<span class="val">alqalamadmin</span>
+<span class="key">DB_PASSWORD</span>=<span class="val">AlQalam@AWS2024!</span>
+
+<span class="cmt"># EC2 Security Group already allowed hai</span></pre>
+        </div>
+      </div>
+      <div class="alert alert-success" style="margin-top:10px">
+        ✅ Ab PHP se fee collect ho → Node.js real-time dashboard per instantly show ho. Same data, same tables. No sync needed!
+      </div>
+    </div>
+
+    <h3>EMS Frontend — Dual Backend Support</h3>
+    <div class="card">
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:10px">
+        EMS mein API Settings kholein (status button → Settings) — ya dono URLs configure karein:
+      </p>
+      <pre><span class="cmt"># Main API (PHP — fee, students, attendance, reports)</span>
+API URL: <span class="val">https://alqalam.edu.pk/ems/alqalam_backend.php</span>
+
+<span class="cmt"># Real-time (Node.js — Socket.io live dashboard)</span>
+RT URL: <span class="val">https://api.alqalam.edu.pk</span>
+
+<span class="cmt"># Mobile App mein — Node.js use karein (faster + real-time)</span>
+Mobile API: <span class="val">https://api.alqalam.edu.pk</span></pre>
+    </div>
+
+    <h3>RDS Security Group — cPanel Access Allow</h3>
+    <div class="card cyan">
+      <pre><span class="cmt"># cPanel IP find karein:</span>
+<span class="cmt"># cPanel → Server Information → Shared IP Address</span>
+
+<span class="cmt"># AWS Console → RDS → DB → Security Group → Inbound → Add:</span>
+Type: MySQL/Aurora (3306)
+Source: <span class="val">cPanel_IP_Address/32</span>   <span class="cmt">← specific IP only</span>
+Description: cPanel PHP Backend</pre>
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="section" id="checklist">
+    <h2>✅ Final Deployment Checklist</h2>
+
+    <div class="grid-2">
+      <div class="card gold">
+        <div class="card-title">📦 Phase 1 — cPanel (Aaj)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> Files upload (backend.php, config.php, .env, .htaccess)</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> MySQL DB create + SQL import</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> .env production values update</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> SSL certificate enable</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> /health endpoint test → ✅</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> EMS mein API URL connect → Test Login</label>
+        </div>
+        <div class="progress-bar" style="margin-top:12px"><div class="progress-fill" id="p1bar" style="width:0%;background:linear-gradient(90deg,var(--gold),var(--orange))"></div></div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:4px" id="p1txt">0/6 complete</div>
+      </div>
+      <div class="card aws">
+        <div class="card-title" style="color:var(--aws)">☁️ Phase 2 — AWS (Baad Mein)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:.85rem">
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> AWS account create (free tier)</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> RDS MySQL instance create</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> SQL alqalam_database.sql → RDS import</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> EC2 t2.micro launch + Node.js install</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> pm2 start + Nginx + SSL certbot</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> DNS: api.alqalam.edu.pk → EC2 IP</label>
+          <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" onchange="updateProgress()"> cPanel + Node.js dono RDS se connect</label>
+        </div>
+        <div class="progress-bar" style="margin-top:12px"><div class="progress-fill" id="p2bar" style="width:0%;background:linear-gradient(90deg,var(--aws),#e07000)"></div></div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:4px" id="p2txt">0/7 complete</div>
+      </div>
+    </div>
+
+    <div class="card red" style="margin-top:16px">
+      <div class="card-title">🔒 Security — Kabhi Mat Bhulen</div>
+      <table>
+        <tr><td>✅</td><td class="hl">.env</td><td>Kabhi Git commit mat karo, .htaccess se block karo</td></tr>
+        <tr><td>✅</td><td class="hl">JWT_SECRET</td><td>64+ characters, random, production mein different</td></tr>
+        <tr><td>✅</td><td class="hl">DB Password</td><td>Strong password, root user mat use karo</td></tr>
+        <tr><td>✅</td><td class="hl">SSH Key</td><td>alqalam-key.pem private rakhein, password nahi</td></tr>
+        <tr><td>✅</td><td class="hl">EC2 Port 22</td><td>Sirf apna IP allow karein, 0.0.0.0 nahi</td></tr>
+        <tr><td>✅</td><td class="hl">RDS Public</td><td>Setup ke baad public access band kar dein</td></tr>
+        <tr><td>✅</td><td class="hl">Backup</td><td>RDS automated backup enable (7 days)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- SUPPORT -->
+  <div class="card" style="text-align:center;padding:28px">
+    <div style="font-size:1.8rem;margin-bottom:8px">🏫</div>
+    <div style="font-weight:700;margin-bottom:4px">AL Qalam International EMS</div>
+    <div style="color:var(--text-muted);font-size:.85rem">claude@alqalam.edu.pk · Deployment Guide v2.0</div>
+    <div style="margin-top:12px;font-size:.82rem;color:var(--text-muted)">
+      Koi problem ho to → EMS mein API Settings → Test Connection → Error message dekh kar guide mein solution dhundein
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.phase-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.phase-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.target)?.classList.add('active');
+  });
+});
+
+// Copy code button
+function copyCode(btn){
+  const pre = btn.parentElement.querySelector('pre');
+  const text = pre.innerText || pre.textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent = 'Copied!';
+    btn.style.background = 'var(--green)';
+    btn.style.color = '#000';
+    setTimeout(()=>{ btn.textContent='Copy'; btn.style.background=''; btn.style.color=''; }, 2000);
+  });
+}
+
+// Progress tracking
+function updateProgress(){
+  const p1checks = document.querySelectorAll('.card.gold input[type=checkbox]');
+  const p2checks = document.querySelectorAll('.card.aws input[type=checkbox]');
+  const p1done = [...p1checks].filter(c=>c.checked).length;
+  const p2done = [...p2checks].filter(c=>c.checked).length;
+  document.getElementById('p1bar').style.width = (p1done/6*100)+'%';
+  document.getElementById('p1txt').textContent = p1done+'/6 complete';
+  document.getElementById('p2bar').style.width = (p2done/7*100)+'%';
+  document.getElementById('p2txt').textContent = p2done+'/7 complete';
+}
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior:'smooth' });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AL Qalam International – STREAM Robotics & Education</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome — primary + fallback CDNs -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css" media="print" onload="this.media='all'" id="fa-fallback">
+<noscript><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css"></noscript>
+<style>
+:root{
+  --bg:#050b1a;--card:#0d1b35;--card2:#0a1628;
+  --cyan:#00d4ff;--gold:#ffd700;--green:#00ff88;
+  --orange:#ff6b35;--purple:#7c3aed;--pink:#f72585;
+  --muted:#8892b0;--border:rgba(0,212,255,.18);
+  --light:#f0f4ff;--textdark:#0a0e27;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:#fff;overflow-x:hidden}
+
+/* ─── NAVBAR ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;background:rgba(5,11,26,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);transition:.3s}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-circle{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;color:#fff;animation:logoPulse 3s infinite}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.5)}50%{box-shadow:0 0 0 10px rgba(0,212,255,0)}}
+.logo-text .t1{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--cyan);line-height:1.2}
+.logo-text .t2{font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.nav-links{display:flex;align-items:center;gap:3px;list-style:none}
+.nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:12.5px;font-weight:500;padding:7px 11px;border-radius:7px;transition:.25s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:var(--cyan);background:rgba(0,212,255,.1)}
+.nav-portal{background:linear-gradient(135deg,var(--cyan),var(--purple))!important;color:#fff!important;border-radius:22px!important;padding:7px 18px!important;font-weight:700!important}
+.nav-portal:hover{box-shadow:0 5px 18px rgba(0,212,255,.4)!important;transform:translateY(-2px)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:5px}
+.hamburger span{width:24px;height:2px;background:var(--cyan);border-radius:2px;transition:.3s}
+.mob-menu{display:none;position:fixed;top:68px;left:0;right:0;background:rgba(5,11,26,.98);border-bottom:1px solid var(--border);padding:1rem 2rem;flex-direction:column;gap:5px;z-index:998}
+.mob-menu.open{display:flex}
+.mob-menu a{color:rgba(255,255,255,.8);text-decoration:none;padding:10px;border-radius:8px;font-size:14px;cursor:pointer;transition:.2s}
+.mob-menu a:hover{color:var(--cyan);background:rgba(0,212,255,.1)}
+
+/* ─── PAGE SYSTEM ─── */
+.page{display:none;min-height:100vh;padding-top:68px}
+.page.active{display:block}
+
+/* ─── TICKER ─── */
+.ticker{background:var(--card);border-bottom:1px solid var(--border);padding:7px 0;overflow:hidden}
+.ticker-inner{display:flex;align-items:center;white-space:nowrap;animation:tick 35s linear infinite}
+@keyframes tick{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+.tick-label{background:var(--cyan);color:var(--bg);padding:2px 10px;border-radius:4px;font-size:.75rem;font-weight:700;letter-spacing:1px;margin-right:1rem;flex-shrink:0}
+.tick-item{color:var(--muted);font-size:.83rem;margin-right:2rem}
+.tick-item b{color:var(--gold)}
+
+/* ─── HERO ─── */
+.hero{min-height:calc(100vh - 68px);background:var(--bg);position:relative;display:flex;align-items:center;overflow:hidden}
+#canvas{position:absolute;inset:0;z-index:0}
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.04) 1px,transparent 1px);background-size:50px 50px;animation:gridMove 20s linear infinite}
+@keyframes gridMove{to{transform:translateY(50px)}}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:4rem 2rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--cyan);padding:5px 16px;border-radius:22px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:1.5rem}
+.hero-badge .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-family:'Orbitron',sans-serif;font-size:clamp(2rem,3.8vw,3.4rem);font-weight:900;line-height:1.1;margin-bottom:1rem}
+.ht1{color:#fff}
+.ht2{background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ht3{background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{color:var(--muted);font-size:1.05rem;line-height:1.75;margin-bottom:2rem}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-p{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;padding:13px 30px;border:none;border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:.3s;font-family:'Exo 2',sans-serif}
+.btn-p:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,212,255,.35)}
+.btn-o{background:transparent;color:var(--cyan);padding:12px 28px;border:2px solid var(--cyan);border-radius:50px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:.3s;font-family:'Exo 2',sans-serif}
+.btn-o:hover{background:rgba(0,212,255,.1);transform:translateY(-3px)}
+
+/* Robot visual */
+.hero-visual{display:flex;justify-content:center;align-items:center}
+.robot-wrap{width:320px;height:320px;position:relative}
+.ring{position:absolute;border:2px solid;border-radius:50%;inset:0;animation:spin 8s linear infinite}
+.ring:nth-child(1){border-color:rgba(0,212,255,.3);animation-duration:8s}
+.ring:nth-child(2){inset:12.5%;border-color:rgba(255,215,0,.3);animation-duration:6s;animation-direction:reverse}
+.ring:nth-child(3){inset:25%;border-color:rgba(0,255,136,.3);animation-duration:4s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ring-dot{position:absolute;width:11px;height:11px;border-radius:50%;top:-5px;left:50%;transform:translateX(-50%)}
+.ring:nth-child(1) .ring-dot{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.ring:nth-child(2) .ring-dot{background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.ring:nth-child(3) .ring-dot{background:var(--green);box-shadow:0 0 10px var(--green)}
+.robot-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:110px;height:110px;background:linear-gradient(135deg,var(--card),var(--card2));border:2px solid var(--cyan);border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 35px rgba(0,212,255,.25);animation:float 4s ease-in-out infinite}
+.robot-core i{font-size:48px;background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+@keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-14px)}}
+
+/* ─── STATS BAR ─── */
+.stats-bar{background:linear-gradient(135deg,var(--card),var(--card2));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2rem}
+.stats-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center}
+.sn{font-family:'Orbitron',sans-serif;font-size:2.4rem;font-weight:900;background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sl{color:var(--muted);font-size:.88rem;letter-spacing:1px;margin-top:4px}
+
+/* ─── SECTION BASE ─── */
+.sec{padding:5rem 2rem}
+.sec-light{background:var(--light);color:var(--textdark)}
+.sec-dark{background:var(--bg)}
+.sec-card{background:linear-gradient(135deg,var(--card),var(--card2))}
+.con{max-width:1200px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:3.5rem}
+.sec-tag{display:inline-block;color:var(--cyan);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:.8rem}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.7rem,3vw,2.6rem);font-weight:700;line-height:1.2;margin-bottom:.9rem}
+.sec-title .ac{color:var(--cyan)}.sec-title .go{color:var(--gold)}
+.sec-title.dk{color:var(--textdark)}
+.sec-desc{color:var(--muted);font-size:1rem;max-width:600px;margin:0 auto;line-height:1.7}
+.sec-desc.dk{color:#555}
+
+/* ─── FEATURE CARDS ─── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.feat-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(0,212,255,.12);border-radius:16px;padding:2rem;transition:.3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0;transition:.3s}
+.feat-card:hover{border-color:rgba(0,212,255,.4);transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,212,255,.12)}
+.feat-card:hover::before{opacity:1}
+.ficon{width:56px;height:56px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:1.2rem}
+.ic{background:rgba(0,212,255,.12);color:var(--cyan)}
+.ig{background:rgba(0,255,136,.12);color:var(--green)}
+.io{background:rgba(255,107,53,.12);color:var(--orange)}
+.ip{background:rgba(124,58,237,.12);color:var(--purple)}
+.iy{background:rgba(255,215,0,.12);color:var(--gold)}
+.ik{background:rgba(247,37,133,.12);color:var(--pink)}
+.feat-title{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.6rem}
+.feat-desc{color:var(--muted);font-size:.88rem;line-height:1.6}
+
+/* ─── STREAM LETTERS ─── */
+.stream-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1rem}
+.stream-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.5rem 1rem;text-align:center;transition:.3s;cursor:pointer}
+.stream-card:hover{transform:translateY(-8px)}
+.stream-card:nth-child(1):hover{border-color:var(--cyan)}
+.stream-card:nth-child(2):hover{border-color:var(--green)}
+.stream-card:nth-child(3):hover{border-color:var(--gold)}
+.stream-card:nth-child(4):hover{border-color:var(--orange)}
+.stream-card:nth-child(5):hover{border-color:var(--purple)}
+.stream-card:nth-child(6):hover{border-color:var(--pink)}
+.sl-letter{font-family:'Orbitron',sans-serif;font-size:2.8rem;font-weight:900;line-height:1;margin-bottom:.4rem}
+.stream-card:nth-child(1) .sl-letter{color:var(--cyan)}
+.stream-card:nth-child(2) .sl-letter{color:var(--green)}
+.stream-card:nth-child(3) .sl-letter{color:var(--gold)}
+.stream-card:nth-child(4) .sl-letter{color:var(--orange)}
+.stream-card:nth-child(5) .sl-letter{color:var(--purple)}
+.stream-card:nth-child(6) .sl-letter{color:var(--pink)}
+.sl-word{font-weight:700;font-size:.95rem;margin-bottom:.3rem}
+.sl-mini{color:var(--muted);font-size:.75rem}
+
+/* ─── PAGE HERO ─── */
+.page-hero{background:linear-gradient(135deg,#050b1a,#0d1635);padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(0,212,255,.06),transparent 60%)}
+.ph-bread{color:var(--cyan);font-size:.85rem;margin-bottom:.8rem;display:flex;align-items:center;justify-content:center;gap:6px}
+.ph-bread span{color:var(--muted)}
+.ph-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;margin-bottom:.8rem}
+.ph-sub{color:var(--muted);font-size:1rem;max-width:550px;margin:0 auto}
+
+/* ─── ABOUT ─── */
+.about-2col{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.about-img{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,var(--card),#1a2d5a);border-radius:20px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:5rem;color:rgba(0,212,255,.3);position:relative;overflow:hidden}
+.about-img::after{content:'AL QALAM INTERNATIONAL';position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(255,255,255,.3);letter-spacing:3px;white-space:nowrap}
+.fbadge{position:absolute;padding:10px 16px;border-radius:10px;font-size:.8rem;font-weight:700;animation:float 4s ease-in-out infinite}
+.fbadge.top{top:-12px;right:-12px;background:linear-gradient(135deg,var(--gold),var(--orange));color:var(--bg)}
+.fbadge.bot{bottom:-12px;left:-12px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;animation-delay:2s}
+.mv-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.8rem}
+.mv-box{padding:1.3rem;border-radius:12px;border:1px solid}
+.mv-box.m{border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.05)}
+.mv-box.v{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.05)}
+.mv-box h4{font-family:'Orbitron',sans-serif;font-size:.9rem;margin-bottom:.6rem}
+.mv-box.m h4{color:var(--cyan)}.mv-box.v h4{color:var(--gold)}
+.mv-box p{color:var(--muted);font-size:.85rem;line-height:1.6}
+.values-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.3rem}
+.val-card{text-align:center;padding:1.5rem 1rem;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid rgba(255,255,255,.07);transition:.3s}
+.val-card:hover{border-color:var(--cyan);transform:translateY(-5px)}
+.val-icon{font-size:2.2rem;margin-bottom:.8rem}
+.val-name{font-weight:700;font-size:.95rem;margin-bottom:.4rem}
+.val-text{color:var(--muted);font-size:.8rem;line-height:1.5}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.team-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.07);transition:.3s;text-align:center}
+.team-card:hover{border-color:var(--cyan);transform:translateY(-5px)}
+.team-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;margin:1.5rem auto 1rem}
+.team-name{font-weight:700;font-size:1rem;margin-bottom:.3rem}
+.team-role{color:var(--cyan);font-size:.82rem;margin-bottom:1rem}
+
+/* ─── ACADEMICS ─── */
+.programs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.prog-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:16px;padding:2rem;border:1px solid rgba(255,255,255,.07);transition:.3s;position:relative;overflow:hidden}
+.prog-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(to bottom,var(--cyan),var(--purple))}
+.prog-card:hover{transform:translateX(5px);border-color:var(--cyan);box-shadow:0 10px 30px rgba(0,212,255,.12)}
+.prog-level{display:inline-block;background:rgba(0,212,255,.12);color:var(--cyan);padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700;margin-bottom:1rem;letter-spacing:1px}
+.prog-name{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:.6rem}
+.prog-desc{color:var(--muted);font-size:.85rem;line-height:1.6}
+.prog-subs{display:flex;flex-wrap:wrap;gap:6px;margin-top:1rem}
+.sub-tag{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7);padding:3px 10px;border-radius:10px;font-size:.75rem}
+
+/* ─── ROBOTICS ─── */
+.robot-projects{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.rp-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(0,255,136,.18);border-radius:16px;padding:2rem;transition:.3s;position:relative;overflow:hidden}
+.rp-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(to bottom,var(--green),var(--cyan))}
+.rp-card:hover{border-color:rgba(0,255,136,.5);transform:translateX(5px);box-shadow:0 10px 30px rgba(0,255,136,.1)}
+.rp-icon{font-size:2.2rem;margin-bottom:.8rem}
+.rp-title{font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:.5rem}
+.rp-desc{color:var(--muted);font-size:.85rem;line-height:1.6}
+.tech-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:1rem}
+.tech-tag{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.3);padding:3px 10px;border-radius:12px;font-size:.73rem;font-weight:600}
+.achievements-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.ach-card{background:linear-gradient(135deg,var(--cyan),var(--purple));border-radius:16px;padding:2rem;text-align:center;color:#fff}
+.ach-num{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;margin-bottom:.4rem}
+.ach-lbl{font-size:.9rem;opacity:.9}
+
+/* ─── CHARACTER BUILDING ─── */
+.char-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.char-card{background:#fff;border-radius:16px;padding:2rem;text-align:center;box-shadow:0 5px 20px rgba(0,0,0,.07);transition:.3s;border-bottom:4px solid}
+.char-card:hover{transform:translateY(-8px);box-shadow:0 15px 40px rgba(0,0,0,.14)}
+.char-card:nth-child(1){border-color:var(--cyan)}
+.char-card:nth-child(2){border-color:var(--gold)}
+.char-card:nth-child(3){border-color:var(--green)}
+.char-card:nth-child(4){border-color:var(--orange)}
+.char-card:nth-child(5){border-color:var(--purple)}
+.char-card:nth-child(6){border-color:var(--pink)}
+.char-icon{font-size:2.8rem;margin-bottom:.9rem}
+.char-title{font-family:'Rajdhani',sans-serif;font-size:1.15rem;font-weight:700;color:var(--textdark);margin-bottom:.6rem}
+.char-desc{color:#666;font-size:.84rem;line-height:1.6}
+
+/* ─── BUSINESS FAIR ─── */
+.fair-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:3rem}
+.fs-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:16px;padding:1.8rem;text-align:center;border:1px solid var(--border)}
+.fs-num{font-family:'Orbitron',sans-serif;font-size:2.2rem;font-weight:900;margin-bottom:.4rem}
+.fs-lbl{color:var(--muted);font-size:.85rem}
+.fair-timeline{position:relative;padding-left:2.5rem}
+.fair-timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--cyan),var(--purple),var(--green))}
+.ft-item{position:relative;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid rgba(255,255,255,.07);padding:1.5rem;margin-bottom:1.3rem}
+.ft-item::before{content:'';position:absolute;left:-2.8rem;top:50%;transform:translateY(-50%);width:13px;height:13px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.ft-year{color:var(--gold);font-size:.82rem;font-weight:700;letter-spacing:1px;margin-bottom:.4rem}
+.ft-name{font-size:1rem;font-weight:700;margin-bottom:.3rem}
+.ft-info{color:var(--muted);font-size:.84rem}
+
+/* ─── ADMISSIONS ─── */
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;position:relative;margin-bottom:3rem}
+.steps-row::before{content:'';position:absolute;top:37px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--green))}
+.step-box{text-align:center;padding:2rem 1rem;background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid rgba(255,255,255,.07)}
+.step-num{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:700;margin:0 auto 1.1rem;position:relative;z-index:1}
+.step-title{font-weight:700;font-size:.95rem;margin-bottom:.4rem}
+.step-desc{color:var(--muted);font-size:.82rem;line-height:1.5}
+.req-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+.req-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;padding:1.5rem;border:1px solid rgba(255,255,255,.07)}
+.req-card h4{color:var(--cyan);font-size:1rem;font-weight:700;margin-bottom:1rem;font-family:'Rajdhani',sans-serif}
+.req-list{list-style:none}
+.req-list li{color:var(--muted);font-size:.85rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:8px}
+.req-list li::before{content:'\f058';font-family:'Font Awesome 6 Free';font-weight:900;color:var(--green);font-size:.75rem}
+
+/* ─── RESULTS ─── */
+.results-wrap{max-width:520px;margin:0 auto}
+.result-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:20px;padding:2.5rem}
+.form-grp{margin-bottom:1.2rem}
+.form-grp label{display:block;color:var(--muted);font-size:.82rem;font-weight:600;margin-bottom:.45rem;letter-spacing:.5px}
+.finput{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 15px;color:#fff;font-size:.9rem;font-family:'Exo 2',sans-serif;transition:.3s;outline:none}
+.finput:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.14)}
+.fselect{width:100%;background:#0d1b35;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 15px;color:#fff;font-size:.9rem;outline:none;cursor:pointer;transition:.3s}
+.fselect:focus{border-color:var(--cyan)}
+.fselect option{background:#0d1b35}
+.result-out{display:none;margin-top:1.5rem;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.25);border-radius:14px;padding:1.5rem}
+.result-out.show{display:block}
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{background:rgba(0,212,255,.1);color:var(--cyan);padding:9px;text-align:left;font-size:.78rem;letter-spacing:1px;text-transform:uppercase}
+.rtable td{padding:9px;color:#fff;font-size:.85rem;border-bottom:1px solid rgba(255,255,255,.05)}
+.grade-A{color:var(--green);font-weight:700}
+.grade-B{color:var(--cyan);font-weight:700}
+.grade-C{color:var(--gold);font-weight:700}
+
+/* ─── PORTALS ─── */
+.portals-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem}
+.port-card{border-radius:20px;padding:2.5rem;text-align:center;cursor:pointer;transition:.35s;position:relative;overflow:hidden}
+.port-card:hover{transform:translateY(-10px)}
+.pt{background:linear-gradient(135deg,#0d1b35,#1a2d5a);border:2px solid var(--cyan)}
+.ps{background:linear-gradient(135deg,#1a0d35,#2d1a5a);border:2px solid var(--purple)}
+.pp{background:linear-gradient(135deg,#0d2a1a,#1a5a35);border:2px solid var(--green)}
+.pa{background:linear-gradient(135deg,#35200d,#5a3a1a);border:2px solid var(--gold)}
+.port-icon{font-size:3.5rem;margin-bottom:1rem}
+.pt .port-icon{color:var(--cyan)}.ps .port-icon{color:var(--purple)}.pp .port-icon{color:var(--green)}.pa .port-icon{color:var(--gold)}
+.port-name{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.7rem}
+.port-desc{color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;line-height:1.5}
+.port-features{list-style:none;text-align:left;margin-bottom:1.5rem}
+.port-features li{color:var(--muted);font-size:.82rem;padding:.3rem 0;display:flex;align-items:center;gap:7px}
+.port-features li::before{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:.7rem}
+.pt .port-features li::before{color:var(--cyan)}.ps .port-features li::before{color:var(--purple)}.pp .port-features li::before{color:var(--green)}.pa .port-features li::before{color:var(--gold)}
+.port-btn{display:inline-block;padding:10px 26px;border-radius:25px;font-size:.9rem;font-weight:700;cursor:pointer;border:none;font-family:'Exo 2',sans-serif;transition:.3s}
+.pt .port-btn{background:var(--cyan);color:var(--bg)}.ps .port-btn{background:var(--purple);color:#fff}.pp .port-btn{background:var(--green);color:var(--bg)}.pa .port-btn{background:var(--gold);color:var(--bg)}
+.port-btn:hover{transform:scale(1.05)}
+
+/* ─── NEWS ─── */
+.news-2col{display:grid;grid-template-columns:2fr 1fr;gap:2rem}
+.news-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:1.5rem;margin-bottom:1.3rem;transition:.3s;cursor:pointer}
+.news-card:hover{border-color:var(--cyan);transform:translateX(4px)}
+.news-date{color:var(--cyan);font-size:.78rem;font-weight:700;letter-spacing:1px;margin-bottom:.4rem}
+.news-title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.news-exc{color:var(--muted);font-size:.84rem;line-height:1.6}
+.notice-box{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);border-radius:12px;padding:1rem;margin-bottom:1rem}
+.notice-box h5{color:var(--gold);font-size:.85rem;margin-bottom:.3rem}
+.notice-box p{color:var(--muted);font-size:.8rem}
+
+/* ─── GALLERY ─── */
+.gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.gal-item{aspect-ratio:4/3;background:linear-gradient(135deg,var(--card),#1a2d5a);border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:.3s;cursor:pointer;overflow:hidden;position:relative}
+.gal-item:hover{border-color:var(--cyan);transform:scale(1.02)}
+.gal-item i{font-size:2.8rem;color:rgba(0,212,255,.35)}
+.gal-item span{color:var(--muted);font-size:.8rem}
+.gal-item.wide{grid-column:span 2}
+
+/* ─── CONTACT ─── */
+.contact-2col{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.cinfo-item{display:flex;gap:1rem;margin-bottom:1.5rem;align-items:flex-start}
+.cicon{width:48px;height:48px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:1.1rem;flex-shrink:0}
+.cinfo-item h4{font-size:.9rem;font-weight:700;margin-bottom:.3rem}
+.cinfo-item p{color:var(--muted);font-size:.85rem}
+.cform-card{background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--border);border-radius:20px;padding:2.5rem}
+.cform-title{font-family:'Orbitron',sans-serif;font-size:1.2rem;color:var(--cyan);margin-bottom:1.5rem}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.ftextarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:11px 15px;color:#fff;font-size:.9rem;font-family:'Exo 2',sans-serif;resize:vertical;min-height:110px;outline:none;transition:.3s}
+.ftextarea:focus{border-color:var(--cyan)}
+
+/* ─── ROBOT ICON FALLBACK ─── */
+.rc-icon{display:flex;align-items:center;justify-content:center}
+.rc-icon .fas{font-size:48px;background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.rc-fallback{display:none;font-size:48px;line-height:1}
+/* Show emoji fallback if FA not loaded */
+@supports not (font-family: 'Font Awesome 6 Free'){.rc-fallback{display:block}.rc-icon .fas{display:none}}
+
+/* ─── MODAL ─── */
+.modal-bg{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(5,11,26,.93);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+}
+.modal-bg.on{display:flex !important}
+.modal{
+  background:linear-gradient(145deg,#0f2040,#0a1628);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:2.5rem;
+  width:100%;
+  max-width:420px;
+  position:relative;
+  animation:mIn .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 40px rgba(0,212,255,.1);
+}
+@keyframes mIn{from{opacity:0;transform:scale(.85) translateY(-24px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-x{
+  position:absolute;top:1rem;right:1rem;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  color:#fff;width:36px;height:36px;border-radius:50%;
+  cursor:pointer;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:.3s;line-height:1;
+}
+.modal-x:hover{background:rgba(255,70,70,.35);border-color:rgba(255,70,70,.5)}
+.modal-logo{text-align:center;margin-bottom:1.5rem}
+.modal-logo .ml-circle{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;margin:0 auto .8rem;font-size:1.6rem}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:1.15rem;margin-bottom:.3rem;color:#fff}
+.modal-sub{color:var(--muted);font-size:.82rem;margin-bottom:1.4rem}
+.demo-creds{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.25);border-radius:10px;padding:.9rem;margin-bottom:1.3rem}
+.demo-creds h5{color:var(--green);font-size:.74rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.45rem;display:flex;align-items:center;gap:5px}
+.demo-creds p{color:var(--muted);font-size:.79rem;line-height:1.7}
+.demo-creds p b{color:var(--cyan);font-family:monospace}
+
+/* ─── FOOTER ─── */
+footer{background:linear-gradient(135deg,#030812,#050b1a);border-top:1px solid var(--border);padding:4rem 2rem 2rem}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.footer-desc{color:var(--muted);font-size:.85rem;line-height:1.7;margin:1rem 0}
+.social-row{display:flex;gap:8px}
+.soc{width:36px;height:36px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--muted);text-decoration:none;font-size:.85rem;transition:.3s}
+.soc:hover{background:rgba(0,212,255,.15);border-color:var(--cyan);color:var(--cyan)}
+.fh{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--cyan);margin-bottom:1.1rem;letter-spacing:1px}
+.flinks{list-style:none}
+.flinks li{margin-bottom:.65rem}
+.flinks a{color:var(--muted);text-decoration:none;font-size:.84rem;transition:.3s;display:flex;align-items:center;gap:5px;cursor:pointer}
+.flinks a:hover{color:var(--cyan);padding-left:4px}
+.footer-bot{padding-top:2rem;border-top:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center}
+.footer-bot p{color:var(--muted);font-size:.8rem}
+.footer-bot span{color:var(--cyan)}
+
+/* ─── FA ICON DETECTION & FALLBACK ─── */
+.fa-icon-wrap{display:inline-flex;align-items:center;gap:6px}
+/* If Font Awesome fails, show data-emoji attribute as pseudo content */
+[data-emoji]::before{content:attr(data-emoji);font-style:normal;margin-right:4px}
+.nav-links a.nav-portal::before{content:'🔐 '}
+.btn-p .fa-rocket::before,.btn-p .fa-file-alt::before{font-family:inherit!important}
+
+/* ─── NOTIFY TOAST ─── */
+.toast{position:fixed;bottom:2rem;right:2rem;background:linear-gradient(135deg,var(--card),var(--card2));border:1px solid var(--green);border-radius:12px;padding:1rem 1.5rem;z-index:3000;display:none;align-items:center;gap:10px;max-width:320px}
+.toast.show{display:flex;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.toast i{color:var(--green);font-size:1.2rem}
+.toast p{font-size:.85rem;color:#fff}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:992px){
+  .hero-content{grid-template-columns:1fr;text-align:center}
+  .hero-visual{display:none}
+  .feat-grid{grid-template-columns:repeat(2,1fr)}
+  .stream-grid{grid-template-columns:repeat(3,1fr)}
+  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .about-2col{grid-template-columns:1fr}
+  .values-grid{grid-template-columns:repeat(2,1fr)}
+  .team-grid{grid-template-columns:repeat(2,1fr)}
+  .programs-grid{grid-template-columns:1fr 1fr}
+  .robot-projects{grid-template-columns:1fr}
+  .achievements-row{grid-template-columns:1fr}
+  .char-grid{grid-template-columns:repeat(2,1fr)}
+  .fair-stats{grid-template-columns:repeat(2,1fr)}
+  .steps-row{grid-template-columns:repeat(2,1fr)}
+  .steps-row::before{display:none}
+  .portals-grid{grid-template-columns:1fr 1fr}
+  .news-2col{grid-template-columns:1fr}
+  .contact-2col{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .feat-grid{grid-template-columns:1fr}
+  .stream-grid{grid-template-columns:repeat(2,1fr)}
+  .portals-grid{grid-template-columns:1fr}
+  .gal-grid{grid-template-columns:repeat(2,1fr)}
+  .gal-item.wide{grid-column:span 1}
+  .footer-grid{grid-template-columns:1fr}
+  .form-row-2{grid-template-columns:1fr}
+  .req-grid{grid-template-columns:1fr}
+  .char-grid{grid-template-columns:1fr}
+  .footer-bot{flex-direction:column;gap:.8rem;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nav-logo" href="#" onclick="showPage('home')">
+    <div class="logo-circle">AQ</div>
+    <div class="logo-text">
+      <div class="t1">AL QALAM INT'L</div>
+      <div class="t2">STREAM Robotics</div>
+    </div>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
+    <li><a onclick="showPage('about')" id="nav-about">About</a></li>
+    <li><a onclick="showPage('academics')" id="nav-academics">Academics</a></li>
+    <li><a onclick="showPage('robotics')" id="nav-robotics">STREAM</a></li>
+    <li><a onclick="showPage('character')" id="nav-character">Character</a></li>
+    <li><a onclick="showPage('fair')" id="nav-fair">Business Fair</a></li>
+    <li><a onclick="showPage('admissions')" id="nav-admissions">Admissions</a></li>
+    <li><a onclick="showPage('results')" id="nav-results">Results</a></li>
+    <li><a onclick="showPage('news')" id="nav-news">News</a></li>
+    <li><a onclick="showPage('gallery')" id="nav-gallery">Gallery</a></li>
+    <li><a onclick="showPage('contact')" id="nav-contact">Contact</a></li>
+    <li><a onclick="showPage('portals')" class="nav-portal"><i class="fas fa-sign-in-alt"></i> Portals</a></li>
+  </ul>
+  <div class="hamburger" onclick="toggleMob()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <a onclick="showPage('home');toggleMob()">🏠 Home</a>
+  <a onclick="showPage('about');toggleMob()">ℹ️ About</a>
+  <a onclick="showPage('academics');toggleMob()">📚 Academics</a>
+  <a onclick="showPage('robotics');toggleMob()">🤖 STREAM</a>
+  <a onclick="showPage('character');toggleMob()">⭐ Character</a>
+  <a onclick="showPage('fair');toggleMob()">🏪 Business Fair</a>
+  <a onclick="showPage('admissions');toggleMob()">📝 Admissions</a>
+  <a onclick="showPage('results');toggleMob()">📊 Results</a>
+  <a onclick="showPage('news');toggleMob()">📰 News</a>
+  <a onclick="showPage('gallery');toggleMob()">🖼️ Gallery</a>
+  <a onclick="showPage('contact');toggleMob()">📞 Contact</a>
+  <a onclick="showPage('portals');toggleMob()" style="color:var(--cyan)">🔐 Portals</a>
+</div>
+
+<!-- ════════════════════════ HOME PAGE ════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Ticker -->
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span class="tick-label">📢 NOTICE</span>
+      <span class="tick-item"><b>Admissions Open 2024-25</b> — Apply Now!</span>
+      <span class="tick-item">🏆 Business Fair Annual Event — <b>March 2025</b></span>
+      <span class="tick-item">🤖 Robotics Competition — <b>1st Place National Level</b></span>
+      <span class="tick-item">📅 Result Cards Available — <b>Login to Portal</b></span>
+      <span class="tick-item">🌟 Character Building Week — <b>Every Friday</b></span>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <canvas id="canvas"></canvas>
+    <div class="hero-grid-bg"></div>
+    <div class="hero-content">
+      <div>
+        <div class="hero-badge">
+          <span class="dot"></span>
+          Est. 2008 · Karachi, Pakistan
+        </div>
+        <h1 class="hero-title">
+          <span class="ht1">Shaping Future</span><br>
+          <span class="ht2">STREAM Leaders</span><br>
+          <span class="ht3">of Tomorrow</span>
+        </h1>
+        <p class="hero-sub">AL Qalam International — where Robotics meets Character Building. We prepare students for the 21st century through Science, Technology, Robotics, Engineering, Arts & Mathematics.</p>
+        <div class="hero-btns">
+          <a class="btn-p" onclick="showPage('admissions')"><i class="fas fa-rocket"></i> Apply Now</a>
+          <a class="btn-o" onclick="showPage('about')"><i class="fas fa-play-circle"></i> Explore More</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="robot-wrap">
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="ring"><div class="ring-dot"></div></div>
+          <div class="robot-core"><span class="rc-icon"><i class="fas fa-robot"></i><span class="rc-fallback">🤖</span></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div><div class="sn" data-count="1200">0</div><div class="sl">Students Enrolled</div></div>
+      <div><div class="sn" data-count="85">0</div><div class="sl">Expert Faculty</div></div>
+      <div><div class="sn" data-count="15">0</div><div class="sl">Years of Excellence</div></div>
+      <div><div class="sn" data-count="42">0</div><div class="sl">Awards Won</div></div>
+    </div>
+  </div>
+
+  <!-- Why AQ -->
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Why Choose Us</div>
+        <h2 class="sec-title">Excellence in Every <span class="ac">Dimension</span></h2>
+        <p class="sec-desc">We combine futuristic education with strong moral values to create well-rounded individuals ready for the world.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="ficon ic"><i class="fas fa-robot"></i></div>
+          <div class="feat-title">Robotics & STREAM</div>
+          <p class="feat-desc">State-of-the-art robotics lab with Arduino, Raspberry Pi, AI kits and hands-on project learning.</p>
+        </div>
+        <div class="feat-card">
+          <div class="ficon ig"><i class="fas fa-user-graduate"></i></div>
+          <div class="feat-title">Character Building</div>
+          <p class="feat-desc">Dedicated programs in leadership, ethics, discipline, communication and social responsibility.</p>
+        </div>
+        <div class="feat-card">
+          <div class="ficon io"><i class="fas fa-store"></i></div>
+          <div class="feat-title">Annual Business Fair</div>
+          <p class="feat-desc">Students run real businesses, learn entrepreneurship, accounting and market dynamics practically.</p>
+        </div>
+        <div class="feat-card">
+          <div class="ficon ip"><i class="fas fa-laptop-code"></i></div>
+          <div class="feat-title">Digital Learning</div>
+          <p class="feat-desc">Smart classrooms, online portals for teachers, students & parents with real-time updates.</p>
+        </div>
+        <div class="feat-card">
+          <div class="ficon iy"><i class="fas fa-award"></i></div>
+          <div class="feat-title">Award-Winning Faculty</div>
+          <p class="feat-desc">85+ qualified teachers with M.Phil and PhD degrees committed to student success.</p>
+        </div>
+        <div class="feat-card">
+          <div class="ficon ik"><i class="fas fa-shield-heart"></i></div>
+          <div class="feat-title">Safe Environment</div>
+          <p class="feat-desc">CCTV monitored, secure campus with dedicated counseling and student support services.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STREAM Section -->
+  <section class="sec sec-card">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Our Methodology</div>
+        <h2 class="sec-title">The <span class="go">STREAM</span> Approach</h2>
+        <p class="sec-desc">Every subject connects — we teach students to think across disciplines.</p>
+      </div>
+      <div class="stream-grid">
+        <div class="stream-card">
+          <div class="sl-letter">S</div>
+          <div class="sl-word">Science</div>
+          <div class="sl-mini">Inquiry-based learning</div>
+        </div>
+        <div class="stream-card">
+          <div class="sl-letter">T</div>
+          <div class="sl-word">Technology</div>
+          <div class="sl-mini">Digital & AI tools</div>
+        </div>
+        <div class="stream-card">
+          <div class="sl-letter">R</div>
+          <div class="sl-word">Robotics</div>
+          <div class="sl-mini">Build & program bots</div>
+        </div>
+        <div class="stream-card">
+          <div class="sl-letter">E</div>
+          <div class="sl-word">Engineering</div>
+          <div class="sl-mini">Design & create</div>
+        </div>
+        <div class="stream-card">
+          <div class="sl-letter">A</div>
+          <div class="sl-word">Arts</div>
+          <div class="sl-mini">Creative expression</div>
+        </div>
+        <div class="stream-card">
+          <div class="sl-letter">M</div>
+          <div class="sl-word">Mathematics</div>
+          <div class="sl-mini">Logical thinking</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="sec" style="background:linear-gradient(135deg,#0a1628,#1a0d35);text-align:center">
+    <div class="con">
+      <h2 class="sec-title" style="margin-bottom:1rem">Ready to Join <span class="ac">AL Qalam</span>?</h2>
+      <p class="sec-desc" style="margin-bottom:2rem">Admissions open for 2024-25. Limited seats available across all programs.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a class="btn-p" onclick="showPage('admissions')"><i class="fas fa-file-alt"></i> Apply for Admission</a>
+        <a class="btn-o" onclick="showPage('contact')"><i class="fas fa-phone"></i> Contact Us</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ ABOUT PAGE ════════════════════════ -->
+<div class="page" id="page-about">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>About Us</div>
+    <h1 class="ph-title">About <span style="color:var(--cyan)">AL Qalam</span></h1>
+    <p class="ph-sub">A legacy of excellence in education, character building and technological innovation since 2008.</p>
+  </div>
+
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="about-2col">
+        <div class="about-img" style="position:relative">
+          <i class="fas fa-school"></i>
+          <div class="fbadge top">Est. 2008</div>
+          <div class="fbadge bot">1200+ Students</div>
+        </div>
+        <div>
+          <div class="sec-tag">Our Story</div>
+          <h2 class="sec-title" style="text-align:left;margin-bottom:1rem">Building Pakistan's <span class="ac">Future Leaders</span></h2>
+          <p style="color:var(--muted);line-height:1.8;margin-bottom:1rem;font-size:.95rem">AL Qalam International was founded with a singular vision: to provide world-class education rooted in Islamic values and character building. Over 15 years, we have grown into a premier institution known for our STREAM robotics program and holistic development approach.</p>
+          <p style="color:var(--muted);line-height:1.8;font-size:.95rem">Our students consistently achieve top positions in national robotics competitions, Olympiads and board examinations. We believe education is not just about grades — it's about shaping confident, ethical and capable human beings.</p>
+          <div class="mv-row">
+            <div class="mv-box m">
+              <h4><i class="fas fa-bullseye"></i> Mission</h4>
+              <p>To nurture intellectually curious, morally sound and technologically capable students who contribute positively to society.</p>
+            </div>
+            <div class="mv-box v">
+              <h4><i class="fas fa-eye"></i> Vision</h4>
+              <p>To be Pakistan's leading institution for STREAM education and character development by 2030.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-card">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Core Values</div>
+        <h2 class="sec-title">What We <span class="go">Stand For</span></h2>
+      </div>
+      <div class="values-grid">
+        <div class="val-card"><div class="val-icon">🕌</div><div class="val-name">Islamic Values</div><p class="val-text">Rooted in the teachings of the Quran and Sunnah in all we do.</p></div>
+        <div class="val-card"><div class="val-icon">🎓</div><div class="val-name">Academic Excellence</div><p class="val-text">Pushing every student to reach their highest potential.</p></div>
+        <div class="val-card"><div class="val-icon">🤝</div><div class="val-name">Integrity</div><p class="val-text">Honest, transparent and accountable in all our dealings.</p></div>
+        <div class="val-card"><div class="val-icon">💡</div><div class="val-name">Innovation</div><p class="val-text">Embracing technology to prepare students for a changing world.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Leadership</div>
+        <h2 class="sec-title">Meet Our <span class="ac">Team</span></h2>
+      </div>
+      <div class="team-grid">
+        <div class="team-card"><div class="team-avatar"><i class="fas fa-user-tie"></i></div><div class="team-name">Dr. Ahmed Raza</div><div class="team-role">Principal</div></div>
+        <div class="team-card"><div class="team-avatar"><i class="fas fa-user-graduate"></i></div><div class="team-name">Ms. Sana Khan</div><div class="team-role">Vice Principal Academics</div></div>
+        <div class="team-card"><div class="team-avatar"><i class="fas fa-robot"></i></div><div class="team-name">Eng. Usman Ali</div><div class="team-role">Head of Robotics</div></div>
+        <div class="team-card"><div class="team-avatar"><i class="fas fa-users-cog"></i></div><div class="team-name">Mr. Tariq Mehmood</div><div class="team-role">Admin Director</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ ACADEMICS PAGE ════════════════════════ -->
+<div class="page" id="page-academics">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Academics</div>
+    <h1 class="ph-title">Academic <span style="color:var(--cyan)">Programs</span></h1>
+    <p class="ph-sub">Comprehensive curriculum from Pre-Primary to Intermediate aligned with STREAM methodology.</p>
+  </div>
+
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Programs Offered</div>
+        <h2 class="sec-title">Our <span class="ac">Academic</span> Structure</h2>
+      </div>
+      <div class="programs-grid">
+        <div class="prog-card"><div class="prog-level">PRE-PRIMARY</div><div class="prog-name">Montessori & KG</div><p class="prog-desc">Play-based learning, motor skills, Quran basics, Urdu & English literacy.</p><div class="prog-subs"><span class="sub-tag">Montessori</span><span class="sub-tag">KG-1</span><span class="sub-tag">KG-2</span></div></div>
+        <div class="prog-card"><div class="prog-level">PRIMARY</div><div class="prog-name">Grade 1 – 5</div><p class="prog-desc">Strong foundation in Mathematics, Science, English, Urdu, Islamiat & Social Studies.</p><div class="prog-subs"><span class="sub-tag">Science</span><span class="sub-tag">Math</span><span class="sub-tag">Coding Basics</span></div></div>
+        <div class="prog-card"><div class="prog-level">MIDDLE</div><div class="prog-name">Grade 6 – 8</div><p class="prog-desc">Introduction to STREAM concepts, robotics basics, logical reasoning & project work.</p><div class="prog-subs"><span class="sub-tag">Robotics Intro</span><span class="sub-tag">Computer</span><span class="sub-tag">Physics</span></div></div>
+        <div class="prog-card"><div class="prog-level">SECONDARY</div><div class="prog-name">Grade 9 – 10 (SSC)</div><p class="prog-desc">Board-aligned curriculum with STREAM electives, advanced robotics projects.</p><div class="prog-subs"><span class="sub-tag">Chemistry</span><span class="sub-tag">Biology</span><span class="sub-tag">Advanced Math</span></div></div>
+        <div class="prog-card"><div class="prog-level">HIGHER SEC</div><div class="prog-name">Grade 11 – 12 (HSSC)</div><p class="prog-desc">Pre-Engineering, Pre-Medical and Computer Science tracks with full STREAM integration.</p><div class="prog-subs"><span class="sub-tag">Pre-Eng</span><span class="sub-tag">Pre-Med</span><span class="sub-tag">CS</span></div></div>
+        <div class="prog-card"><div class="prog-level">SPECIAL</div><div class="prog-name">Quran & Islamic Studies</div><p class="prog-desc">Hifz program, Nazra, Tajweed and Islamic ethics integrated throughout all levels.</p><div class="prog-subs"><span class="sub-tag">Hifz</span><span class="sub-tag">Tajweed</span><span class="sub-tag">Islamic Ethics</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-card">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Assessment</div>
+        <h2 class="sec-title">Evaluation <span class="go">System</span></h2>
+      </div>
+      <div class="feat-grid">
+        <div class="feat-card"><div class="ficon ic"><i class="fas fa-calendar-week"></i></div><div class="feat-title">Weekly Tests</div><p class="feat-desc">Regular assessment every Friday to track weekly progress and identify gaps early.</p></div>
+        <div class="feat-card"><div class="ficon ig"><i class="fas fa-calendar-alt"></i></div><div class="feat-title">Monthly Exams</div><p class="feat-desc">Comprehensive monthly evaluations with parent result cards and teacher feedback.</p></div>
+        <div class="feat-card"><div class="ficon io"><i class="fas fa-scroll"></i></div><div class="feat-title">Annual Board Exams</div><p class="feat-desc">Full preparation for BISE board examinations with model papers and mock tests.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ ROBOTICS PAGE ════════════════════════ -->
+<div class="page" id="page-robotics">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>STREAM Robotics</div>
+    <h1 class="ph-title"><span style="color:var(--green)">STREAM</span> Robotics</h1>
+    <p class="ph-sub">Pakistan's most advanced school-level robotics & technology program for young innovators.</p>
+  </div>
+
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Our Projects</div>
+        <h2 class="sec-title">Student <span class="ac">Robotics Projects</span></h2>
+      </div>
+      <div class="robot-projects">
+        <div class="rp-card"><div class="rp-icon">🤖</div><div class="rp-title">Line Following Robot</div><p class="rp-desc">Students build autonomous robots that follow tracks using IR sensors and Arduino microcontrollers.</p><div class="tech-tags"><span class="tech-tag">Arduino</span><span class="tech-tag">C++</span><span class="tech-tag">IR Sensors</span></div></div>
+        <div class="rp-card"><div class="rp-icon">🦾</div><div class="rp-title">Robotic Arm</div><p class="rp-desc">Servo-motor controlled robotic arms programmed to pick and place objects with precision.</p><div class="tech-tags"><span class="tech-tag">Servo Motors</span><span class="tech-tag">Python</span><span class="tech-tag">3D Printing</span></div></div>
+        <div class="rp-card"><div class="rp-icon">🚗</div><div class="rp-title">Obstacle Avoidance Car</div><p class="rp-desc">Autonomous vehicles using ultrasonic sensors to navigate without human input.</p><div class="tech-tags"><span class="tech-tag">Ultrasonic</span><span class="tech-tag">L298N Driver</span><span class="tech-tag">Arduino</span></div></div>
+        <div class="rp-card"><div class="rp-icon">🌿</div><div class="rp-title">Smart Agriculture Bot</div><p class="rp-desc">IoT-based plant monitoring system tracking soil moisture, temperature and auto-watering.</p><div class="tech-tags"><span class="tech-tag">Raspberry Pi</span><span class="tech-tag">IoT</span><span class="tech-tag">Sensors</span></div></div>
+        <div class="rp-card"><div class="rp-icon">🔒</div><div class="rp-title">Smart Security System</div><p class="rp-desc">Face recognition based entry system with RFID cards and mobile alerts.</p><div class="tech-tags"><span class="tech-tag">OpenCV</span><span class="tech-tag">RFID</span><span class="tech-tag">Python</span></div></div>
+        <div class="rp-card"><div class="rp-icon">☀️</div><div class="rp-title">Solar Energy Tracker</div><p class="rp-desc">Dual-axis solar panel that tracks sun movement to maximize energy generation efficiency.</p><div class="tech-tags"><span class="tech-tag">LDR Sensors</span><span class="tech-tag">Servo</span><span class="tech-tag">Energy</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-card">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Achievements</div>
+        <h2 class="sec-title">Competition <span class="go">Victories</span></h2>
+      </div>
+      <div class="achievements-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="ach-card"><div class="ach-num">🥇 12</div><div class="ach-lbl">National Gold Medals</div></div>
+        <div class="ach-card" style="background:linear-gradient(135deg,var(--green),var(--cyan))"><div class="ach-num">🏆 5</div><div class="ach-lbl">International Awards</div></div>
+        <div class="ach-card" style="background:linear-gradient(135deg,var(--gold),var(--orange));color:var(--bg)"><div class="ach-num">🎖️ 28</div><div class="ach-lbl">Regional Championships</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ CHARACTER PAGE ════════════════════════ -->
+<div class="page" id="page-character">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Character Building</div>
+    <h1 class="ph-title">Character <span style="color:var(--gold)">Building</span></h1>
+    <p class="ph-sub">We believe academic excellence must be matched by strong moral character and social responsibility.</p>
+  </div>
+
+  <section class="sec sec-light">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag" style="color:#7c3aed">Our Programs</div>
+        <h2 class="sec-title dk">Building <span style="color:var(--purple)">Whole Persons</span></h2>
+        <p class="sec-desc dk">Character is built through consistent habits, mentorship and lived experience.</p>
+      </div>
+      <div class="char-grid">
+        <div class="char-card"><div class="char-icon">🕌</div><div class="char-title">Islamic Ethics</div><p class="char-desc">Weekly Islamic studies, Seerah lessons, Dua sessions and Salah training integrated into daily school life.</p></div>
+        <div class="char-card"><div class="char-icon">🗣️</div><div class="char-title">Leadership Training</div><p class="char-desc">Student council, debate competitions, public speaking workshops and class prefect programs.</p></div>
+        <div class="char-card"><div class="char-icon">🤲</div><div class="char-title">Community Service</div><p class="char-desc">Monthly volunteer drives, food distribution, hospital visits and awareness campaigns.</p></div>
+        <div class="char-card"><div class="char-icon">📖</div><div class="char-title">Reading Culture</div><p class="char-desc">Library programs, book clubs, story-telling competitions and reading challenges.</p></div>
+        <div class="char-card"><div class="char-icon">🏃</div><div class="char-title">Sports & Fitness</div><p class="char-desc">Cricket, football, badminton, athletics and annual sports day with inter-class competitions.</p></div>
+        <div class="char-card"><div class="char-icon">🎨</div><div class="char-title">Arts & Culture</div><p class="char-desc">Calligraphy, painting, nasheeds, drama and annual cultural fest celebrating Pakistani heritage.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ BUSINESS FAIR PAGE ════════════════════════ -->
+<div class="page" id="page-fair">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Business Fair</div>
+    <h1 class="ph-title">Annual <span style="color:var(--gold)">Business Fair</span></h1>
+    <p class="ph-sub">Our flagship event where students become entrepreneurs for a day, running real businesses.</p>
+  </div>
+
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="fair-stats">
+        <div class="fs-card"><div class="fs-num" style="color:var(--cyan)">500+</div><div class="fs-lbl">Visitors Annually</div></div>
+        <div class="fs-card"><div class="fs-num" style="color:var(--gold)">80+</div><div class="fs-lbl">Student Stalls</div></div>
+        <div class="fs-card"><div class="fs-num" style="color:var(--green)">Rs.2L+</div><div class="fs-lbl">Revenue Generated</div></div>
+        <div class="fs-card"><div class="fs-num" style="color:var(--orange)">15</div><div class="fs-lbl">Years Running</div></div>
+      </div>
+
+      <div class="sec-head">
+        <div class="sec-tag">Event History</div>
+        <h2 class="sec-title">Fair <span class="go">Timeline</span></h2>
+      </div>
+      <div class="fair-timeline">
+        <div class="ft-item"><div class="ft-year">📅 MARCH 2024</div><div class="ft-name">Tech & Entrepreneurship Fair 2024</div><div class="ft-info">Theme: "Innovation for Pakistan" — 95 stalls, robotics showcase, digital payment system used for first time.</div></div>
+        <div class="ft-item"><div class="ft-year">📅 MARCH 2023</div><div class="ft-name">Green Business Fair 2023</div><div class="ft-info">Theme: "Eco-Friendly Future" — sustainable products, recycled art, solar-powered food stalls.</div></div>
+        <div class="ft-item"><div class="ft-year">📅 MARCH 2022</div><div class="ft-name">Digital Pakistan Fair 2022</div><div class="ft-info">First post-COVID fair — hybrid model with online and physical stalls, 200+ online visitors.</div></div>
+        <div class="ft-item"><div class="ft-year">📅 MARCH 2019</div><div class="ft-name">Traditional Industries Fair 2019</div><div class="ft-info">Pakistani crafts, textile, food and cultural products — largest fair with 120 stalls.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-card">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">How It Works</div>
+        <h2 class="sec-title">Fair <span class="ac">Process</span></h2>
+      </div>
+      <div class="steps-row">
+        <div class="step-box"><div class="step-num">01</div><div class="step-title">Business Plan</div><p class="step-desc">Teams submit a business plan 2 months before the fair for teacher approval.</p></div>
+        <div class="step-box"><div class="step-num">02</div><div class="step-title">Funding</div><p class="step-desc">Rs.500–2000 seed funding per group. Students manage their own budget.</p></div>
+        <div class="step-box"><div class="step-num">03</div><div class="step-title">Fair Day</div><p class="step-desc">Run stalls, sell products/services, handle customers and manage cash.</p></div>
+        <div class="step-box"><div class="step-num">04</div><div class="step-title">Awards</div><p class="step-desc">Best stall, most revenue and most innovative product awards announced.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ ADMISSIONS PAGE ════════════════════════ -->
+<div class="page" id="page-admissions">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Admissions</div>
+    <h1 class="ph-title">Join <span style="color:var(--cyan)">AL Qalam</span></h1>
+    <p class="ph-sub">Admissions open for 2024-25. Limited seats. Early applicants get priority.</p>
+  </div>
+
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Application Process</div>
+        <h2 class="sec-title">How to <span class="ac">Apply</span></h2>
+      </div>
+      <div class="steps-row">
+        <div class="step-box"><div class="step-num">01</div><div class="step-title">Download Form</div><p class="step-desc">Get the admission form from our office or download it from our portal.</p></div>
+        <div class="step-box"><div class="step-num">02</div><div class="step-title">Submit Docs</div><p class="step-desc">B-Form, last result card, 4 photos, parent CNIC copy.</p></div>
+        <div class="step-box"><div class="step-num">03</div><div class="step-title">Entry Test</div><p class="step-desc">Written test in Math, English, Urdu and general knowledge.</p></div>
+        <div class="step-box"><div class="step-num">04</div><div class="step-title">Enrollment</div><p class="step-desc">Pay fee, collect uniform, ID card and start your AL Qalam journey!</p></div>
+      </div>
+      <div class="req-grid">
+        <div class="req-card">
+          <h4><i class="fas fa-file-alt"></i> Required Documents</h4>
+          <ul class="req-list">
+            <li>Child's B-Form (original + copy)</li>
+            <li>Last class result card</li>
+            <li>4 recent passport photos</li>
+            <li>Father/Guardian CNIC copy</li>
+            <li>Transfer Certificate (if applicable)</li>
+            <li>Medical fitness certificate</li>
+          </ul>
+        </div>
+        <div class="req-card">
+          <h4><i class="fas fa-calendar-check"></i> Important Dates 2024-25</h4>
+          <ul class="req-list">
+            <li>Form Availability: Jan 15, 2025</li>
+            <li>Last Submission: Feb 28, 2025</li>
+            <li>Entry Test: March 10, 2025</li>
+            <li>Result Announcement: March 15, 2025</li>
+            <li>Enrollment Deadline: March 25, 2025</li>
+            <li>Classes Begin: April 1, 2025</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ RESULTS PAGE ════════════════════════ -->
+<div class="page" id="page-results">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Results</div>
+    <h1 class="ph-title">Student <span style="color:var(--green)">Results</span></h1>
+    <p class="ph-sub">Check exam results by entering your student ID and class details below.</p>
+  </div>
+
+  <section class="sec sec-dark">
+    <div class="con" style="max-width:600px">
+      <div class="result-card">
+        <div style="text-align:center;margin-bottom:1.5rem">
+          <i class="fas fa-chart-bar" style="font-size:2.5rem;color:var(--cyan);margin-bottom:.8rem;display:block"></i>
+          <h3 style="font-family:'Orbitron',sans-serif;font-size:1.1rem;margin-bottom:.3rem">Result Lookup</h3>
+          <p style="color:var(--muted);font-size:.85rem">Enter your student ID to view your results</p>
+        </div>
+        <div class="form-grp">
+          <label>Student ID / Roll Number</label>
+          <input class="finput" id="rid" placeholder="e.g. AQ-2024-1045" type="text">
+        </div>
+        <div class="form-grp">
+          <label>Class</label>
+          <select class="fselect" id="rclass">
+            <option value="">Select Class</option>
+            <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+            <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+            <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+            <option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+          </select>
+        </div>
+        <div class="form-grp">
+          <label>Exam Type</label>
+          <select class="fselect" id="rexam">
+            <option value="">Select Exam</option>
+            <option>Weekly Test</option><option>Monthly Exam</option>
+            <option>Mid-Term</option><option>Annual Exam</option>
+          </select>
+        </div>
+        <button class="btn-p" style="width:100%;justify-content:center" onclick="showResult()"><i class="fas fa-search"></i> Check Result</button>
+
+        <div class="result-out" id="resultOut">
+          <div style="text-align:center;margin-bottom:1rem">
+            <div style="font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--green)">✅ Result Found</div>
+            <div style="color:var(--muted);font-size:.82rem;margin-top:.3rem">Student: <b style="color:#fff">Muhammad Ali Khan</b> | Class: Grade 9-A</div>
+          </div>
+          <table class="rtable">
+            <tr><th>Subject</th><th>Marks</th><th>Grade</th></tr>
+            <tr><td>Mathematics</td><td>87/100</td><td class="grade-A">A</td></tr>
+            <tr><td>Physics</td><td>79/100</td><td class="grade-B">B+</td></tr>
+            <tr><td>Chemistry</td><td>82/100</td><td class="grade-A">A</td></tr>
+            <tr><td>English</td><td>91/100</td><td class="grade-A">A+</td></tr>
+            <tr><td>Urdu</td><td>74/100</td><td class="grade-B">B</td></tr>
+            <tr><td>Islamiat</td><td>95/100</td><td class="grade-A">A+</td></tr>
+            <tr><td><b>Total</b></td><td><b>508/600</b></td><td class="grade-A"><b>84.7% — A</b></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ NEWS PAGE ════════════════════════ -->
+<div class="page" id="page-news">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>News & Events</div>
+    <h1 class="ph-title">News & <span style="color:var(--cyan)">Events</span></h1>
+    <p class="ph-sub">Stay updated with the latest happenings at AL Qalam International.</p>
+  </div>
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="news-2col">
+        <div>
+          <h3 style="font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--cyan);margin-bottom:1.5rem;letter-spacing:1px">LATEST NEWS</h3>
+          <div class="news-card"><div class="news-date">📅 DEC 15, 2024</div><div class="news-title">AL Qalam Wins National Robotics Championship 2024</div><p class="news-exc">Our Grade 10 team took first place at the National School Robotics Competition held in Karachi with their innovative obstacle-avoidance robot.</p></div>
+          <div class="news-card"><div class="news-date">📅 NOV 28, 2024</div><div class="news-title">Annual Business Fair Preparations Begin</div><p class="news-exc">Students have started planning their business proposals for the upcoming Annual Business Fair scheduled for March 2025.</p></div>
+          <div class="news-card"><div class="news-date">📅 NOV 10, 2024</div><div class="news-title">New Robotics Lab Equipment Installed</div><p class="news-exc">20 new Arduino starter kits, 5 Raspberry Pi sets and a 3D printer have been added to our state-of-the-art robotics laboratory.</p></div>
+          <div class="news-card"><div class="news-date">📅 OCT 25, 2024</div><div class="news-title">Parent-Teacher Meeting — Grade 8 & 9</div><p class="news-exc">Monthly PTM results showed 92% parent satisfaction rate. Mid-term results were distributed and future goals discussed.</p></div>
+        </div>
+        <div>
+          <h3 style="font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--gold);margin-bottom:1.5rem;letter-spacing:1px">📌 NOTICES</h3>
+          <div class="notice-box"><h5>🔔 Exam Schedule</h5><p>Annual exams begin January 20, 2025. Admit cards available from Jan 10.</p></div>
+          <div class="notice-box"><h5>🔔 Fee Submission</h5><p>December fee due by Dec 10. Late fee penalty applies after Dec 15.</p></div>
+          <div class="notice-box"><h5>🔔 Winter Uniform</h5><p>Winter uniform mandatory from Nov 1. Available at school store.</p></div>
+          <div class="notice-box"><h5>🔔 Admissions Open</h5><p>2024-25 admissions now open. Limited seats. Apply early.</p></div>
+          <div class="notice-box"><h5>🔔 Friday Assembly</h5><p>Character Building sessions every Friday 8:00–8:30 AM.</p></div>
+          <div style="margin-top:1.5rem">
+            <h3 style="font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--green);margin-bottom:1rem;letter-spacing:1px">📅 UPCOMING</h3>
+            <div style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);border-radius:12px;padding:1rem">
+              <p style="color:#fff;font-size:.85rem;margin-bottom:.4rem"><b style="color:var(--green)">Jan 20</b> — Annual Exams Begin</p>
+              <p style="color:#fff;font-size:.85rem;margin-bottom:.4rem"><b style="color:var(--green)">Feb 14</b> — Science Olympiad</p>
+              <p style="color:#fff;font-size:.85rem;margin-bottom:.4rem"><b style="color:var(--green)">Mar 15</b> — Business Fair</p>
+              <p style="color:#fff;font-size:.85rem"><b style="color:var(--green)">Apr 1</b> — New Session Begins</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ GALLERY PAGE ════════════════════════ -->
+<div class="page" id="page-gallery">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Gallery</div>
+    <h1 class="ph-title">Photo <span style="color:var(--cyan)">Gallery</span></h1>
+    <p class="ph-sub">Moments from classroom, lab, competitions and events at AL Qalam International.</p>
+  </div>
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="sec-head">
+        <div class="sec-tag">Media</div>
+        <h2 class="sec-title">Campus <span class="ac">Life</span></h2>
+      </div>
+      <div class="gal-grid">
+        <div class="gal-item wide"><i class="fas fa-robot"></i><span>Robotics Competition 2024</span></div>
+        <div class="gal-item"><i class="fas fa-flask"></i><span>Science Lab</span></div>
+        <div class="gal-item"><i class="fas fa-store"></i><span>Business Fair 2024</span></div>
+        <div class="gal-item"><i class="fas fa-graduation-cap"></i><span>Annual Prize Day</span></div>
+        <div class="gal-item wide"><i class="fas fa-users"></i><span>Sports Day 2024</span></div>
+        <div class="gal-item"><i class="fas fa-microphone"></i><span>Debate Competition</span></div>
+        <div class="gal-item"><i class="fas fa-mosque"></i><span>Quran Recitation Event</span></div>
+        <div class="gal-item"><i class="fas fa-paint-brush"></i><span>Arts Exhibition</span></div>
+        <div class="gal-item"><i class="fas fa-trophy"></i><span>Award Ceremony</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ PORTALS PAGE ════════════════════════ -->
+<div class="page" id="page-portals">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Portals</div>
+    <h1 class="ph-title">Login <span style="color:var(--cyan)">Portals</span></h1>
+    <p class="ph-sub">Secure role-based access for teachers, students, parents and administrators.</p>
+  </div>
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="portals-grid">
+        <div class="port-card pt">
+          <div class="port-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="port-name">Teacher Portal</div>
+          <p class="port-desc">Complete teaching management dashboard</p>
+          <ul class="port-features">
+            <li>Weekly & monthly planning</li>
+            <li>Attendance marking</li>
+            <li>Result entry & grade book</li>
+            <li>Notice board access</li>
+            <li>Lesson plan uploads</li>
+            <li>Leave applications</li>
+          </ul>
+          <button class="port-btn" onclick="openModal('teacher')">Login as Teacher</button>
+        </div>
+        <div class="port-card ps">
+          <div class="port-icon"><i class="fas fa-user-graduate"></i></div>
+          <div class="port-name">Student Portal</div>
+          <p class="port-desc">Personal learning dashboard for students</p>
+          <ul class="port-features">
+            <li>View results & report cards</li>
+            <li>Homework & assignments</li>
+            <li>Timetable access</li>
+            <li>Fee payment status</li>
+            <li>Library catalog</li>
+            <li>Event announcements</li>
+          </ul>
+          <button class="port-btn" onclick="openModal('student')">Login as Student</button>
+        </div>
+        <div class="port-card pp">
+          <div class="port-icon"><i class="fas fa-users"></i></div>
+          <div class="port-name">Parent Portal</div>
+          <p class="port-desc">Stay connected with your child's progress</p>
+          <ul class="port-features">
+            <li>Child's attendance record</li>
+            <li>Live result tracking</li>
+            <li>Fee payment online</li>
+            <li>Teacher communication</li>
+            <li>School notices</li>
+            <li>PTM scheduling</li>
+          </ul>
+          <button class="port-btn" onclick="openModal('parent')">Login as Parent</button>
+        </div>
+        <div class="port-card pa">
+          <div class="port-icon"><i class="fas fa-user-shield"></i></div>
+          <div class="port-name">Admin Portal</div>
+          <p class="port-desc">Full school management & website control</p>
+          <ul class="port-features">
+            <li>Website content management</li>
+            <li>All user management</li>
+            <li>Inventory & stock control</li>
+            <li>Accounts & fee records</li>
+            <li>Reports generation</li>
+            <li>Role-based access control</li>
+          </ul>
+          <button class="port-btn" onclick="openModal('admin')">Login as Admin</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════ CONTACT PAGE ════════════════════════ -->
+<div class="page" id="page-contact">
+  <div class="page-hero">
+    <div class="ph-bread"><i class="fas fa-home"></i><span>/</span>Contact</div>
+    <h1 class="ph-title">Get In <span style="color:var(--cyan)">Touch</span></h1>
+    <p class="ph-sub">We'd love to hear from you. Reach out for admissions, queries or feedback.</p>
+  </div>
+  <section class="sec sec-dark">
+    <div class="con">
+      <div class="contact-2col">
+        <div>
+          <div class="sec-tag">Contact Info</div>
+          <h2 class="sec-title" style="text-align:left;margin-bottom:2rem">We're Here <span class="ac">For You</span></h2>
+          <div class="cinfo-item"><div class="cicon"><i class="fas fa-map-marker-alt"></i></div><div><h4>Address</h4><p>AL Qalam International School,<br>Block 14, Gulshan-e-Iqbal, Karachi, Pakistan</p></div></div>
+          <div class="cinfo-item"><div class="cicon"><i class="fas fa-phone"></i></div><div><h4>Phone</h4><p>+92-21-34xxxxxx<br>+92-300-xxxxxxx</p></div></div>
+          <div class="cinfo-item"><div class="cicon"><i class="fas fa-envelope"></i></div><div><h4>Email</h4><p>claude@alqalam.edu.pk<br>admissions@alqalam.edu.pk</p></div></div>
+          <div class="cinfo-item"><div class="cicon"><i class="fas fa-clock"></i></div><div><h4>Office Hours</h4><p>Mon–Fri: 8:00 AM – 3:00 PM<br>Saturday: 8:00 AM – 12:00 PM</p></div></div>
+        </div>
+        <div class="cform-card">
+          <div class="cform-title"><i class="fas fa-paper-plane"></i> Send Message</div>
+          <div class="form-row-2">
+            <div class="form-grp"><label>First Name</label><input class="finput" placeholder="Ahmed"></div>
+            <div class="form-grp"><label>Last Name</label><input class="finput" placeholder="Khan"></div>
+          </div>
+          <div class="form-grp"><label>Email</label><input class="finput" placeholder="you@example.com" type="email"></div>
+          <div class="form-grp"><label>Subject</label>
+            <select class="fselect"><option>Admissions Inquiry</option><option>Fee Query</option><option>General Query</option><option>Complaint</option><option>Other</option></select>
+          </div>
+          <div class="form-grp"><label>Message</label><textarea class="ftextarea" placeholder="Write your message here..."></textarea></div>
+          <button class="btn-p" style="width:100%;justify-content:center" onclick="showToast('Message sent! We will reply within 24 hours.')"><i class="fas fa-send"></i> Send Message</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════ FOOTER (All Pages) ═══════════════ -->
+<footer id="globalFooter" style="display:none">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="nav-logo" style="margin-bottom:.5rem">
+          <div class="logo-circle">AQ</div>
+          <div class="logo-text"><div class="t1">AL QALAM INT'L</div><div class="t2">STREAM Robotics</div></div>
+        </div>
+        <p class="footer-desc">AL Qalam International — shaping future leaders through STREAM education, character building and academic excellence since 2008.</p>
+        <div class="social-row">
+          <a class="soc" href="#"><i class="fab fa-facebook-f"></i></a>
+          <a class="soc" href="#"><i class="fab fa-twitter"></i></a>
+          <a class="soc" href="#"><i class="fab fa-instagram"></i></a>
+          <a class="soc" href="#"><i class="fab fa-youtube"></i></a>
+          <a class="soc" href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div>
+        <div class="fh">Quick Links</div>
+        <ul class="flinks">
+          <li><a onclick="showPage('home')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Home</a></li>
+          <li><a onclick="showPage('about')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>About Us</a></li>
+          <li><a onclick="showPage('academics')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Academics</a></li>
+          <li><a onclick="showPage('robotics')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>STREAM</a></li>
+          <li><a onclick="showPage('fair')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Business Fair</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fh">Portals</div>
+        <ul class="flinks">
+          <li><a onclick="openModal('teacher')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Teacher Portal</a></li>
+          <li><a onclick="openModal('student')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Student Portal</a></li>
+          <li><a onclick="openModal('parent')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Parent Portal</a></li>
+          <li><a onclick="openModal('admin')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Admin Portal</a></li>
+          <li><a onclick="showPage('results')"><i class="fas fa-chevron-right" style="font-size:.65rem"></i>Results</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="fh">Contact</div>
+        <ul class="flinks">
+          <li><a href="#"><i class="fas fa-map-marker-alt" style="color:var(--cyan)"></i>Gulshan-e-Iqbal, Karachi</a></li>
+          <li><a href="#"><i class="fas fa-phone" style="color:var(--cyan)"></i>+92-21-34xxxxxx</a></li>
+          <li><a href="#"><i class="fas fa-envelope" style="color:var(--cyan)"></i>claude@alqalam.edu.pk</a></li>
+          <li><a href="#"><i class="fas fa-clock" style="color:var(--cyan)"></i>Mon–Fri 8AM–3PM</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <p>© 2024 <span>AL Qalam International</span>. All rights reserved.</p>
+      <p>Powered by <span>STREAM Robotics & Education</span> 🚀</p>
+    </div>
+  </div>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal-bg" id="loginModal" onclick="handleOverlayClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-x" onclick="closeModal()" title="Close">&#10005;</button>
+    <div class="modal-logo">
+      <div class="ml-circle" id="modalIcon">🔐</div>
+      <div class="modal-title" id="modalTitle">Teacher Login</div>
+      <div class="modal-sub" id="modalSub">Access your dashboard</div>
+    </div>
+    <div class="demo-creds">
+      <h5>&#128273; Demo Credentials</h5>
+      <p id="demoCreds">Username: <b>teacher01</b> | Password: <b>AqTeach@2024</b></p>
+    </div>
+    <div class="form-grp">
+      <label>Username / Roll No / Email</label>
+      <input class="finput" id="loginUser" placeholder="Enter your username" autocomplete="username">
+    </div>
+    <div class="form-grp" style="position:relative">
+      <label>Password</label>
+      <input class="finput" type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password" style="padding-right:44px">
+      <button onclick="togglePass()" style="position:absolute;right:12px;bottom:11px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem" title="Show/hide password" id="passToggleBtn">&#128065;</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <label style="display:flex;align-items:center;gap:6px;color:var(--muted);font-size:.8rem;cursor:pointer">
+        <input type="checkbox" style="accent-color:var(--cyan)"> Remember me
+      </label>
+      <a href="#" style="color:var(--cyan);font-size:.8rem;text-decoration:none">Forgot Password?</a>
+    </div>
+    <button class="btn-p" style="width:100%;justify-content:center;font-size:1rem" onclick="doLogin()">
+      &#128275; Login to Portal
+    </button>
+    <p style="text-align:center;margin-top:1rem;color:var(--muted);font-size:.78rem">
+      Need help? Contact <a href="mailto:claude@alqalam.edu.pk" style="color:var(--cyan)">claude@alqalam.edu.pk</a>
+    </p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i class="fas fa-check-circle"></i>
+  <p id="toastMsg">Action completed!</p>
+</div>
+
+<script>
+// ─── PAGE NAVIGATION ───
+const pages = ['home','about','academics','robotics','character','fair','admissions','results','news','gallery','portals','contact'];
+
+function showPage(id){
+  pages.forEach(p=>{
+    document.getElementById('page-'+p).classList.remove('active');
+    const nav=document.getElementById('nav-'+p);
+    if(nav) nav.classList.remove('active');
+  });
+  document.getElementById('page-'+id).classList.add('active');
+  const nav=document.getElementById('nav-'+id);
+  if(nav) nav.classList.add('active');
+  // show/hide footer
+  document.getElementById('globalFooter').style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── MOBILE MENU ───
+function toggleMob(){
+  document.getElementById('mobMenu').classList.toggle('open');
+}
+
+// ─── NAVBAR SCROLL ───
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').style.boxShadow = window.scrollY>50 ? '0 4px 30px rgba(0,212,255,.12)' : 'none';
+});
+
+// ─── MODAL ───
+const modalData = {
+  teacher:{
+    title:'Teacher Portal Login',
+    sub:'Lesson plans, attendance, grading & planning',
+    creds:'Username: <b>teacher01</b> &nbsp;|&nbsp; Password: <b>AqTeach@2024</b>',
+    icon:'📚', color:'var(--cyan)'
+  },
+  student:{
+    title:'Student Portal Login',
+    sub:'Results, homework, timetable & fee status',
+    creds:'Roll No: <b>AQ-2024-1045</b> &nbsp;|&nbsp; Password: <b>Student@123</b>',
+    icon:'🎓', color:'var(--purple)'
+  },
+  parent:{
+    title:'Parent Portal Login',
+    sub:'Track your child\'s progress, attendance & fee',
+    creds:'Username: <b>parent_ali</b> &nbsp;|&nbsp; Password: <b>Parent@2024</b>',
+    icon:'👨‍👩‍👧', color:'var(--green)'
+  },
+  admin:{
+    title:'Admin Portal Login',
+    sub:'Full school management, CMS & reports',
+    creds:'Username: <b>admin</b> &nbsp;|&nbsp; Password: <b>AqAdmin@2024</b>',
+    icon:'🛡️', color:'var(--gold)'
+  }
+};
+
+function openModal(role){
+  const d = modalData[role] || modalData.admin;
+  document.getElementById('modalTitle').textContent = d.title;
+  document.getElementById('modalSub').textContent   = d.sub;
+  document.getElementById('demoCreds').innerHTML    = d.creds;
+  document.getElementById('modalIcon').textContent  = d.icon;
+  document.getElementById('modalIcon').style.background = 'linear-gradient(135deg,'+d.color+',rgba(124,58,237,.8))';
+  // Clear previous inputs
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  const modal = document.getElementById('loginModal');
+  modal.style.display = 'flex';
+  modal.classList.add('on');
+  document.body.style.overflow = 'hidden';
+  setTimeout(()=>document.getElementById('loginUser').focus(), 350);
+}
+
+function closeModal(){
+  const modal = document.getElementById('loginModal');
+  modal.classList.remove('on');
+  setTimeout(()=>{ modal.style.display='none'; }, 50);
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e){
+  if(e.target === document.getElementById('loginModal')) closeModal();
+}
+
+// Escape key closes modal
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+function togglePass(){
+  const p = document.getElementById('loginPass');
+  const b = document.getElementById('passToggleBtn');
+  if(p.type==='password'){ p.type='text'; b.textContent='🙈'; }
+  else { p.type='password'; b.textContent='👁'; }
+}
+
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if(!u){ showToast('⚠️ Please enter your username.'); document.getElementById('loginUser').focus(); return; }
+  if(!p){ showToast('⚠️ Please enter your password.'); document.getElementById('loginPass').focus(); return; }
+  // Demo validation
+  // User → {password, portal file}
+  const validUsers = {
+    'teacher01':    {pass:'AqTeach@2024',   portal:'portal_teacher.html'},
+    'teacher02':    {pass:'AqTeach2@2024',  portal:'portal_teacher.html'},
+    'AQ-2024-1045': {pass:'Student@123',    portal:'portal_student.html'},
+    'student001':   {pass:'Student@123',    portal:'portal_student.html'},
+    'parent_ali':   {pass:'Parent@2024',    portal:'portal_parent.html'},
+    'parent001':    {pass:'Parent@2024',    portal:'portal_parent.html'},
+    'admin':        {pass:'AqAdmin@2024',   portal:'portal_admin.html'},
+    'superadmin':   {pass:'AqSuper@2024',   portal:'portal_admin.html'},
+    'principal':    {pass:'AqPrincipal@24', portal:'portal_admin.html'},
+    'accountant1':  {pass:'AqAcct@2024',    portal:'portal_admin.html'},
+    'storekeeper1': {pass:'AqStore@2024',   portal:'portal_admin.html'}
+  };
+  const found = validUsers[u];
+  if(found && found.pass === p){
+    closeModal();
+    showToast('✅ Login successful! Redirecting to dashboard...');
+    setTimeout(()=>{ window.location.href = found.portal; }, 1200);
+  } else {
+    showToast('❌ Invalid credentials. Use demo credentials shown above.');
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+// ─── TOAST ───
+function showToast(msg){
+  document.getElementById('toastMsg').textContent=msg;
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ─── RESULTS ───
+function showResult(){
+  const rid=document.getElementById('rid').value;
+  const rc=document.getElementById('rclass').value;
+  const re=document.getElementById('rexam').value;
+  if(!rid||!rc||!re){showToast('Please fill all fields.');return;}
+  document.getElementById('resultOut').classList.add('show');
+}
+
+// ─── PARTICLE CANVAS ───
+(function(){
+  const c=document.getElementById('canvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight}
+  resize();
+  window.addEventListener('resize',resize);
+  const colors=['rgba(0,212,255,','rgba(0,255,136,','rgba(255,215,0,','rgba(124,58,237,'];
+  for(let i=0;i<80;i++)pts.push({
+    x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,
+    r:Math.random()*2+1,
+    c:colors[Math.floor(Math.random()*colors.length)]
+  });
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.c+'0.7)';
+      ctx.fill();
+    });
+    pts.forEach((a,i)=>{
+      for(let j=i+1;j<pts.length;j++){
+        const b=pts[j];
+        const d=Math.hypot(a.x-b.x,a.y-b.y);
+        if(d<120){
+          ctx.beginPath();
+          ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+          ctx.strokeStyle=`rgba(0,212,255,${.15*(1-d/120)})`;
+          ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ─── COUNTER ANIMATION ───
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target=+el.dataset.count;
+    let cur=0;
+    const step=target/60;
+    const t=setInterval(()=>{
+      cur=Math.min(cur+step,target);
+      el.textContent=Math.floor(cur)+(target>=100?'+':'');
+      if(cur>=target)clearInterval(t);
+    },25);
+  });
+}
+
+// ─── INTERSECTION OBSERVER ───
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}
+  });
+},{threshold:.15});
+document.querySelectorAll('.fade-up,.slide-in-left').forEach(el=>io.observe(el));
+
+// ─── FONT AWESOME DETECTION ───
+(function detectFA(){
+  // Check if Font Awesome loaded by testing if .fas renders correctly
+  setTimeout(()=>{
+    const testEl = document.createElement('i');
+    testEl.className = 'fas fa-robot';
+    testEl.style.cssText = 'position:absolute;left:-9999px;top:-9999px;font-size:20px';
+    document.body.appendChild(testEl);
+    const style = window.getComputedStyle(testEl,'::before');
+    const faLoaded = style && style.fontFamily && style.fontFamily.includes('Font Awesome');
+    document.body.removeChild(testEl);
+    if(!faLoaded){
+      console.warn('Font Awesome not detected — emoji fallback active');
+      // Replace key icon elements with emojis
+      const emojiMap = {
+        'fa-robot':'🤖','fa-school':'🏫','fa-rocket':'🚀',
+        'fa-play-circle':'▶️','fa-user-graduate':'🎓','fa-store':'🏪',
+        'fa-laptop-code':'💻','fa-award':'🏆','fa-shield-heart':'🛡️',
+        'fa-chalkboard-teacher':'👨‍🏫','fa-users':'👨‍👩‍👧‍👦','fa-user-shield':'👑',
+        'fa-sign-in-alt':'🔐','fa-home':'🏠','fa-file-alt':'📄',
+        'fa-phone':'📞','fa-bullseye':'🎯','fa-eye':'👁',
+        'fa-map-marker-alt':'📍','fa-envelope':'✉️','fa-clock':'⏰',
+        'fa-paper-plane':'📨','fa-send':'📤','fa-search':'🔍',
+        'fa-chart-bar':'📊','fa-check-circle':'✅','fa-times':'✕',
+        'fa-robot':'🤖','fa-flask':'⚗️','fa-graduation-cap':'🎓',
+        'fa-trophy':'🏆','fa-microphone':'🎤','fa-mosque':'🕌',
+        'fa-paint-brush':'🎨','fa-user-tie':'👔','fa-users-cog':'⚙️',
+        'fa-calendar-week':'📅','fa-calendar-alt':'📆','fa-scroll':'📜',
+        'fa-chevron-right':'›','fa-facebook-f':'f','fa-twitter':'t',
+        'fa-instagram':'📸','fa-youtube':'▶','fa-whatsapp':'💬',
+        'fa-check':'✓','fa-ban':'🚫'
+      };
+      document.querySelectorAll('i[class*="fa-"]').forEach(el=>{
+        const cls = Array.from(el.classList).find(c=>c.startsWith('fa-'));
+        if(cls && emojiMap[cls]){
+          const span = document.createElement('span');
+          span.textContent = emojiMap[cls];
+          span.style.fontSize = '1em';
+          el.parentNode.replaceChild(span, el);
+        }
+      });
+    }
+  }, 1500);
+})();
+
+// ─── INIT ───
+showPage('home');
+setTimeout(animateCounters,800);
+</script>
+</body>
+</html>

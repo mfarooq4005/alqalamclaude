@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard – AL Qalam International</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+:root{
+  --bg:#050b1a;--card:#0d1b35;--card2:#0a1628;--sidebar:#070f22;
+  --cyan:#00d4ff;--gold:#ffd700;--green:#00ff88;--orange:#ff6b35;
+  --purple:#7c3aed;--pink:#f72585;--red:#ef4444;
+  --muted:#8892b0;--border:rgba(0,212,255,.15);--white:#fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--white);display:flex;min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:.3s}
+.sb-brand{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:12px;color:#fff;flex-shrink:0}
+.sb-brand-text .t1{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--gold);line-height:1.2}
+.sb-brand-text .t2{font-size:9px;color:var(--muted);letter-spacing:1px}
+.sb-user{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.sb-uname{font-size:.82rem;font-weight:600;color:#fff}
+.sb-urole{font-size:.72rem;color:var(--gold);text-transform:uppercase;letter-spacing:.5px}
+.sb-nav{flex:1;padding:.8rem 0;overflow-y:auto}
+.sb-section{padding:.4rem 1rem .2rem;font-size:.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-top:.5rem}
+.sb-link{display:flex;align-items:center;gap:10px;padding:.65rem 1.5rem;color:var(--muted);text-decoration:none;font-size:.85rem;transition:.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Exo 2',sans-serif}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sb-link.active{color:var(--gold);background:rgba(255,215,0,.08);border-right:3px solid var(--gold)}
+.sb-link i{width:18px;text-align:center;font-size:.9rem}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:700}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.sb-logout{display:flex;align-items:center;gap:8px;color:var(--muted);text-decoration:none;font-size:.83rem;cursor:pointer;transition:.2s}
+.sb-logout:hover{color:var(--red)}
+
+/* ── MAIN ── */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:60px;background:rgba(7,15,34,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:99;backdrop-filter:blur(10px)}
+.topbar-left h2{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--white)}
+.topbar-left p{font-size:.75rem;color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.tb-btn{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;transition:.2s;position:relative;padding:.3rem}
+.tb-btn:hover{color:var(--white)}
+.tb-notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--sidebar)}
+.tb-profile{display:flex;align-items:center;gap:8px;cursor:pointer}
+.tb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.tb-name{font-size:.82rem;font-weight:600}
+
+/* ── CONTENT ── */
+.content{padding:1.5rem 2rem;flex:1}
+.page-tab{display:none}.page-tab.active{display:block}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:1.5rem}
+.stat-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;padding:1.4rem;border:1px solid var(--border);position:relative;overflow:hidden;transition:.3s}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.stat-card::after{content:'';position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;opacity:.08}
+.sc-cyan::after{background:var(--cyan)}.sc-gold::after{background:var(--gold)}.sc-green::after{background:var(--green)}.sc-purple::after{background:var(--purple)}
+.stat-icon{font-size:1.6rem;margin-bottom:.6rem}
+.sc-cyan .stat-icon{color:var(--cyan)}.sc-gold .stat-icon{color:var(--gold)}.sc-green .stat-icon{color:var(--green)}.sc-purple .stat-icon{color:var(--purple)}
+.stat-num{font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;line-height:1;margin-bottom:.2rem}
+.stat-lbl{color:var(--muted);font-size:.78rem;letter-spacing:.5px}
+.stat-change{font-size:.72rem;margin-top:.4rem}
+.stat-up{color:var(--green)}.stat-down{color:var(--red)}
+
+/* ── GRID LAYOUTS ── */
+.grid-2{display:grid;grid-template-columns:1.5fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:1.2rem}
+.grid-equal{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+
+/* ── CARD ── */
+.dash-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.dc-head{padding:1rem 1.3rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.dc-title{font-family:'Orbitron',sans-serif;font-size:.85rem;font-weight:700;color:var(--white)}
+.dc-sub{font-size:.75rem;color:var(--muted)}
+.dc-action{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.25);padding:4px 12px;border-radius:8px;font-size:.75rem;cursor:pointer;font-family:'Exo 2',sans-serif;transition:.2s}
+.dc-action:hover{background:rgba(0,212,255,.2)}
+.dc-body{padding:1.2rem}
+
+/* ── TABLE ── */
+.dash-table{width:100%;border-collapse:collapse}
+.dash-table th{background:rgba(0,212,255,.07);color:var(--cyan);padding:9px 12px;text-align:left;font-size:.73rem;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.dash-table td{padding:9px 12px;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.85);vertical-align:middle}
+.dash-table tr:last-child td{border-bottom:none}
+.dash-table tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:.7rem;font-weight:700}
+.badge-green{background:rgba(0,255,136,.15);color:var(--green)}
+.badge-gold{background:rgba(255,215,0,.15);color:var(--gold)}
+.badge-cyan{background:rgba(0,212,255,.15);color:var(--cyan)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-purple{background:rgba(124,58,237,.15);color:var(--purple)}
+.badge-orange{background:rgba(255,107,53,.15);color:var(--orange)}
+
+/* ── PROGRESS BAR ── */
+.prog-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:.3rem}
+.prog-fill{height:100%;border-radius:3px;transition:width 1s ease}
+
+/* ── QUICK ACTION CARDS ── */
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.2rem}
+.qa-card{background:linear-gradient(135deg,var(--card),var(--card2));border-radius:12px;border:1px solid var(--border);padding:1rem;text-align:center;cursor:pointer;transition:.3s}
+.qa-card:hover{transform:translateY(-4px);border-color:var(--cyan)}
+.qa-icon{font-size:1.8rem;margin-bottom:.5rem}
+.qa-label{font-size:.78rem;color:var(--muted);font-weight:600}
+
+/* ── CHART PLACEHOLDER ── */
+.chart-placeholder{height:160px;display:flex;align-items:flex-end;gap:6px;padding:.5rem 0}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.chart-bar-inner{width:100%;border-radius:4px 4px 0 0;transition:height .8s ease;min-height:4px}
+.chart-label{font-size:.65rem;color:var(--muted)}
+.chart-val{font-size:.68rem;color:var(--cyan)}
+
+/* ── NOTICE LIST ── */
+.notice-item{padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;gap:.8rem;align-items:flex-start}
+.notice-item:last-child{border-bottom:none}
+.ni-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ni-text h5{font-size:.83rem;font-weight:600;margin-bottom:.2rem}
+.ni-text p{font-size:.75rem;color:var(--muted)}
+
+/* ── INVENTORY ITEMS ── */
+.inv-item{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.inv-item:last-child{border-bottom:none}
+.inv-name{font-size:.83rem;font-weight:600;margin-bottom:.2rem}
+.inv-cat{font-size:.72rem;color:var(--muted)}
+.inv-stock{text-align:right}
+.inv-qty{font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:700}
+.inv-reorder{font-size:.7rem;color:var(--muted)}
+
+/* ── FORM ELEMENTS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-grp{margin-bottom:1rem}
+.form-grp label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.4rem;font-weight:600;letter-spacing:.3px}
+.finput{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#fff;font-size:.85rem;font-family:'Exo 2',sans-serif;outline:none;transition:.25s}
+.finput:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+.fselect{width:100%;background:#0d1b35;border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:10px 14px;color:#fff;font-size:.85rem;outline:none}
+.fselect option{background:#0d1b35}
+.btn-submit{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;padding:10px 24px;border:none;border-radius:9px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:'Exo 2',sans-serif;transition:.25s}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,212,255,.3)}
+
+/* ── MOBILE TOGGLE ── */
+.mobile-toggle{display:none;position:fixed;top:10px;left:10px;z-index:200;background:var(--sidebar);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;color:var(--cyan)}
+.sidebar.collapsed{width:0;overflow:hidden}
+.main.expanded{margin-left:0}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .mobile-toggle{display:block}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .grid-2,.grid-3,.grid-equal{grid-template-columns:1fr}
+  .qa-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+  .topbar{padding:0 1rem}
+  .content{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+  <i class="fas fa-bars"></i>
+</button>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">AQ</div>
+    <div class="sb-brand-text">
+      <div class="t1">AL QALAM</div>
+      <div class="t2">Admin Portal</div>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar">👑</div>
+    <div>
+      <div class="sb-uname">Admin User</div>
+      <div class="sb-urole">Super Administrator</div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Main</div>
+    <button class="sb-link active" onclick="switchTab('dashboard',this)"><i class="fas fa-th-large"></i> Dashboard</button>
+    <button class="sb-link" onclick="switchTab('students',this)"><i class="fas fa-user-graduate"></i> Students <span class="sb-badge">1200</span></button>
+    <button class="sb-link" onclick="switchTab('teachers',this)"><i class="fas fa-chalkboard-teacher"></i> Teachers</button>
+    <button class="sb-link" onclick="switchTab('classes',this)"><i class="fas fa-school"></i> Classes</button>
+    <div class="sb-section">Academic</div>
+    <button class="sb-link" onclick="switchTab('exams',this)"><i class="fas fa-scroll"></i> Exams & Results</button>
+    <button class="sb-link" onclick="switchTab('attendance',this)"><i class="fas fa-calendar-check"></i> Attendance</button>
+    <button class="sb-link" onclick="switchTab('admissions',this)"><i class="fas fa-file-signature"></i> Admissions <span class="sb-badge">14</span></button>
+    <div class="sb-section">Finance</div>
+    <button class="sb-link" onclick="switchTab('fee',this)"><i class="fas fa-wallet"></i> Fee Management</button>
+    <button class="sb-link" onclick="switchTab('salary',this)"><i class="fas fa-money-check-alt"></i> Salary</button>
+    <div class="sb-section">Operations</div>
+    <button class="sb-link" onclick="switchTab('inventory',this)"><i class="fas fa-boxes"></i> Inventory <span class="sb-badge" style="background:var(--orange)">3 Low</span></button>
+    <button class="sb-link" onclick="switchTab('notices',this)"><i class="fas fa-bell"></i> Notices</button>
+    <button class="sb-link" onclick="switchTab('library',this)"><i class="fas fa-book"></i> Library</button>
+    <button class="sb-link" onclick="switchTab('fair',this)"><i class="fas fa-store"></i> Business Fair</button>
+    <div class="sb-section">System</div>
+    <button class="sb-link" onclick="switchTab('cms',this)"><i class="fas fa-globe"></i> Website CMS</button>
+    <button class="sb-link" onclick="switchTab('users',this)"><i class="fas fa-users-cog"></i> User Management</button>
+    <button class="sb-link" onclick="switchTab('reports',this)"><i class="fas fa-chart-bar"></i> Reports</button>
+    <button class="sb-link" onclick="switchTab('settings',this)"><i class="fas fa-cog"></i> Settings</button>
+  </nav>
+  <div class="sb-footer">
+    <a class="sb-logout" href="alqalam_website.html"><i class="fas fa-sign-out-alt"></i> Back to Website</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2 id="topbar-title">Dashboard Overview</h2>
+      <p id="topbar-sub">Welcome back, Admin | Saturday, 18 Apr 2026</p>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-btn" title="Notifications" onclick="alert('3 new notifications:\n1. Fee overdue: 12 students\n2. Low stock: Pencils\n3. New admission: Ayesha Farooq')">
+        <i class="fas fa-bell"></i>
+        <span class="tb-notif-dot"></span>
+      </button>
+      <button class="tb-btn" title="Messages"><i class="fas fa-envelope"></i></button>
+      <button class="tb-btn" title="Full Screen" onclick="toggleFS()"><i class="fas fa-expand"></i></button>
+      <div class="tb-profile" onclick="alert('Profile settings coming soon!')">
+        <div class="tb-avatar">👑</div>
+        <div class="tb-name">Admin</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD TAB ── -->
+    <div class="page-tab active" id="tab-dashboard">
+      <!-- Quick Actions -->
+      <div class="qa-grid">
+        <div class="qa-card" onclick="switchTab('students',document.querySelector('[onclick*=students]'))">
+          <div class="qa-icon">👨‍🎓</div><div class="qa-label">Add Student</div>
+        </div>
+        <div class="qa-card" onclick="switchTab('fee',document.querySelector('[onclick*=fee]'))">
+          <div class="qa-icon">💰</div><div class="qa-label">Collect Fee</div>
+        </div>
+        <div class="qa-card" onclick="switchTab('inventory',document.querySelector('[onclick*=inventory]'))">
+          <div class="qa-icon">📦</div><div class="qa-label">Issue Item</div>
+        </div>
+        <div class="qa-card" onclick="switchTab('notices',document.querySelector('[onclick*=notices]'))">
+          <div class="qa-icon">📢</div><div class="qa-label">Post Notice</div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card sc-cyan">
+          <div class="stat-icon"><i class="fas fa-user-graduate"></i></div>
+          <div class="stat-num">1,200</div>
+          <div class="stat-lbl">Total Students</div>
+          <div class="stat-change stat-up">▲ 45 new this month</div>
+        </div>
+        <div class="stat-card sc-gold">
+          <div class="stat-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="stat-num">85</div>
+          <div class="stat-lbl">Teaching Staff</div>
+          <div class="stat-change stat-up">▲ 3 new this session</div>
+        </div>
+        <div class="stat-card sc-green">
+          <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+          <div class="stat-num">4.2L</div>
+          <div class="stat-lbl">Fee Collected (Apr)</div>
+          <div class="stat-change stat-down">▼ Rs. 35K pending</div>
+        </div>
+        <div class="stat-card sc-purple">
+          <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+          <div class="stat-num">3</div>
+          <div class="stat-lbl">Low Stock Items</div>
+          <div class="stat-change stat-down">⚠️ Reorder needed</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Recent Students -->
+        <div class="dash-card">
+          <div class="dc-head">
+            <div><div class="dc-title">Recent Enrollments</div><div class="dc-sub">Last 7 days</div></div>
+            <button class="dc-action" onclick="switchTab('students',document.querySelector('[onclick*=students]'))">View All</button>
+          </div>
+          <div class="dc-body" style="padding:0">
+            <table class="dash-table">
+              <tr><th>Student</th><th>Class</th><th>Date</th><th>Status</th></tr>
+              <tr><td><b>Muhammad Ali</b></td><td>Grade 9-A</td><td>Apr 15</td><td><span class="badge badge-green">Active</span></td></tr>
+              <tr><td><b>Ayesha Farooq</b></td><td>Grade 6-B</td><td>Apr 14</td><td><span class="badge badge-gold">Pending</span></td></tr>
+              <tr><td><b>Hassan Raza</b></td><td>Grade 11-A</td><td>Apr 13</td><td><span class="badge badge-green">Active</span></td></tr>
+              <tr><td><b>Sana Malik</b></td><td>Grade 4-A</td><td>Apr 12</td><td><span class="badge badge-green">Active</span></td></tr>
+              <tr><td><b>Bilal Ahmed</b></td><td>Grade 7-C</td><td>Apr 11</td><td><span class="badge badge-cyan">New</span></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Fee Chart -->
+        <div class="dash-card">
+          <div class="dc-head">
+            <div><div class="dc-title">Fee Collection</div><div class="dc-sub">Last 6 months</div></div>
+            <span class="dc-sub" style="color:var(--green)">Rs. 24.8L total</span>
+          </div>
+          <div class="dc-body">
+            <div class="chart-placeholder" id="feeChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <!-- Low Stock -->
+        <div class="dash-card">
+          <div class="dc-head">
+            <div><div class="dc-title">⚠️ Low Stock Alert</div><div class="dc-sub">Items below reorder level</div></div>
+          </div>
+          <div class="dc-body">
+            <div class="inv-item">
+              <div><div class="inv-name">Pencil HB</div><div class="inv-cat">Stationary</div></div>
+              <div class="inv-stock"><div class="inv-qty" style="color:var(--red)">12 left</div><div class="inv-reorder">Reorder: 50</div></div>
+            </div>
+            <div class="inv-item">
+              <div><div class="inv-name">A4 Paper Ream</div><div class="inv-cat">Stationary</div></div>
+              <div class="inv-stock"><div class="inv-qty" style="color:var(--orange)">3 left</div><div class="inv-reorder">Reorder: 5</div></div>
+            </div>
+            <div class="inv-item">
+              <div><div class="inv-name">Surf/Detergent</div><div class="inv-cat">Grocery</div></div>
+              <div class="inv-stock"><div class="inv-qty" style="color:var(--red)">2 kg left</div><div class="inv-reorder">Reorder: 5 kg</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <div class="dash-card">
+          <div class="dc-head">
+            <div><div class="dc-title">Item Requests</div><div class="dc-sub">Pending approval</div></div>
+            <span class="badge badge-red">4 new</span>
+          </div>
+          <div class="dc-body">
+            <div class="inv-item">
+              <div><div class="inv-name">Glue Gun (x2)</div><div class="inv-cat" style="color:var(--cyan)">Ms. Aisha — Teacher</div></div>
+              <div style="display:flex;gap:6px">
+                <button style="background:var(--green);border:none;color:#000;padding:3px 8px;border-radius:6px;font-size:.7rem;cursor:pointer;font-weight:700" onclick="alert('Request approved! Store keeper notified.')">✓</button>
+                <button style="background:var(--red);border:none;color:#fff;padding:3px 8px;border-radius:6px;font-size:.7rem;cursor:pointer" onclick="alert('Request rejected.')">✗</button>
+              </div>
+            </div>
+            <div class="inv-item">
+              <div><div class="inv-name">Markers (x5)</div><div class="inv-cat" style="color:var(--cyan)">Mr. Bilal — Teacher</div></div>
+              <div style="display:flex;gap:6px">
+                <button style="background:var(--green);border:none;color:#000;padding:3px 8px;border-radius:6px;font-size:.7rem;cursor:pointer;font-weight:700" onclick="alert('Approved!')">✓</button>
+                <button style="background:var(--red);border:none;color:#fff;padding:3px 8px;border-radius:6px;font-size:.7rem;cursor:pointer" onclick="alert('Rejected.')">✗</button>
+              </div>
+            </div>
+            <div class="inv-item">
+              <div><div class="inv-name">A4 Paper (x2 reams)</div><div class="inv-cat" style="color:var(--cyan)">Mr. Tariq — Admin</div></div>
+              <div style="display:flex;gap:6px">
+                <button style="background:var(--green);border:none;color:#000;padding:3px 8px;border-radius:6px;font-size:.7rem;cursor:pointer;font-weight:700" onclick="alert('Approved!')">✓</button>
+                <button style="background:var(--red);border:none;color:#fff;padding:3px 8px;border-radius:6px;font-size:.7rem;cursor:pointer" onclick="alert('Rejected.')">✗</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notices & Events -->
+        <div class="dash-card">
+          <div class="dc-head">
+            <div><div class="dc-title">Recent Notices</div><div class="dc-sub">Published this week</div></div>
+            <button class="dc-action" onclick="switchTab('notices',document.querySelector('[onclick*=notices]'))">+ Add</button>
+          </div>
+          <div class="dc-body">
+            <div class="notice-item"><div class="ni-dot" style="background:var(--red)"></div><div class="ni-text"><h5>Exam Schedule Posted</h5><p>Annual exams Jan 20 — all classes</p></div></div>
+            <div class="notice-item"><div class="ni-dot" style="background:var(--gold)"></div><div class="ni-text"><h5>Fee Reminder</h5><p>April fee due by Apr 10</p></div></div>
+            <div class="notice-item"><div class="ni-dot" style="background:var(--green)"></div><div class="ni-text"><h5>Business Fair 2025</h5><p>Registration open for Grade 5-12</p></div></div>
+            <div class="notice-item"><div class="ni-dot" style="background:var(--cyan)"></div><div class="ni-text"><h5>Winter Uniform</h5><p>Mandatory from next Monday</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Overview -->
+      <div class="dash-card" style="margin-bottom:1.2rem">
+        <div class="dc-head">
+          <div><div class="dc-title">Today's Attendance</div><div class="dc-sub">Saturday, 18 Apr 2026 — All Classes</div></div>
+          <span style="color:var(--green);font-size:.82rem;font-weight:700">Overall: 91%</span>
+        </div>
+        <div class="dc-body">
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1rem">
+            <div><div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">Grade 9</div><div class="prog-bar"><div class="prog-fill" style="width:95%;background:var(--green)"></div></div><div style="font-size:.75rem;color:var(--green);margin-top:.3rem">95% — 38/40</div></div>
+            <div><div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">Grade 10</div><div class="prog-bar"><div class="prog-fill" style="width:88%;background:var(--cyan)"></div></div><div style="font-size:.75rem;color:var(--cyan);margin-top:.3rem">88% — 35/40</div></div>
+            <div><div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">Grade 7</div><div class="prog-bar"><div class="prog-fill" style="width:92%;background:var(--green)"></div></div><div style="font-size:.75rem;color:var(--green);margin-top:.3rem">92% — 37/40</div></div>
+            <div><div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">Grade 5</div><div class="prog-bar"><div class="prog-fill" style="width:75%;background:var(--orange)"></div></div><div style="font-size:.75rem;color:var(--orange);margin-top:.3rem">75% — 30/40</div></div>
+            <div><div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem">Grade 3</div><div class="prog-bar"><div class="prog-fill" style="width:90%;background:var(--green)"></div></div><div style="font-size:.75rem;color:var(--green);margin-top:.3rem">90% — 36/40</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STUDENTS TAB ── -->
+    <div class="page-tab" id="tab-students">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+        <div><h3 style="font-family:'Orbitron',sans-serif;font-size:1rem">Student Management</h3><p style="color:var(--muted);font-size:.8rem">1,200 total enrolled students</p></div>
+        <button class="btn-submit" onclick="alert('Add Student form — connect to backend for live data!')"><i class="fas fa-plus"></i> Add New Student</button>
+      </div>
+      <div style="display:flex;gap:1rem;margin-bottom:1.2rem;flex-wrap:wrap">
+        <input class="finput" style="width:250px" placeholder="🔍 Search by name or roll no...">
+        <select class="fselect" style="width:150px"><option>All Classes</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option></select>
+        <select class="fselect" style="width:150px"><option>All Status</option><option>Active</option><option>Inactive</option></select>
+      </div>
+      <div class="dash-card">
+        <table class="dash-table">
+          <tr><th>#</th><th>Roll No</th><th>Student Name</th><th>Class</th><th>Father Name</th><th>Fee Status</th><th>Attendance</th><th>Actions</th></tr>
+          <tr><td>1</td><td>AQ-2024-1045</td><td><b>Muhammad Ali Khan</b></td><td>Grade 9-A</td><td>Mr. Imran Khan</td><td><span class="badge badge-green">Paid</span></td><td><span style="color:var(--green)">95%</span></td><td><button style="background:rgba(0,212,255,.1);border:1px solid var(--cyan);color:var(--cyan);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Student profile: Muhammad Ali Khan\nRoll: AQ-2024-1045\nClass: 9-A\nAttendance: 95%\nLast Result: 84.7% - Grade A')">View</button></td></tr>
+          <tr><td>2</td><td>AQ-2024-1046</td><td><b>Fatima Zahra</b></td><td>Grade 7-B</td><td>Mr. Zahid Ali</td><td><span class="badge badge-red">Overdue</span></td><td><span style="color:var(--orange)">82%</span></td><td><button style="background:rgba(0,212,255,.1);border:1px solid var(--cyan);color:var(--cyan);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Student profile: Fatima Zahra\nFee overdue — contact parents')">View</button></td></tr>
+          <tr><td>3</td><td>AQ-2024-1047</td><td><b>Hassan Raza</b></td><td>Grade 11-A</td><td>Mr. Raza Ahmed</td><td><span class="badge badge-green">Paid</span></td><td><span style="color:var(--green)">98%</span></td><td><button style="background:rgba(0,212,255,.1);border:1px solid var(--cyan);color:var(--cyan);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Student profile: Hassan Raza\nTop performer in Grade 11')">View</button></td></tr>
+          <tr><td>4</td><td>AQ-2024-1048</td><td><b>Ayesha Siddiqui</b></td><td>Grade 4-A</td><td>Mr. Siddiqui</td><td><span class="badge badge-gold">Partial</span></td><td><span style="color:var(--cyan)">88%</span></td><td><button style="background:rgba(0,212,255,.1);border:1px solid var(--cyan);color:var(--cyan);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Partial fee paid. Rs. 2,000 pending.')">View</button></td></tr>
+          <tr><td>5</td><td>AQ-2024-1049</td><td><b>Usman Tariq</b></td><td>Grade 6-C</td><td>Mr. Tariq Mehmood</td><td><span class="badge badge-green">Paid</span></td><td><span style="color:var(--green)">91%</span></td><td><button style="background:rgba(0,212,255,.1);border:1px solid var(--cyan);color:var(--cyan);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('All clear. Performing well.')">View</button></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── INVENTORY TAB ── -->
+    <div class="page-tab" id="tab-inventory">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+        <div><h3 style="font-family:'Orbitron',sans-serif;font-size:1rem">Inventory Management</h3><p style="color:var(--muted);font-size:.8rem">Stock items, issuance & teacher wallets</p></div>
+        <button class="btn-submit" onclick="alert('Stock IN form — add new items received from supplier')"><i class="fas fa-plus"></i> Stock IN</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card sc-cyan"><div class="stat-icon">📦</div><div class="stat-num">47</div><div class="stat-lbl">Total Item Types</div></div>
+        <div class="stat-card sc-gold"><div class="stat-icon">✅</div><div class="stat-num">38</div><div class="stat-lbl">Items Available</div></div>
+        <div class="stat-card" style="background:linear-gradient(135deg,var(--card),var(--card2));border-color:rgba(239,68,68,.3)"><div class="stat-icon">⚠️</div><div class="stat-num" style="color:var(--red)">3</div><div class="stat-lbl">Low Stock Alert</div></div>
+        <div class="stat-card sc-purple"><div class="stat-icon">🔄</div><div class="stat-num">12</div><div class="stat-lbl">Pending Requests</div></div>
+      </div>
+      <div class="dash-card">
+        <div class="dc-head"><div class="dc-title">All Inventory Items</div><input class="finput" style="width:200px" placeholder="Search item..."></div>
+        <table class="dash-table">
+          <tr><th>Item Name</th><th>Category</th><th>Type</th><th>Stock</th><th>Reorder At</th><th>Unit Cost</th><th>Status</th><th>Action</th></tr>
+          <tr><td><b>Pencil HB</b></td><td>Stationary</td><td><span class="badge badge-orange">Consumable</span></td><td style="color:var(--red)">12</td><td>50</td><td>Rs. 5</td><td><span class="badge badge-red">Low Stock</span></td><td><button style="background:rgba(255,215,0,.1);border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Issue item to teacher — select teacher and quantity')">Issue</button></td></tr>
+          <tr><td><b>Glue Gun</b></td><td>Stationary</td><td><span class="badge badge-cyan">Non-Consumable</span></td><td style="color:var(--green)">10</td><td>2</td><td>Rs. 250</td><td><span class="badge badge-green">OK</span></td><td><button style="background:rgba(255,215,0,.1);border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Issue Glue Gun to teacher — return date required for non-consumable items')">Issue</button></td></tr>
+          <tr><td><b>A4 Paper Ream</b></td><td>Stationary</td><td><span class="badge badge-orange">Consumable</span></td><td style="color:var(--orange)">3</td><td>5</td><td>Rs. 600</td><td><span class="badge badge-orange">Critical</span></td><td><button style="background:rgba(255,215,0,.1);border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Only 3 reams left! Place reorder immediately.')">Issue</button></td></tr>
+          <tr><td><b>Arduino Kit</b></td><td>Lab Equipment</td><td><span class="badge badge-cyan">Non-Consumable</span></td><td style="color:var(--green)">15</td><td>3</td><td>Rs. 3,500</td><td><span class="badge badge-green">OK</span></td><td><button style="background:rgba(255,215,0,.1);border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Issue Arduino Kit — requires return by end of semester')">Issue</button></td></tr>
+          <tr><td><b>Soap Bar</b></td><td>Grocery</td><td><span class="badge badge-orange">Consumable</span></td><td style="color:var(--green)">80</td><td>20</td><td>Rs. 30</td><td><span class="badge badge-green">OK</span></td><td><button style="background:rgba(255,215,0,.1);border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:6px;font-size:.72rem;cursor:pointer" onclick="alert('Issue soap')">Issue</button></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── CMS TAB ── -->
+    <div class="page-tab" id="tab-cms">
+      <h3 style="font-family:'Orbitron',sans-serif;font-size:1rem;margin-bottom:1rem">Website CMS — <span style="color:var(--cyan)">Content Management</span></h3>
+      <div class="grid-equal">
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">Website Pages</div><div class="dc-sub">Click to edit content</div></div>
+          <div class="dc-body">
+            <table class="dash-table">
+              <tr><th>Page</th><th>Status</th><th>Action</th></tr>
+              <tr><td>🏠 Home</td><td><span class="badge badge-green">Published</span></td><td><button class="dc-action" onclick="alert('Edit Home page:\n- Hero title\n- Stats numbers\n- Feature cards\n- CTA text\n\nAll changes go live instantly!')">Edit</button></td></tr>
+              <tr><td>ℹ️ About</td><td><span class="badge badge-green">Published</span></td><td><button class="dc-action" onclick="alert('Edit About page content')">Edit</button></td></tr>
+              <tr><td>📚 Academics</td><td><span class="badge badge-green">Published</span></td><td><button class="dc-action" onclick="alert('Edit Academics page')">Edit</button></td></tr>
+              <tr><td>🤖 STREAM</td><td><span class="badge badge-green">Published</span></td><td><button class="dc-action" onclick="alert('Edit STREAM/Robotics page')">Edit</button></td></tr>
+              <tr><td>🏪 Business Fair</td><td><span class="badge badge-green">Published</span></td><td><button class="dc-action" onclick="alert('Edit Business Fair page')">Edit</button></td></tr>
+              <tr><td>📝 Admissions</td><td><span class="badge badge-green">Published</span></td><td><button class="dc-action" onclick="alert('Edit Admissions page')">Edit</button></td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-head"><div class="dc-title">Post New Notice</div></div>
+          <div class="dc-body">
+            <div class="form-grp"><label>Notice Title</label><input class="finput" placeholder="e.g. Exam Schedule Announced"></div>
+            <div class="form-grp"><label>Message</label><textarea class="finput" style="resize:vertical;min-height:80px" placeholder="Notice details..."></textarea></div>
+            <div class="form-grp"><label>Target Audience</label>
+              <select class="fselect"><option>All (Teachers + Students + Parents)</option><option>Teachers Only</option><option>Students Only</option><option>Parents Only</option></select>
+            </div>
+            <div class="form-grp"><label>Priority</label>
+              <select class="fselect"><option>Medium</option><option>High</option><option>Urgent</option><option>Low</option></select>
+            </div>
+            <button class="btn-submit" style="width:100%" onclick="alert('✅ Notice published! It will appear on the website ticker and in all portal notification feeds.')">📢 Publish Notice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OTHER TABS (placeholder) ── -->
+    <div class="page-tab" id="tab-teachers"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">👨‍🏫</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Teacher Management</h3><p style="color:var(--muted)">85 teachers | Employee records, salary, attendance, leave management.</p><br><button class="btn-submit" onclick="alert('Teacher management module — connects to MySQL database via backend API')">View Teachers</button></div></div></div>
+    <div class="page-tab" id="tab-classes"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">🏫</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Classes & Sections</h3><p style="color:var(--muted)">15 classes, 35 sections | Timetable, teacher assignments, student allocation.</p><br><button class="btn-submit" onclick="alert('Classes module — timetable builder and section management')">Manage Classes</button></div></div></div>
+    <div class="page-tab" id="tab-exams"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📊</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Exams & Results</h3><p style="color:var(--muted)">Schedule exams, enter marks, generate report cards and position lists.</p><br><button class="btn-submit" onclick="alert('Exam module — schedule → enter marks → declare results → generate report cards')">Manage Exams</button></div></div></div>
+    <div class="page-tab" id="tab-attendance"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📅</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Attendance Records</h3><p style="color:var(--muted)">Daily attendance for all classes, monthly summaries, absentee alerts to parents.</p><br><button class="btn-submit" onclick="alert('Attendance module — daily marking, monthly reports, SMS alerts to parents')">View Attendance</button></div></div></div>
+    <div class="page-tab" id="tab-admissions"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📝</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Admissions (14 Pending)</h3><p style="color:var(--muted)">Review applications, schedule tests, send acceptance letters, enroll new students.</p><br><button class="btn-submit" onclick="alert('14 pending admission applications — review and process')">Review Applications</button></div></div></div>
+    <div class="page-tab" id="tab-fee"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">💰</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Fee Management</h3><p style="color:var(--muted)">Collect fees, print receipts, view overdue list, apply scholarships, generate monthly reports.</p><br><button class="btn-submit" onclick="alert('Fee module — collect → receipt → overdue → reports')">Collect Fee</button></div></div></div>
+    <div class="page-tab" id="tab-salary"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">💵</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Salary & Payroll</h3><p style="color:var(--muted)">Monthly salary processing, salary slips, increment management, deductions.</p><br><button class="btn-submit" onclick="alert('Process April 2026 salary for 85 staff members')">Process Salaries</button></div></div></div>
+    <div class="page-tab" id="tab-notices"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📢</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Notices & Circulars</h3><p style="color:var(--muted)">Post, schedule and manage all school notices. Notices appear on website ticker and portals.</p><br><button class="btn-submit" onclick="switchTab('cms',document.querySelector('[onclick*=cms]'))">Go to CMS</button></div></div></div>
+    <div class="page-tab" id="tab-library"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📚</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Library System</h3><p style="color:var(--muted)">Book catalog, issue/return tracking, overdue fines, subject-wise catalog.</p><br><button class="btn-submit" onclick="alert('Library module — 2,400 books | 45 currently issued')">View Catalog</button></div></div></div>
+    <div class="page-tab" id="tab-fair"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">🏪</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Business Fair 2025</h3><p style="color:var(--muted)">Create event, register stalls, allocate budgets, record revenues, announce winners.</p><br><button class="btn-submit" onclick="alert('Business Fair 2025 — Date: March 15 | 45 stalls registered so far')">Manage Fair</button></div></div></div>
+    <div class="page-tab" id="tab-users"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">👥</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">User Management</h3><p style="color:var(--muted)">Create/edit/delete user accounts. Assign roles and branch access. Reset passwords.</p><br><button class="btn-submit" onclick="alert('9 system users | Roles: super_admin, admin, principal, teacher×2, student, parent, accountant, store_keeper')">Manage Users</button></div></div></div>
+    <div class="page-tab" id="tab-reports"><div class="dash-card"><div class="dc-body" style="text-align:center;padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📈</div><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:.5rem">Reports & Analytics</h3><p style="color:var(--muted)">Academic performance, fee collection, attendance summaries, inventory usage, salary reports.</p><br><button class="btn-submit" onclick="alert('Generate Report → Select type → Select date range → Download PDF/Excel')">Generate Report</button></div></div></div>
+    <div class="page-tab" id="tab-settings"><div class="dash-card"><div class="dc-body" style="padding:2rem"><h3 style="font-family:'Orbitron',sans-serif;color:var(--cyan);margin-bottom:1.5rem;font-size:1rem">⚙️ System Settings</h3><div class="form-grid"><div class="form-grp"><label>School Name</label><input class="finput" value="AL Qalam International"></div><div class="form-grp"><label>Current Session</label><input class="finput" value="2025-26"></div><div class="form-grp"><label>Fee Due Day</label><input class="finput" value="10" type="number"></div><div class="form-grp"><label>Late Fee (per day)</label><input class="finput" value="50" type="number"></div><div class="form-grp"><label>Working Days</label><input class="finput" value="Mon, Tue, Wed, Thu, Fri, Sat"></div><div class="form-grp"><label>Contact Email</label><input class="finput" value="claude@alqalam.edu.pk"></div></div><button class="btn-submit" onclick="alert('✅ Settings saved successfully!')">Save Settings</button></div></div></div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+function switchTab(id, el){
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  const tab = document.getElementById('tab-'+id);
+  if(tab) tab.classList.add('active');
+  if(el) el.classList.add('active');
+  const titles = {
+    dashboard:'Dashboard Overview',students:'Student Management',teachers:'Teacher Management',
+    classes:'Classes & Sections',exams:'Exams & Results',attendance:'Attendance',
+    admissions:'Admissions',fee:'Fee Management',salary:'Salary & Payroll',
+    inventory:'Inventory Management',notices:'Notices & Circulars',library:'Library',
+    fair:'Business Fair',cms:'Website CMS',users:'User Management',
+    reports:'Reports & Analytics',settings:'System Settings'
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+
+function toggleFS(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+// Build fee chart
+(function(){
+  const chart = document.getElementById('feeChart');
+  if(!chart) return;
+  const months = ['Nov','Dec','Jan','Feb','Mar','Apr'];
+  const vals   = [380000,420000,390000,450000,410000,425000];
+  const max    = Math.max(...vals);
+  months.forEach((m,i)=>{
+    const pct = (vals[i]/max)*100;
+    const wrap = document.createElement('div');
+    wrap.className='chart-bar-wrap';
+    wrap.innerHTML=`<div class="chart-val">Rs.${(vals[i]/1000).toFixed(0)}K</div>
+      <div class="chart-bar-inner" style="height:${pct}%;background:linear-gradient(to top,var(--cyan),var(--purple))"></div>
+      <div class="chart-label">${m}</div>`;
+    chart.appendChild(wrap);
+  });
+})();
+</script>
+</body>
+</html>
