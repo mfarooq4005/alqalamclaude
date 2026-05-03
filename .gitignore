@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+alqalam_next/node_modules/
+alqalam_mobile/node_modules/
+
+# Environment (never commit secrets)
+.env
+.env.local
+.env.*.local
+alqalam_next/.env.local
+
+# Next.js
+alqalam_next/.next/
+alqalam_next/out/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.log
+
+# Debug
+npm-debug.log*

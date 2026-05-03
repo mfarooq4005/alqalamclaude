@@ -1,29 +1,40 @@
-# Legacy Freeze and Archive Plan
+# Legacy freeze and archive
 
-Legacy web assets are frozen as reference and no longer receive feature work.
+Legacy web and PHP assets are **archived** under `legacy_archive/` and are **not** part of the active stack.
 
-## Frozen legacy frontends
-- `portal_admin.html`
-- `portal_teacher.html`
-- `portal_student.html`
-- `portal_parent.html`
-- `alqalam_ems.html`
-- `alqalam_website.html`
-- `alqalam_website_3d.html`
-- `alqalam_identity_frontend.html`
-- `alqalam_site/*`
+## Archived legacy frontends
 
-## Frozen legacy backends
-- `alqalam_backend.php`
-- `alqalam_api.php`
-- `alqalam_fcm.php`
-- `config.php`
+- `legacy_archive/html/portal_admin.html`
+- `legacy_archive/html/portal_teacher.html`
+- `legacy_archive/html/portal_student.html`
+- `legacy_archive/html/portal_parent.html`
+- `legacy_archive/html/alqalam_ems.html`
+- `legacy_archive/html/alqalam_website.html`
+- `legacy_archive/html/alqalam_website_3d.html`
+- `legacy_archive/html/alqalam_identity_frontend.html`
+- `legacy_archive/alqalam_site/*`
+
+## Archived legacy backends and config
+
+- `legacy_archive/php/alqalam_backend.php`
+- `legacy_archive/php/alqalam_api.php`
+- `legacy_archive/php/alqalam_fcm.php`
+- `legacy_archive/php/config.php`
+
+## Archived documentation snapshots
+
+- `legacy_archive/docs/ALQALAM_SERVER_GUIDE.html`
+- `legacy_archive/docs/DEPLOYMENT_GUIDE.html`
+- `legacy_archive/docs/ALQALAM_PRODUCTION_GUIDE.html`
+- `legacy_archive/docs/alqalam_system_blueprint.md`
 
 ## Canonical runtime
-- Frontend: `alqalam_next`
-- Backend: `alqalam_node_server.js`
+
+- **Frontend:** `alqalam_next`
+- **Backend:** `alqalam_node_server.js` (repo root)
 
 ## Rules
-1. No new features in frozen files.
-2. Only emergency fixes allowed if production is blocked.
-3. All new module work must target Next + Node stack.
+
+1. No new features in archived files.
+2. Emergency fixes only if production still depends on archived PHP (prefer migrating to Node).
+3. All new work targets Next.js + Node API.
