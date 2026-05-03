@@ -205,6 +205,16 @@ app.post('/auth/change-password', auth(), async (req, res) => {
   res.json(success({ message: 'Password changed successfully' }));
 });
 
+app.get('/auth/me', auth(), async (req, res) => {
+  const [rows] = await pool.query(
+    `SELECT u.id, u.username, u.full_name, u.email, u.phone, u.branch_id, r.name AS role
+     FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ? LIMIT 1`,
+    [req.user.id]
+  );
+  if (!rows.length) return res.status(404).json(fail('User not found', 404));
+  res.json(success(rows[0]));
+});
+
 // ══════════════════════════════════════════════════════════════
 //  ROUTE: STUDENTS
 // ══════════════════════════════════════════════════════════════
@@ -277,6 +287,79 @@ app.post('/students', auth(['super_admin','admin','receptionist']), async (req, 
   } finally { conn.release(); }
 });
 
+app.put('/students/:id', auth(['super_admin','admin','receptionist']), async (req, res) => {
+  const { full_name, email, phone, class_id, section_id, status } = req.body;
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [rows] = await conn.query(`SELECT user_id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]);
+    if (!rows.length) {
+      await conn.rollback();
+      return res.status(404).json(fail('Student not found', 404));
+    }
+    const userId = rows[0].user_id;
+    await conn.query(`UPDATE users SET full_name = COALESCE(?,full_name), email = COALESCE(?,email), phone = COALESCE(?,phone) WHERE id = ?`, [full_name||null, email||null, phone||null, userId]);
+    await conn.query(`UPDATE students SET class_id = COALESCE(?,class_id), section_id = COALESCE(?,section_id), status = COALESCE(?,status) WHERE id = ?`, [class_id||null, section_id||null, status||null, req.params.id]);
+    await conn.commit();
+    res.json(success({ message: 'Student updated successfully' }));
+  } catch (e) {
+    await conn.rollback();
+    res.status(500).json(fail(e.message, 500));
+  } finally {
+    conn.release();
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  ROUTE: CLASSES / SECTIONS
+// ══════════════════════════════════════════════════════════════
+app.get('/classes', auth(), async (req, res) => {
+  const [rows] = await pool.query(`SELECT * FROM classes WHERE branch_id = ? ORDER BY display_order, name`, [req.user.branch_id]);
+  res.json(success({ items: rows, total: rows.length }));
+});
+
+app.post('/classes', auth(['super_admin','admin','principal']), async (req, res) => {
+  const { name, display_order } = req.body;
+  if (!name) return res.status(400).json(fail('name is required'));
+  const [result] = await pool.query(
+    `INSERT INTO classes (branch_id, name, display_order, is_active) VALUES (?,?,?,1)`,
+    [req.user.branch_id, name, display_order || 0]
+  );
+  res.status(201).json(success({ id: result.insertId, message: 'Class created' }));
+});
+
+app.put('/classes/:id', auth(['super_admin','admin','principal']), async (req, res) => {
+  const { name, display_order, is_active } = req.body;
+  await pool.query(
+    `UPDATE classes SET name = COALESCE(?,name), display_order = COALESCE(?,display_order), is_active = COALESCE(?,is_active) WHERE id = ? AND branch_id = ?`,
+    [name||null, display_order ?? null, is_active ?? null, req.params.id, req.user.branch_id]
+  );
+  res.json(success({ message: 'Class updated' }));
+});
+
+app.get('/sections', auth(), async (req, res) => {
+  const classId = req.query.class_id || null;
+  let q = `SELECT sec.*, c.name AS class_name FROM sections sec JOIN classes c ON sec.class_id = c.id WHERE c.branch_id = ?`;
+  const p = [req.user.branch_id];
+  if (classId) {
+    q += ` AND sec.class_id = ?`;
+    p.push(classId);
+  }
+  q += ` ORDER BY sec.name`;
+  const [rows] = await pool.query(q, p);
+  res.json(success({ items: rows, total: rows.length }));
+});
+
+app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
+  const { class_id, name } = req.body;
+  if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [result] = await pool.query(
+    `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
+    [class_id, name]
+  );
+  res.status(201).json(success({ id: result.insertId, message: 'Section created' }));
+});
+
 // ══════════════════════════════════════════════════════════════
 //  ROUTE: FEE
 // ══════════════════════════════════════════════════════════════
@@ -341,6 +424,47 @@ app.get('/fee/arrears', auth(['super_admin','admin','accountant','principal']), 
      ORDER BY fa.balance DESC`, [req.user.branch_id]
   );
   res.json(success({ items: rows, total: rows.length }));
+});
+
+app.get('/fee/student/:studentId', auth(), async (req, res) => {
+  const [rows] = await pool.query(
+    `SELECT fp.*, u.full_name AS student_name
+     FROM fee_payments fp
+     JOIN students s ON fp.student_id = s.id
+     JOIN users u ON s.user_id = u.id
+     WHERE fp.student_id = ? AND s.branch_id = ?
+     ORDER BY fp.due_date DESC`,
+    [req.params.studentId, req.user.branch_id]
+  );
+  res.json(success({ items: rows, total: rows.length }));
+});
+
+app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), async (req, res) => {
+  const { class_id, month, amount_due, due_date } = req.body;
+  if (!class_id || !month) return res.status(400).json(fail('class_id and month are required'));
+
+  const [students] = await pool.query(
+    `SELECT s.id AS student_id, s.roll_number, u.full_name
+     FROM students s JOIN users u ON s.user_id = u.id
+     WHERE s.branch_id = ? AND s.class_id = ? AND s.status = 'active'`,
+    [req.user.branch_id, class_id]
+  );
+  if (!students.length) return res.status(404).json(fail('No active students found for selected class', 404));
+
+  const amt = Number(amount_due || 5000);
+  let generated = 0;
+  for (const st of students) {
+    const invoiceNo = `INV-${month}-${String(st.student_id).padStart(5, '0')}`;
+    await pool.query(
+      `INSERT INTO fee_payments (student_id, branch_id, invoice_no, amount_due, amount_paid, due_date, status, month, created_by)
+       VALUES (?,?,?,?,0,?, 'pending', ?, ?)
+       ON DUPLICATE KEY UPDATE amount_due=VALUES(amount_due), due_date=VALUES(due_date), updated_at=NOW()`,
+      [st.student_id, req.user.branch_id, invoiceNo, amt, due_date || `${month}-10`, month, req.user.id]
+    );
+    generated++;
+  }
+  io.emit('challans_generated', { class_id, month, total: generated });
+  res.status(201).json(success({ message: 'Challans generated successfully', class_id, month, generated }));
 });
 
 app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req, res) => {
@@ -458,6 +582,66 @@ app.get('/staff', auth(['super_admin','admin','principal','hr_manager']), async 
     [req.user.branch_id, per, offset]
   );
   res.json(success({ items: rows, total, page }));
+});
+
+app.post('/staff', auth(['super_admin','admin','principal','hr_manager']), async (req, res) => {
+  const { full_name, email, phone, role_name, qualification, joining_date, basic_salary } = req.body;
+  if (!full_name || !email) return res.status(400).json(fail('full_name and email are required'));
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [roleRows] = await conn.query(`SELECT id FROM roles WHERE name = ? LIMIT 1`, [role_name || 'teacher']);
+    if (!roleRows.length) {
+      await conn.rollback();
+      return res.status(400).json(fail('Invalid role_name'));
+    }
+    const username = `${(role_name || 'staff').slice(0,3)}_${Date.now()}`;
+    const password_hash = await bcrypt.hash('Staff@123', 10);
+    const [u] = await conn.query(
+      `INSERT INTO users (branch_id, role_id, username, email, password_hash, full_name, phone, is_active)
+       VALUES (?,?,?,?,?,?,?,1)`,
+      [req.user.branch_id, roleRows[0].id, username, email, password_hash, full_name, phone || null]
+    );
+    await conn.query(
+      `INSERT INTO teachers (user_id, branch_id, qualification, joining_date, basic_salary, status)
+       VALUES (?,?,?,?,?, 'active')`,
+      [u.insertId, req.user.branch_id, qualification || null, joining_date || new Date().toISOString().split('T')[0], basic_salary || 0]
+    );
+    await conn.commit();
+    res.status(201).json(success({ message: 'Staff member created', user_id: u.insertId, username }));
+  } catch (e) {
+    await conn.rollback();
+    res.status(500).json(fail(e.message, 500));
+  } finally {
+    conn.release();
+  }
+});
+
+app.put('/staff/:id', auth(['super_admin','admin','principal','hr_manager']), async (req, res) => {
+  const { full_name, email, phone, qualification, joining_date, basic_salary, status } = req.body;
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [rows] = await conn.query(`SELECT user_id FROM teachers WHERE id = ? AND branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]);
+    if (!rows.length) {
+      await conn.rollback();
+      return res.status(404).json(fail('Staff member not found', 404));
+    }
+    const userId = rows[0].user_id;
+    await conn.query(`UPDATE users SET full_name = COALESCE(?,full_name), email = COALESCE(?,email), phone = COALESCE(?,phone) WHERE id = ?`, [full_name||null, email||null, phone||null, userId]);
+    await conn.query(
+      `UPDATE teachers SET qualification = COALESCE(?,qualification), joining_date = COALESCE(?,joining_date), basic_salary = COALESCE(?,basic_salary), status = COALESCE(?,status) WHERE id = ?`,
+      [qualification||null, joining_date||null, basic_salary ?? null, status||null, req.params.id]
+    );
+    await conn.commit();
+    res.json(success({ message: 'Staff member updated' }));
+  } catch (e) {
+    await conn.rollback();
+    res.status(500).json(fail(e.message, 500));
+  } finally {
+    conn.release();
+  }
 });
 
 app.get('/salary/sheet', auth(['super_admin','admin','accountant','hr_manager']), async (req, res) => {
