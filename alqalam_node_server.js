@@ -254,7 +254,7 @@ app.get('/students/:id', auth(), async (req, res) => {
             c.name AS class_name, sec.name AS section_name
      FROM students s JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id LEFT JOIN sections sec ON s.section_id = sec.id
-     WHERE s.id = ? LIMIT 1`, [req.params.id]
+     WHERE s.id = ? AND s.branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]
   );
   if (!rows.length) return res.status(404).json(fail('Student not found', 404));
   res.json(success(rows[0]));
@@ -263,6 +263,19 @@ app.get('/students/:id', auth(), async (req, res) => {
 app.post('/students', auth(['super_admin','admin','receptionist']), async (req, res) => {
   const { full_name, email, phone, class_id, section_id, roll_number, admission_date, father_name, father_phone } = req.body;
   if (!full_name || !class_id) return res.status(400).json(fail('full_name and class_id are required'));
+  const [[cls]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!cls) return res.status(404).json(fail('Class not found', 404));
+  if (section_id) {
+    const [[sec]] = await pool.query(
+      `SELECT sec.id FROM sections sec JOIN classes c ON sec.class_id = c.id
+       WHERE sec.id = ? AND c.id = ? AND c.branch_id = ? LIMIT 1`,
+      [section_id, class_id, req.user.branch_id]
+    );
+    if (!sec) return res.status(404).json(fail('Section not found for this class', 404));
+  }
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -292,10 +305,32 @@ app.put('/students/:id', auth(['super_admin','admin','receptionist']), async (re
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
-    const [rows] = await conn.query(`SELECT user_id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]);
+    const [rows] = await conn.query(
+      `SELECT user_id, class_id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`,
+      [req.params.id, req.user.branch_id]
+    );
     if (!rows.length) {
       await conn.rollback();
       return res.status(404).json(fail('Student not found', 404));
+    }
+    if (class_id) {
+      const [[cls]] = await conn.query(`SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`, [class_id, req.user.branch_id]);
+      if (!cls) {
+        await conn.rollback();
+        return res.status(404).json(fail('Class not found', 404));
+      }
+    }
+    if (section_id) {
+      const effectiveClassId = class_id || rows[0].class_id;
+      const [[sec]] = await conn.query(
+        `SELECT sec.id FROM sections sec JOIN classes c ON sec.class_id = c.id
+         WHERE sec.id = ? AND c.id = ? AND c.branch_id = ? LIMIT 1`,
+        [section_id, effectiveClassId, req.user.branch_id]
+      );
+      if (!sec) {
+        await conn.rollback();
+        return res.status(404).json(fail('Section not found for this class', 404));
+      }
     }
     const userId = rows[0].user_id;
     await conn.query(`UPDATE users SET full_name = COALESCE(?,full_name), email = COALESCE(?,email), phone = COALESCE(?,phone) WHERE id = ?`, [full_name||null, email||null, phone||null, userId]);
@@ -353,6 +388,11 @@ app.get('/sections', auth(), async (req, res) => {
 app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
   const { class_id, name } = req.body;
   if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [[cls]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!cls) return res.status(404).json(fail('Class not found', 404));
   const [result] = await pool.query(
     `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
     [class_id, name]
