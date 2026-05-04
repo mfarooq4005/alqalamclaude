@@ -254,7 +254,7 @@ app.get('/students/:id', auth(), async (req, res) => {
             c.name AS class_name, sec.name AS section_name
      FROM students s JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id LEFT JOIN sections sec ON s.section_id = sec.id
-     WHERE s.id = ? LIMIT 1`, [req.params.id]
+     WHERE s.id = ? AND s.branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]
   );
   if (!rows.length) return res.status(404).json(fail('Student not found', 404));
   res.json(success(rows[0]));
