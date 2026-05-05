@@ -254,7 +254,7 @@ app.get('/students/:id', auth(), async (req, res) => {
             c.name AS class_name, sec.name AS section_name
      FROM students s JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id LEFT JOIN sections sec ON s.section_id = sec.id
-     WHERE s.id = ? LIMIT 1`, [req.params.id]
+     WHERE s.id = ? AND s.branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]
   );
   if (!rows.length) return res.status(404).json(fail('Student not found', 404));
   res.json(success(rows[0]));
@@ -353,6 +353,8 @@ app.get('/sections', auth(), async (req, res) => {
 app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
   const { class_id, name } = req.body;
   if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [[ownClass]] = await pool.query(`SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`, [class_id, req.user.branch_id]);
+  if (!ownClass) return res.status(404).json(fail('Class not found', 404));
   const [result] = await pool.query(
     `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
     [class_id, name]
@@ -393,11 +395,20 @@ app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req,
   const method  = methods.includes(payment_method) ? payment_method : 'cash';
   const rcpNo   = receipt_no || `RCP-${Date.now()}`;
 
+  const [[pending]] = await pool.query(
+    `SELECT fp.id FROM fee_payments fp
+     INNER JOIN students st ON fp.student_id = st.id
+     WHERE fp.student_id = ? AND st.branch_id = ? AND fp.status IN ('pending','partial')
+     ORDER BY fp.due_date ASC LIMIT 1`,
+    [student_id, req.user.branch_id]
+  );
+  if (!pending) return res.status(404).json(fail('No pending fee found for this student'));
+
   const [result] = await pool.query(
     `UPDATE fee_payments SET amount_paid=?, payment_method=?, receipt_no=?, payment_date=CURDATE(),
      status=IF(?>=amount_due,'paid','partial'), collected_by=?
-     WHERE student_id=? AND status IN('pending','partial') ORDER BY due_date ASC LIMIT 1`,
-    [amount_paid, method, rcpNo, amount_paid, req.user.id, student_id]
+     WHERE id = ?`,
+    [amount_paid, method, rcpNo, amount_paid, req.user.id, pending.id]
   );
   if (result.affectedRows === 0) return res.status(404).json(fail('No pending fee found for this student'));
 
@@ -405,7 +416,10 @@ app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req,
   io.emit('fee_collected', { student_id, amount: amount_paid, method, time: new Date().toISOString() });
 
   // WhatsApp notification (async, don't block response)
-  const [st] = await pool.query(`SELECT u.phone, u.full_name FROM students s JOIN users u ON s.user_id=u.id WHERE s.id=?`, [student_id]);
+  const [st] = await pool.query(
+    `SELECT u.phone, u.full_name FROM students s JOIN users u ON s.user_id=u.id WHERE s.id=? AND s.branch_id=?`,
+    [student_id, req.user.branch_id]
+  );
   if (st.length && process.env.TWILIO_SID && !process.env.TWILIO_SID.startsWith('ACxxxx')) {
     sendWhatsApp(st[0].phone, `✅ Fee Received\nStudent: ${st[0].full_name}\nAmount: Rs. ${parseInt(amount_paid).toLocaleString()}\nReceipt: ${rcpNo}\nMethod: ${method}\n\n— AL Qalam International`).catch(()=>{});
   }
@@ -470,6 +484,8 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
 app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req, res) => {
   const { student_id, amount, valid_for, payment_mode, bank_name, cheque_no, receipt_no } = req.body;
   if (!student_id || !amount) return res.status(400).json(fail('student_id and amount required'));
+  const [[st]] = await pool.query(`SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!st) return res.status(404).json(fail('Student not found', 404));
   await pool.query(
     `INSERT INTO fee_advance_payments (student_id, branch_id, amount, paid_date, valid_for, receipt_no, payment_mode, bank_name, cheque_no, collected_by)
      VALUES (?,?,?,CURDATE(),?,?,?,?,?,?)`,
@@ -508,6 +524,18 @@ app.get('/attendance/today', auth(['super_admin','admin','principal','teacher'])
 app.post('/attendance/bulk', auth(['super_admin','admin','teacher']), async (req, res) => {
   const { class_id, date, records } = req.body; // records: [{student_id, status, remarks}]
   if (!class_id || !records?.length) return res.status(400).json(fail('class_id and records required'));
+  const [[cls]] = await pool.query(`SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`, [class_id, req.user.branch_id]);
+  if (!cls) return res.status(404).json(fail('Class not found', 404));
+  const studentIds = [...new Set(records.map(r => r.student_id).filter(Boolean))];
+  if (!studentIds.length) return res.status(400).json(fail('records must include student_id'));
+  const placeholders = studentIds.map(() => '?').join(',');
+  const [stRows] = await pool.query(
+    `SELECT id FROM students WHERE branch_id = ? AND class_id = ? AND id IN (${placeholders})`,
+    [req.user.branch_id, class_id, ...studentIds]
+  );
+  if (stRows.length !== studentIds.length) {
+    return res.status(400).json(fail('One or more students are not in this class at your branch'));
+  }
   const attendanceDate = date || new Date().toISOString().split('T')[0];
   const values = records.map(r => [r.student_id, attendanceDate, r.status||'absent', r.remarks||null, req.user.id]);
   await pool.query(
@@ -673,8 +701,13 @@ app.get('/library/books', auth(), async (req, res) => {
 app.post('/library/issue', auth(['super_admin','admin','librarian']), async (req, res) => {
   const { book_id, student_id, due_date } = req.body;
   if (!book_id || !student_id) return res.status(400).json(fail('book_id and student_id required'));
-  const [[book]] = await pool.query(`SELECT * FROM library_books WHERE id=? AND (total_copies - issued_copies) > 0`, [book_id]);
+  const [[book]] = await pool.query(
+    `SELECT * FROM library_books WHERE id=? AND branch_id=? AND (total_copies - issued_copies) > 0`,
+    [book_id, req.user.branch_id]
+  );
   if (!book) return res.status(400).json(fail('Book not available'));
+  const [[student]] = await pool.query(`SELECT id FROM students WHERE id=? AND branch_id=? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!student) return res.status(404).json(fail('Student not found', 404));
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
@@ -690,13 +723,19 @@ app.post('/library/issue', auth(['super_admin','admin','librarian']), async (req
 });
 
 app.put('/library/return/:issueId', auth(['super_admin','admin','librarian']), async (req, res) => {
+  const [[issueRow]] = await pool.query(
+    `SELECT li.id, li.book_id FROM library_issues li
+     INNER JOIN library_books b ON li.book_id = b.id
+     WHERE li.id = ? AND li.status = 'issued' AND b.branch_id = ? LIMIT 1`,
+    [req.params.issueId, req.user.branch_id]
+  );
+  if (!issueRow) return res.status(404).json(fail('Issue record not found or already returned'));
   const [result] = await pool.query(
     `UPDATE library_issues SET return_date=CURDATE(), status='returned' WHERE id=? AND status='issued'`,
-    [req.params.issueId]
+    [issueRow.id]
   );
   if (!result.affectedRows) return res.status(404).json(fail('Issue record not found or already returned'));
-  const [[issue]] = await pool.query(`SELECT book_id FROM library_issues WHERE id=?`, [req.params.issueId]);
-  await pool.query(`UPDATE library_books SET issued_copies = issued_copies - 1 WHERE id=?`, [issue.book_id]);
+  await pool.query(`UPDATE library_books SET issued_copies = issued_copies - 1 WHERE id=?`, [issueRow.book_id]);
   res.json(success({ message: 'Book returned successfully' }));
 });
 
@@ -715,7 +754,9 @@ app.get('/transport/routes/:id/students', auth(['super_admin','admin','transport
      JOIN students s ON ts.student_id = s.id
      JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id
-     WHERE ts.route_id = ? AND ts.status='active'`, [req.params.id]
+     JOIN transport_routes tr ON ts.route_id = tr.id
+     WHERE ts.route_id = ? AND tr.branch_id = ? AND ts.status='active'`,
+    [req.params.id, req.user.branch_id]
   );
   res.json(success({ items: rows, total: rows.length }));
 });
@@ -723,6 +764,9 @@ app.get('/transport/routes/:id/students', auth(['super_admin','admin','transport
 app.post('/transport/enroll', auth(['super_admin','admin','transport_manager']), async (req, res) => {
   const { student_id, route_id, pickup_stop } = req.body;
   if (!student_id || !route_id) return res.status(400).json(fail('student_id and route_id required'));
+  const [[route]] = await pool.query(`SELECT id FROM transport_routes WHERE id = ? AND branch_id = ? LIMIT 1`, [route_id, req.user.branch_id]);
+  const [[student]] = await pool.query(`SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!route || !student) return res.status(404).json(fail('Student or route not found', 404));
   await pool.query(
     `INSERT INTO transport_students (student_id, route_id, pickup_stop, enrolled_date, status) VALUES (?,?,?,CURDATE(),'active')
      ON DUPLICATE KEY UPDATE route_id=VALUES(route_id), pickup_stop=VALUES(pickup_stop), status='active'`,
@@ -754,11 +798,13 @@ app.get('/examination/schedule/:examId', auth(), async (req, res) => {
     `SELECT es.*, sub.name AS subject_name, c.name AS class_name,
             u.full_name AS invigilator_name
      FROM exam_schedule es
+     JOIN exams ex ON es.exam_id = ex.id
      JOIN subjects sub ON es.subject_id = sub.id
      JOIN classes c ON es.class_id = c.id
      LEFT JOIN teachers t ON es.invigilator_id = t.id
      LEFT JOIN users u ON t.user_id = u.id
-     WHERE es.exam_id = ? ORDER BY es.exam_date, es.start_time`, [req.params.examId]
+     WHERE es.exam_id = ? AND ex.branch_id = ? ORDER BY es.exam_date, es.start_time`,
+    [req.params.examId, req.user.branch_id]
   );
   res.json(success({ items: rows, total: rows.length }));
 });
@@ -766,6 +812,13 @@ app.get('/examination/schedule/:examId', auth(), async (req, res) => {
 app.post('/examination/results', auth(['super_admin','admin','teacher','exam_controller']), async (req, res) => {
   const { student_id, exam_id, subject_id, marks_obtained, total_marks, remarks } = req.body;
   if (!student_id || !exam_id || !subject_id) return res.status(400).json(fail('student_id, exam_id, subject_id required'));
+  const [[scopeOk]] = await pool.query(
+    `SELECT 1 AS ok FROM exams e
+     INNER JOIN students s ON s.id = ? AND s.branch_id = e.branch_id
+     WHERE e.id = ? AND e.branch_id = ? LIMIT 1`,
+    [student_id, exam_id, req.user.branch_id]
+  );
+  if (!scopeOk) return res.status(404).json(fail('Student or exam not found for this branch', 404));
   const grade = calcGrade(marks_obtained, total_marks||100);
   await pool.query(
     `INSERT INTO results (student_id, exam_id, subject_id, marks_obtained, total_marks, grade, remarks, entered_by)
