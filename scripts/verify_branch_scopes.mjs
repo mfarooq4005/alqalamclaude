@@ -24,6 +24,7 @@ const mustContain = [
   ["transport enroll route branch", "transport_routes WHERE id = ? AND branch_id = ?"],
   ["exam schedule joins exams branch", "JOIN exams ex ON es.exam_id = ex.id"],
   ["exam results scope", "FROM exams e"],
+  ["fee closing branch override super_admin only", "req.user.role === 'super_admin' && branch_id"],
 ];
 
 let failed = 0;

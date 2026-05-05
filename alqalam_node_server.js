@@ -497,7 +497,11 @@ app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req,
 app.post('/fee/closing/generate', auth(['super_admin','admin','accountant']), async (req, res) => {
   const { branch_id, month } = req.body;
   if (!month) return res.status(400).json(fail('month is required (YYYY-MM format)'));
-  const [rows] = await pool.query(`CALL GenerateFeeClosingReport(?, ?)`, [branch_id||req.user.branch_id, month]);
+  let targetBranchId = req.user.branch_id;
+  if (req.user.role === 'super_admin' && branch_id != null && branch_id !== '') {
+    targetBranchId = branch_id;
+  }
+  const [rows] = await pool.query(`CALL GenerateFeeClosingReport(?, ?)`, [targetBranchId, month]);
   res.json(success(rows[0]?.[0] || { message: 'Report generated', month }));
 });
 
