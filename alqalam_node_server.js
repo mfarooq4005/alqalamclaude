@@ -248,13 +248,13 @@ app.get('/students', auth(['super_admin','admin','principal','teacher','accounta
   res.json(success({ items: students, total, page, pages: Math.ceil(total/per) }));
 });
 
-app.get('/students/:id', auth(), async (req, res) => {
+app.get('/students/:id', auth(['super_admin','admin','principal','teacher','accountant','receptionist']), async (req, res) => {
   const [rows] = await pool.query(
     `SELECT s.*, u.full_name, u.email, u.phone, u.gender, u.dob, u.address,
             c.name AS class_name, sec.name AS section_name
      FROM students s JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id LEFT JOIN sections sec ON s.section_id = sec.id
-     WHERE s.id = ? LIMIT 1`, [req.params.id]
+     WHERE s.id = ? AND s.branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]
   );
   if (!rows.length) return res.status(404).json(fail('Student not found', 404));
   res.json(success(rows[0]));
@@ -393,11 +393,21 @@ app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req,
   const method  = methods.includes(payment_method) ? payment_method : 'cash';
   const rcpNo   = receipt_no || `RCP-${Date.now()}`;
 
+  // Scope to this branch (student_id alone is not tenant-safe).
+  const [pending] = await pool.query(
+    `SELECT fp.id FROM fee_payments fp
+     INNER JOIN students s ON fp.student_id = s.id
+     WHERE fp.student_id = ? AND fp.status IN ('pending','partial') AND s.branch_id = ?
+     ORDER BY fp.due_date ASC LIMIT 1`,
+    [student_id, req.user.branch_id]
+  );
+  if (!pending.length) return res.status(404).json(fail('No pending fee found for this student'));
+
   const [result] = await pool.query(
     `UPDATE fee_payments SET amount_paid=?, payment_method=?, receipt_no=?, payment_date=CURDATE(),
      status=IF(?>=amount_due,'paid','partial'), collected_by=?
-     WHERE student_id=? AND status IN('pending','partial') ORDER BY due_date ASC LIMIT 1`,
-    [amount_paid, method, rcpNo, amount_paid, req.user.id, student_id]
+     WHERE id = ?`,
+    [amount_paid, method, rcpNo, amount_paid, req.user.id, pending[0].id]
   );
   if (result.affectedRows === 0) return res.status(404).json(fail('No pending fee found for this student'));
 
@@ -405,7 +415,10 @@ app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req,
   io.emit('fee_collected', { student_id, amount: amount_paid, method, time: new Date().toISOString() });
 
   // WhatsApp notification (async, don't block response)
-  const [st] = await pool.query(`SELECT u.phone, u.full_name FROM students s JOIN users u ON s.user_id=u.id WHERE s.id=?`, [student_id]);
+  const [st] = await pool.query(
+    `SELECT u.phone, u.full_name FROM students s JOIN users u ON s.user_id=u.id WHERE s.id=? AND s.branch_id=?`,
+    [student_id, req.user.branch_id]
+  );
   if (st.length && process.env.TWILIO_SID && !process.env.TWILIO_SID.startsWith('ACxxxx')) {
     sendWhatsApp(st[0].phone, `✅ Fee Received\nStudent: ${st[0].full_name}\nAmount: Rs. ${parseInt(amount_paid).toLocaleString()}\nReceipt: ${rcpNo}\nMethod: ${method}\n\n— AL Qalam International`).catch(()=>{});
   }
@@ -470,6 +483,13 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
 app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req, res) => {
   const { student_id, amount, valid_for, payment_mode, bank_name, cheque_no, receipt_no } = req.body;
   if (!student_id || !amount) return res.status(400).json(fail('student_id and amount required'));
+
+  const [[studentRow]] = await pool.query(
+    `SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [student_id, req.user.branch_id]
+  );
+  if (!studentRow) return res.status(404).json(fail('Student not found', 404));
+
   await pool.query(
     `INSERT INTO fee_advance_payments (student_id, branch_id, amount, paid_date, valid_for, receipt_no, payment_mode, bank_name, cheque_no, collected_by)
      VALUES (?,?,?,CURDATE(),?,?,?,?,?,?)`,
