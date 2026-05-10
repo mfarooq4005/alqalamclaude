@@ -353,6 +353,11 @@ app.get('/sections', auth(), async (req, res) => {
 app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
   const { class_id, name } = req.body;
   if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [cls] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!cls.length) return res.status(400).json(fail('class_id does not belong to this branch'));
   const [result] = await pool.query(
     `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
     [class_id, name]
@@ -427,6 +432,28 @@ app.get('/fee/arrears', auth(['super_admin','admin','accountant','principal']), 
 });
 
 app.get('/fee/student/:studentId', auth(), async (req, res) => {
+  const studentId = req.params.studentId;
+  const staffRoles = ['super_admin','admin','accountant','principal','vice_principal','teacher','receptionist','hr_manager'];
+  let mayView = staffRoles.includes(req.user.role);
+  if (!mayView && req.user.role === 'parent') {
+    const [[row]] = await pool.query(
+      `SELECT COUNT(*) AS n FROM parents p
+       INNER JOIN student_parent_link spl ON spl.parent_id = p.id
+       INNER JOIN students s ON s.id = spl.student_id
+       WHERE p.user_id = ? AND spl.student_id = ? AND s.branch_id = ?`,
+      [req.user.id, studentId, req.user.branch_id]
+    );
+    mayView = row.n > 0;
+  }
+  if (!mayView && req.user.role === 'student') {
+    const [[row]] = await pool.query(
+      `SELECT COUNT(*) AS n FROM students s WHERE s.id = ? AND s.user_id = ? AND s.branch_id = ?`,
+      [studentId, req.user.id, req.user.branch_id]
+    );
+    mayView = row.n > 0;
+  }
+  if (!mayView) return res.status(403).json(fail('Forbidden — cannot view this student fee record', 403));
+
   const [rows] = await pool.query(
     `SELECT fp.*, u.full_name AS student_name
      FROM fee_payments fp
@@ -434,7 +461,7 @@ app.get('/fee/student/:studentId', auth(), async (req, res) => {
      JOIN users u ON s.user_id = u.id
      WHERE fp.student_id = ? AND s.branch_id = ?
      ORDER BY fp.due_date DESC`,
-    [req.params.studentId, req.user.branch_id]
+    [studentId, req.user.branch_id]
   );
   res.json(success({ items: rows, total: rows.length }));
 });
@@ -458,7 +485,10 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
     await pool.query(
       `INSERT INTO fee_payments (student_id, branch_id, invoice_no, amount_due, amount_paid, due_date, status, month, created_by)
        VALUES (?,?,?,?,0,?, 'pending', ?, ?)
-       ON DUPLICATE KEY UPDATE amount_due=VALUES(amount_due), due_date=VALUES(due_date), updated_at=NOW()`,
+       ON DUPLICATE KEY UPDATE
+         amount_due = IF(status IN ('pending','partial','overdue'), VALUES(amount_due), amount_due),
+         due_date   = IF(status IN ('pending','partial','overdue'), VALUES(due_date), due_date),
+         updated_at = IF(status IN ('pending','partial','overdue'), NOW(), updated_at)`,
       [st.student_id, req.user.branch_id, invoiceNo, amt, due_date || `${month}-10`, month, req.user.id]
     );
     generated++;
