@@ -22,6 +22,7 @@ const bcrypt       = require('bcryptjs');
 const rateLimit    = require('express-rate-limit');
 const { Server }   = require('socket.io');
 const http         = require('http');
+const { verifyStoredPassword } = require('./password_verify');
 
 const app    = express();
 const server = http.createServer(app);
@@ -157,10 +158,7 @@ app.post('/auth/login', async (req, res) => {
   if (!rows.length) return res.status(401).json(fail('Invalid credentials'));
 
   const user = rows[0];
-  // For DEMO: allow plain-text comparison if hash starts with $2 (bcrypt) else direct
-  const valid = user.password_hash.startsWith('$2')
-    ? await bcrypt.compare(password, user.password_hash)
-    : password === user.password_hash; // demo mode
+  const valid = await verifyStoredPassword(password, user.password_hash);
 
   if (!valid) {
     await pool.query(`INSERT INTO login_logs (user_id,username,role,ip_address,action,status,fail_reason) VALUES (?,?,?,?,?,?,?)`,
@@ -197,11 +195,12 @@ app.post('/auth/change-password', auth(), async (req, res) => {
   if (new_password.length < 8) return res.status(400).json(fail('New password must be at least 8 characters'));
 
   const [rows] = await pool.query('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
-  const valid   = await bcrypt.compare(current_password, rows[0]?.password_hash || '');
+  const storedHash = rows[0]?.password_hash;
+  const valid = await verifyStoredPassword(current_password, storedHash);
   if (!valid) return res.status(400).json(fail('Current password is wrong'));
 
-  const hash = await bcrypt.hash(new_password, 12);
-  await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hash, req.user.id]);
+  const newHash = await bcrypt.hash(new_password, 12);
+  await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, req.user.id]);
   res.json(success({ message: 'Password changed successfully' }));
 });
 
@@ -254,7 +253,7 @@ app.get('/students/:id', auth(), async (req, res) => {
             c.name AS class_name, sec.name AS section_name
      FROM students s JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id LEFT JOIN sections sec ON s.section_id = sec.id
-     WHERE s.id = ? LIMIT 1`, [req.params.id]
+     WHERE s.id = ? AND s.branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]
   );
   if (!rows.length) return res.status(404).json(fail('Student not found', 404));
   res.json(success(rows[0]));
@@ -353,6 +352,8 @@ app.get('/sections', auth(), async (req, res) => {
 app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
   const { class_id, name } = req.body;
   if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [crows] = await pool.query(`SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`, [class_id, req.user.branch_id]);
+  if (!crows.length) return res.status(400).json(fail('Invalid class_id for this branch'));
   const [result] = await pool.query(
     `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
     [class_id, name]
@@ -393,19 +394,44 @@ app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req,
   const method  = methods.includes(payment_method) ? payment_method : 'cash';
   const rcpNo   = receipt_no || `RCP-${Date.now()}`;
 
-  const [result] = await pool.query(
-    `UPDATE fee_payments SET amount_paid=?, payment_method=?, receipt_no=?, payment_date=CURDATE(),
-     status=IF(?>=amount_due,'paid','partial'), collected_by=?
-     WHERE student_id=? AND status IN('pending','partial') ORDER BY due_date ASC LIMIT 1`,
-    [amount_paid, method, rcpNo, amount_paid, req.user.id, student_id]
-  );
-  if (result.affectedRows === 0) return res.status(404).json(fail('No pending fee found for this student'));
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [pending] = await conn.query(
+      `SELECT fp.id FROM fee_payments fp
+       INNER JOIN students st ON st.id = fp.student_id AND st.branch_id = ?
+       WHERE fp.student_id = ? AND fp.status IN ('pending','partial')
+       ORDER BY fp.due_date ASC LIMIT 1
+       FOR UPDATE`,
+      [req.user.branch_id, student_id]
+    );
+    if (!pending.length) {
+      await conn.rollback();
+      return res.status(404).json(fail('No pending fee found for this student'));
+    }
+    const fpId = pending[0].id;
+    await conn.query(
+      `UPDATE fee_payments SET amount_paid=?, payment_method=?, receipt_no=?, payment_date=CURDATE(),
+       status=IF(?>=amount_due,'paid','partial'), collected_by=?
+       WHERE id = ?`,
+      [amount_paid, method, rcpNo, amount_paid, req.user.id, fpId]
+    );
+    await conn.commit();
+  } catch (e) {
+    await conn.rollback();
+    return res.status(500).json(fail(e.message, 500));
+  } finally {
+    conn.release();
+  }
 
   // Emit real-time
   io.emit('fee_collected', { student_id, amount: amount_paid, method, time: new Date().toISOString() });
 
   // WhatsApp notification (async, don't block response)
-  const [st] = await pool.query(`SELECT u.phone, u.full_name FROM students s JOIN users u ON s.user_id=u.id WHERE s.id=?`, [student_id]);
+  const [st] = await pool.query(
+    `SELECT u.phone, u.full_name FROM students s JOIN users u ON s.user_id=u.id WHERE s.id=? AND s.branch_id=?`,
+    [student_id, req.user.branch_id]
+  );
   if (st.length && process.env.TWILIO_SID && !process.env.TWILIO_SID.startsWith('ACxxxx')) {
     sendWhatsApp(st[0].phone, `✅ Fee Received\nStudent: ${st[0].full_name}\nAmount: Rs. ${parseInt(amount_paid).toLocaleString()}\nReceipt: ${rcpNo}\nMethod: ${method}\n\n— AL Qalam International`).catch(()=>{});
   }
@@ -470,6 +496,8 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
 app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req, res) => {
   const { student_id, amount, valid_for, payment_mode, bank_name, cheque_no, receipt_no } = req.body;
   if (!student_id || !amount) return res.status(400).json(fail('student_id and amount required'));
+  const [owns] = await pool.query(`SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!owns.length) return res.status(404).json(fail('Student not found', 404));
   await pool.query(
     `INSERT INTO fee_advance_payments (student_id, branch_id, amount, paid_date, valid_for, receipt_no, payment_mode, bank_name, cheque_no, collected_by)
      VALUES (?,?,?,CURDATE(),?,?,?,?,?,?)`,
@@ -508,6 +536,16 @@ app.get('/attendance/today', auth(['super_admin','admin','principal','teacher'])
 app.post('/attendance/bulk', auth(['super_admin','admin','teacher']), async (req, res) => {
   const { class_id, date, records } = req.body; // records: [{student_id, status, remarks}]
   if (!class_id || !records?.length) return res.status(400).json(fail('class_id and records required'));
+  const ids = [...new Set(records.map(r => r.student_id).filter(Boolean))];
+  if (!ids.length) return res.status(400).json(fail('records must include student_id'));
+  const placeholders = ids.map(() => '?').join(',');
+  const [okStudents] = await pool.query(
+    `SELECT id FROM students WHERE branch_id = ? AND class_id = ? AND id IN (${placeholders})`,
+    [req.user.branch_id, class_id, ...ids]
+  );
+  if (okStudents.length !== ids.length) {
+    return res.status(400).json(fail('One or more students are not in this class or branch'));
+  }
   const attendanceDate = date || new Date().toISOString().split('T')[0];
   const values = records.map(r => [r.student_id, attendanceDate, r.status||'absent', r.remarks||null, req.user.id]);
   await pool.query(
@@ -673,7 +711,12 @@ app.get('/library/books', auth(), async (req, res) => {
 app.post('/library/issue', auth(['super_admin','admin','librarian']), async (req, res) => {
   const { book_id, student_id, due_date } = req.body;
   if (!book_id || !student_id) return res.status(400).json(fail('book_id and student_id required'));
-  const [[book]] = await pool.query(`SELECT * FROM library_books WHERE id=? AND (total_copies - issued_copies) > 0`, [book_id]);
+  const [stu] = await pool.query(`SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!stu.length) return res.status(404).json(fail('Student not found', 404));
+  const [[book]] = await pool.query(
+    `SELECT * FROM library_books WHERE id=? AND branch_id=? AND (total_copies - issued_copies) > 0`,
+    [book_id, req.user.branch_id]
+  );
   if (!book) return res.status(400).json(fail('Book not available'));
   const conn = await pool.getConnection();
   try {
@@ -691,8 +734,11 @@ app.post('/library/issue', auth(['super_admin','admin','librarian']), async (req
 
 app.put('/library/return/:issueId', auth(['super_admin','admin','librarian']), async (req, res) => {
   const [result] = await pool.query(
-    `UPDATE library_issues SET return_date=CURDATE(), status='returned' WHERE id=? AND status='issued'`,
-    [req.params.issueId]
+    `UPDATE library_issues li
+     INNER JOIN library_books b ON b.id = li.book_id AND b.branch_id = ?
+     SET li.return_date = CURDATE(), li.status = 'returned'
+     WHERE li.id = ? AND li.status = 'issued'`,
+    [req.user.branch_id, req.params.issueId]
   );
   if (!result.affectedRows) return res.status(404).json(fail('Issue record not found or already returned'));
   const [[issue]] = await pool.query(`SELECT book_id FROM library_issues WHERE id=?`, [req.params.issueId]);
@@ -723,6 +769,10 @@ app.get('/transport/routes/:id/students', auth(['super_admin','admin','transport
 app.post('/transport/enroll', auth(['super_admin','admin','transport_manager']), async (req, res) => {
   const { student_id, route_id, pickup_stop } = req.body;
   if (!student_id || !route_id) return res.status(400).json(fail('student_id and route_id required'));
+  const [st] = await pool.query(`SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!st.length) return res.status(404).json(fail('Student not found', 404));
+  const [rt] = await pool.query(`SELECT id FROM transport_routes WHERE id = ? AND branch_id = ? LIMIT 1`, [route_id, req.user.branch_id]);
+  if (!rt.length) return res.status(404).json(fail('Route not found', 404));
   await pool.query(
     `INSERT INTO transport_students (student_id, route_id, pickup_stop, enrolled_date, status) VALUES (?,?,?,CURDATE(),'active')
      ON DUPLICATE KEY UPDATE route_id=VALUES(route_id), pickup_stop=VALUES(pickup_stop), status='active'`,
@@ -766,6 +816,10 @@ app.get('/examination/schedule/:examId', auth(), async (req, res) => {
 app.post('/examination/results', auth(['super_admin','admin','teacher','exam_controller']), async (req, res) => {
   const { student_id, exam_id, subject_id, marks_obtained, total_marks, remarks } = req.body;
   if (!student_id || !exam_id || !subject_id) return res.status(400).json(fail('student_id, exam_id, subject_id required'));
+  const [st] = await pool.query(`SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`, [student_id, req.user.branch_id]);
+  if (!st.length) return res.status(404).json(fail('Student not found', 404));
+  const [ex] = await pool.query(`SELECT id FROM exams WHERE id = ? AND branch_id = ? LIMIT 1`, [exam_id, req.user.branch_id]);
+  if (!ex.length) return res.status(404).json(fail('Exam not found', 404));
   const grade = calcGrade(marks_obtained, total_marks||100);
   await pool.query(
     `INSERT INTO results (student_id, exam_id, subject_id, marks_obtained, total_marks, grade, remarks, entered_by)
