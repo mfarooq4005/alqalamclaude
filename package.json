@@ -6,7 +6,7 @@
   "scripts": {
     "start":   "node alqalam_node_server.js",
     "dev":     "nodemon alqalam_node_server.js",
-    "test":    "node -e \"require('./alqalam_node_server.js')\" && echo 'Server file OK'",
+    "test":    "node --check alqalam_node_server.js && node scripts/verify_branch_scopes.mjs",
     "pm2":     "pm2 start alqalam_node_server.js --name alqalam-ems --watch",
     "pm2:stop":"pm2 stop alqalam-ems"
   },
