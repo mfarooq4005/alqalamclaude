@@ -353,6 +353,11 @@ app.get('/sections', auth(), async (req, res) => {
 app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
   const { class_id, name } = req.body;
   if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [[klass]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!klass) return res.status(404).json(fail('Class not found in your branch', 404));
   const [result] = await pool.query(
     `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
     [class_id, name]
@@ -388,6 +393,12 @@ app.get('/fee/challans', auth(['super_admin','admin','accountant','principal']),
 app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req, res) => {
   const { student_id, amount_paid, payment_method, bank_name, transaction_ref, receipt_no } = req.body;
   if (!student_id || !amount_paid) return res.status(400).json(fail('student_id and amount_paid required'));
+
+  const [[student]] = await pool.query(
+    `SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [student_id, req.user.branch_id]
+  );
+  if (!student) return res.status(404).json(fail('Student not found in your branch', 404));
 
   const methods = ['cash','bank_transfer','cheque','online'];
   const method  = methods.includes(payment_method) ? payment_method : 'cash';
@@ -443,6 +454,22 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
   const { class_id, month, amount_due, due_date } = req.body;
   if (!class_id || !month) return res.status(400).json(fail('class_id and month are required'));
 
+  const [[klass]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!klass) return res.status(404).json(fail('Class not found in your branch', 404));
+
+  const [[feeStructure]] = await pool.query(
+    `SELECT id, amount, due_day FROM fee_structures
+     WHERE branch_id = ? AND class_id = ? AND fee_type = 'tuition' AND is_active = 1
+     ORDER BY id DESC LIMIT 1`,
+    [req.user.branch_id, class_id]
+  );
+  if (!feeStructure) {
+    return res.status(404).json(fail('No active tuition fee structure found for this class', 404));
+  }
+
   const [students] = await pool.query(
     `SELECT s.id AS student_id, s.roll_number, u.full_name
      FROM students s JOIN users u ON s.user_id = u.id
@@ -451,20 +478,26 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
   );
   if (!students.length) return res.status(404).json(fail('No active students found for selected class', 404));
 
-  const amt = Number(amount_due || 5000);
+  const amt = amount_due != null ? Number(amount_due) : Number(feeStructure.amount);
+  const dueDay = feeStructure.due_day || 10;
+  const dueDateVal = due_date || `${month}-${String(dueDay).padStart(2, '0')}`;
   let generated = 0;
+  let skipped = 0;
   for (const st of students) {
     const invoiceNo = `INV-${month}-${String(st.student_id).padStart(5, '0')}`;
-    await pool.query(
-      `INSERT INTO fee_payments (student_id, branch_id, invoice_no, amount_due, amount_paid, due_date, status, month, created_by)
-       VALUES (?,?,?,?,0,?, 'pending', ?, ?)
-       ON DUPLICATE KEY UPDATE amount_due=VALUES(amount_due), due_date=VALUES(due_date), updated_at=NOW()`,
-      [st.student_id, req.user.branch_id, invoiceNo, amt, due_date || `${month}-10`, month, req.user.id]
+    const [result] = await pool.query(
+      `INSERT INTO fee_payments (student_id, fee_structure_id, invoice_no, amount_due, amount_paid, due_date, status)
+       VALUES (?,?,?,?,0,?, 'pending')
+       ON DUPLICATE KEY UPDATE
+         amount_due = IF(status IN ('pending','partial'), VALUES(amount_due), amount_due),
+         due_date = IF(status IN ('pending','partial'), VALUES(due_date), due_date)`,
+      [st.student_id, feeStructure.id, invoiceNo, amt, dueDateVal]
     );
-    generated++;
+    if (result.affectedRows > 0) generated++;
+    else skipped++;
   }
   io.emit('challans_generated', { class_id, month, total: generated });
-  res.status(201).json(success({ message: 'Challans generated successfully', class_id, month, generated }));
+  res.status(201).json(success({ message: 'Challans generated successfully', class_id, month, generated, skipped }));
 });
 
 app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req, res) => {
