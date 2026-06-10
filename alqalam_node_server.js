@@ -254,7 +254,7 @@ app.get('/students/:id', auth(), async (req, res) => {
             c.name AS class_name, sec.name AS section_name
      FROM students s JOIN users u ON s.user_id = u.id
      JOIN classes c ON s.class_id = c.id LEFT JOIN sections sec ON s.section_id = sec.id
-     WHERE s.id = ? LIMIT 1`, [req.params.id]
+     WHERE s.id = ? AND s.branch_id = ? LIMIT 1`, [req.params.id, req.user.branch_id]
   );
   if (!rows.length) return res.status(404).json(fail('Student not found', 404));
   res.json(success(rows[0]));
@@ -353,6 +353,11 @@ app.get('/sections', auth(), async (req, res) => {
 app.post('/sections', auth(['super_admin','admin','principal']), async (req, res) => {
   const { class_id, name } = req.body;
   if (!class_id || !name) return res.status(400).json(fail('class_id and name required'));
+  const [[klass]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!klass) return res.status(404).json(fail('Class not found in your branch', 404));
   const [result] = await pool.query(
     `INSERT INTO sections (class_id, name, is_active) VALUES (?,?,1)`,
     [class_id, name]
@@ -389,13 +394,19 @@ app.post('/fee/collect', auth(['super_admin','admin','accountant']), async (req,
   const { student_id, amount_paid, payment_method, bank_name, transaction_ref, receipt_no } = req.body;
   if (!student_id || !amount_paid) return res.status(400).json(fail('student_id and amount_paid required'));
 
+  const [[student]] = await pool.query(
+    `SELECT id FROM students WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [student_id, req.user.branch_id]
+  );
+  if (!student) return res.status(404).json(fail('Student not found in your branch', 404));
+
   const methods = ['cash','bank_transfer','cheque','online'];
   const method  = methods.includes(payment_method) ? payment_method : 'cash';
   const rcpNo   = receipt_no || `RCP-${Date.now()}`;
 
   const [result] = await pool.query(
-    `UPDATE fee_payments SET amount_paid=?, payment_method=?, receipt_no=?, payment_date=CURDATE(),
-     status=IF(?>=amount_due,'paid','partial'), collected_by=?
+    `UPDATE fee_payments SET amount_paid = amount_paid + ?, payment_method=?, receipt_no=?, payment_date=CURDATE(),
+     status=IF(amount_paid + ? >= amount_due,'paid','partial'), collected_by=?
      WHERE student_id=? AND status IN('pending','partial') ORDER BY due_date ASC LIMIT 1`,
     [amount_paid, method, rcpNo, amount_paid, req.user.id, student_id]
   );
@@ -443,6 +454,22 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
   const { class_id, month, amount_due, due_date } = req.body;
   if (!class_id || !month) return res.status(400).json(fail('class_id and month are required'));
 
+  const [[klass]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!klass) return res.status(404).json(fail('Class not found in your branch', 404));
+
+  const [[feeStructure]] = await pool.query(
+    `SELECT id, amount, due_day FROM fee_structures
+     WHERE branch_id = ? AND class_id = ? AND fee_type = 'tuition' AND is_active = 1
+     ORDER BY id DESC LIMIT 1`,
+    [req.user.branch_id, class_id]
+  );
+  if (!feeStructure) {
+    return res.status(404).json(fail('No active tuition fee structure found for this class', 404));
+  }
+
   const [students] = await pool.query(
     `SELECT s.id AS student_id, s.roll_number, u.full_name
      FROM students s JOIN users u ON s.user_id = u.id
@@ -451,20 +478,27 @@ app.post('/fee/challans/generate', auth(['super_admin','admin','accountant']), a
   );
   if (!students.length) return res.status(404).json(fail('No active students found for selected class', 404));
 
-  const amt = Number(amount_due || 5000);
+  const amt = amount_due != null ? Number(amount_due) : Number(feeStructure.amount);
+  const dueDay = feeStructure.due_day || 10;
+  const dueDateVal = due_date || `${month}-${String(dueDay).padStart(2, '0')}`;
   let generated = 0;
+  let skipped = 0;
   for (const st of students) {
     const invoiceNo = `INV-${month}-${String(st.student_id).padStart(5, '0')}`;
-    await pool.query(
-      `INSERT INTO fee_payments (student_id, branch_id, invoice_no, amount_due, amount_paid, due_date, status, month, created_by)
-       VALUES (?,?,?,?,0,?, 'pending', ?, ?)
-       ON DUPLICATE KEY UPDATE amount_due=VALUES(amount_due), due_date=VALUES(due_date), updated_at=NOW()`,
-      [st.student_id, req.user.branch_id, invoiceNo, amt, due_date || `${month}-10`, month, req.user.id]
+    const [result] = await pool.query(
+      `INSERT INTO fee_payments (student_id, fee_structure_id, invoice_no, amount_due, amount_paid, due_date, status, remarks)
+       VALUES (?,?,?,?,0,?, 'pending', ?)
+       ON DUPLICATE KEY UPDATE
+         amount_due = IF(status IN ('pending','overdue'), VALUES(amount_due), amount_due),
+         due_date = IF(status IN ('pending','overdue'), VALUES(due_date), due_date),
+         remarks = IF(status IN ('pending','overdue'), VALUES(remarks), remarks)`,
+      [st.student_id, feeStructure.id, invoiceNo, amt, dueDateVal, month]
     );
-    generated++;
+    if (result.affectedRows > 0) generated++;
+    else skipped++;
   }
   io.emit('challans_generated', { class_id, month, total: generated });
-  res.status(201).json(success({ message: 'Challans generated successfully', class_id, month, generated }));
+  res.status(201).json(success({ message: 'Challans generated successfully', class_id, month, generated, skipped }));
 });
 
 app.post('/fee/advance', auth(['super_admin','admin','accountant']), async (req, res) => {
@@ -508,11 +542,31 @@ app.get('/attendance/today', auth(['super_admin','admin','principal','teacher'])
 app.post('/attendance/bulk', auth(['super_admin','admin','teacher']), async (req, res) => {
   const { class_id, date, records } = req.body; // records: [{student_id, status, remarks}]
   if (!class_id || !records?.length) return res.status(400).json(fail('class_id and records required'));
+
+  const [[klass]] = await pool.query(
+    `SELECT id FROM classes WHERE id = ? AND branch_id = ? LIMIT 1`,
+    [class_id, req.user.branch_id]
+  );
+  if (!klass) return res.status(404).json(fail('Class not found in your branch', 404));
+
+  const studentIds = records.map(r => r.student_id);
+  const [studentRows] = await pool.query(
+    `SELECT id, section_id FROM students WHERE branch_id = ? AND class_id = ? AND id IN (?)`,
+    [req.user.branch_id, class_id, studentIds]
+  );
+  const sectionByStudent = new Map(studentRows.map(s => [s.id, s.section_id]));
   const attendanceDate = date || new Date().toISOString().split('T')[0];
-  const values = records.map(r => [r.student_id, attendanceDate, r.status||'absent', r.remarks||null, req.user.id]);
+  const values = [];
+  for (const r of records) {
+    const sectionId = sectionByStudent.get(r.student_id);
+    if (!sectionId) {
+      return res.status(400).json(fail(`Student ${r.student_id} is not in this class or has no section assigned`, 400));
+    }
+    values.push([r.student_id, sectionId, attendanceDate, r.status || 'absent', r.remarks || null, req.user.id]);
+  }
   await pool.query(
-    `INSERT INTO student_attendance (student_id, date, status, remarks, marked_by) VALUES ?
-     ON DUPLICATE KEY UPDATE status=VALUES(status), remarks=VALUES(remarks), marked_by=VALUES(marked_by)`,
+    `INSERT INTO student_attendance (student_id, section_id, date, status, remarks, marked_by) VALUES ?
+     ON DUPLICATE KEY UPDATE status=VALUES(status), remarks=VALUES(remarks), marked_by=VALUES(marked_by), section_id=VALUES(section_id)`,
     [values]
   );
   // Real-time push to dashboard
@@ -604,8 +658,8 @@ app.post('/staff', auth(['super_admin','admin','principal','hr_manager']), async
       [req.user.branch_id, roleRows[0].id, username, email, password_hash, full_name, phone || null]
     );
     await conn.query(
-      `INSERT INTO teachers (user_id, branch_id, qualification, joining_date, basic_salary, status)
-       VALUES (?,?,?,?,?, 'active')`,
+      `INSERT INTO teachers (user_id, branch_id, qualification, joining_date, salary)
+       VALUES (?,?,?,?,?)`,
       [u.insertId, req.user.branch_id, qualification || null, joining_date || new Date().toISOString().split('T')[0], basic_salary || 0]
     );
     await conn.commit();
@@ -631,8 +685,8 @@ app.put('/staff/:id', auth(['super_admin','admin','principal','hr_manager']), as
     const userId = rows[0].user_id;
     await conn.query(`UPDATE users SET full_name = COALESCE(?,full_name), email = COALESCE(?,email), phone = COALESCE(?,phone) WHERE id = ?`, [full_name||null, email||null, phone||null, userId]);
     await conn.query(
-      `UPDATE teachers SET qualification = COALESCE(?,qualification), joining_date = COALESCE(?,joining_date), basic_salary = COALESCE(?,basic_salary), status = COALESCE(?,status) WHERE id = ?`,
-      [qualification||null, joining_date||null, basic_salary ?? null, status||null, req.params.id]
+      `UPDATE teachers SET qualification = COALESCE(?,qualification), joining_date = COALESCE(?,joining_date), salary = COALESCE(?,salary) WHERE id = ?`,
+      [qualification||null, joining_date||null, basic_salary ?? null, req.params.id]
     );
     await conn.commit();
     res.json(success({ message: 'Staff member updated' }));
